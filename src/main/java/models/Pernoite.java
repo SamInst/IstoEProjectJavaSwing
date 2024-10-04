@@ -18,7 +18,6 @@ public class Pernoite {
     private Long id;
     @ManyToOne
     private Quarto quarto;
-
     private LocalTime horaChegada;
     private LocalDate dataEntrada;
     private LocalDate dataSaida;

@@ -26,7 +26,7 @@ public class CustomJCalendar {
         jCalendar.setLocale(new Locale("pt", "BR"));
 
         // Aumentar o tamanho do JCalendar
-        jCalendar.setPreferredSize(new Dimension(500, 400));  // Aumentar o tamanho do calendário
+        jCalendar.setPreferredSize(new Dimension(300, 200));  // Aumentar o tamanho do calendário
 
         // Evento para tratar a troca de mês e garantir o reset das cores e eventos
         jCalendar.getMonthChooser().addPropertyChangeListener("month", evt -> applyButtonStyles(jCalendar.getDayChooser()));
@@ -76,13 +76,7 @@ public class CustomJCalendar {
 
                 // Garantir que a seleção restaura a cor correta
                 dayButton.addActionListener(e -> {
-                    // Resetar TODOS os botões antes de aplicar a nova seleção
                     resetAllButtons(daysPanel);
-                    resetAllButtons(daysPanel);
-
-                    // Marcar o botão atual como selecionado
-//                    selectedButton = dayButton;
-//                    dayButton.setBackground(new Color(180, 200, 220));  // Cor do botão selecionado
                 });
             }
         }
@@ -91,8 +85,7 @@ public class CustomJCalendar {
     // Método para resetar todos os botões para branco
     private void resetAllButtons(JPanel daysPanel) {
         for (Component component : daysPanel.getComponents()) {
-            if (component instanceof JButton) {
-                JButton dayButton = (JButton) component;
+            if (component instanceof JButton dayButton) {
                 dayButton.setBackground(Color.WHITE);  // Reseta todos os botões para branco
             }
         }
