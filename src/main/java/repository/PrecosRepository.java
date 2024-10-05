@@ -13,6 +13,7 @@ import java.util.List;
 public class PrecosRepository extends PostgresDatabaseConnect {
 
     public Float precoDiaria(int quantidadePessoas) {
+        if (quantidadePessoas == 0) {return 0F;}
         String sql = """
         SELECT valor_diaria
         FROM preco_pernoite

@@ -2,6 +2,8 @@ package principals.panels;
 
 import com.toedter.calendar.JCalendar;
 import enums.StatusQuartoEnum;
+import lombok.Getter;
+import principals.panels.subPanels.BuscaPessoasPanel;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
@@ -21,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OvernightPanel extends javax.swing.JPanel {
@@ -28,9 +31,10 @@ public class OvernightPanel extends javax.swing.JPanel {
     Long quarto_id = null;
     LocalDate dataEntrada = LocalDate.now();
     LocalDate dataSaida = LocalDate.now();
-    Integer quantidade_de_pessoas = 0;
+    private final ObservableValue<Integer> quantidadeDePessoas = new ObservableValue<>(0);
+    private final ObservableValue<Integer> quantidadeDeDiarias = new ObservableValue<>(0);
+    private final ObservableValue<Float> valorTotalGlobal = new ObservableValue<>(0F);
     List<Long> pessoas = null;
-    Float valor_total = 0F;
 
     PessoaRepository pessoaRepository = new PessoaRepository();
     PernoitesRepository pernoitesRepository = new PernoitesRepository();
@@ -61,45 +65,51 @@ public class OvernightPanel extends javax.swing.JPanel {
 
 
     public void abrirJanelaAdicionarPernoite() {
-        // Criar a nova janela
         JFrame janelaAdicionar = new JFrame("Adicionar Pernoite");
-        janelaAdicionar.setSize(800, 600);
+        janelaAdicionar.setSize(580, 600);
         janelaAdicionar.setLayout(new BorderLayout());
         janelaAdicionar.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         janelaAdicionar.setBackground(Color.WHITE);
 
-        // Painel principal que conterá os 4 blocos
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(Color.WHITE);
 
-        // Criar os primeiros três blocos com tamanho fixo
-        JPanel blocoQuartoEDatas = criarBlocoSuperior(); // Altura fixa de 100px
-        JPanel bloco2 = criarBlocoDiarias(); // Altura fixa de 100px
-        JPanel bloco3 = criarBlocoVerde(100); // Altura fixa de 100px
+        // Blocos de Quarto e Datas e Diárias
+        JPanel blocoQuartoEDatas = criarBlocoSuperior();
+        JPanel blocoDiarias = criarBlocoDiarias();
+        JPanel blocoBuscaPessoas = new BuscaPessoasPanel();
 
-        // Criar o último bloco expansível
-        JPanel bloco4 = new JPanel();
-        bloco4.setBackground(Color.RED);
-        bloco4.setLayout(new BorderLayout());
-
-        // Adicionar os blocos ao painel principal
         mainPanel.add(blocoQuartoEDatas);
-        mainPanel.add(bloco2);
-        mainPanel.add(bloco3);
+        mainPanel.add(blocoDiarias);
 
-        // Painel que irá expandir
-        JScrollPane scrollPane = new JScrollPane(bloco4);
-        scrollPane.setPreferredSize(new Dimension(800, 300)); // Dimensão preferida para o scroll
+        // Adicionar o bloco de busca de pessoas antes do botão
+        JScrollPane scrollPane = new JScrollPane(blocoBuscaPessoas);
+        scrollPane.setPreferredSize(new Dimension(800, 300));
+        mainPanel.add(scrollPane);  // Adicionando bloco de busca de pessoas
 
-        // Adicionar o painel principal e o bloco expansível à janela
+        // Novo bloco com botão à direita
+        JPanel blocoBotao = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        blocoBotao.setBackground(Color.WHITE);
+
+        JButton adicionarButton = new JButton("Adicionar Pernoite");
+        adicionarButton.setPreferredSize(new Dimension(150, 30));  // Tamanho do botão
+        blocoBotao.add(adicionarButton);
+
+        // Adicionar bloco do botão após a busca de pessoas
+        mainPanel.add(blocoBotao);  // Agora o botão fica abaixo da busca de pessoas
+
         janelaAdicionar.add(mainPanel, BorderLayout.NORTH);
-        janelaAdicionar.add(scrollPane, BorderLayout.CENTER);
-
-        // Configurar e mostrar a janela
         janelaAdicionar.setLocationRelativeTo(null);
         janelaAdicionar.setVisible(true);
+
+        // Log para depuração
+        System.out.println("Quarto: " + quarto_id + ", DataEntrada: " + dataEntrada + ", DataSaida: " + dataSaida
+                + ", Quantidade Pessoas: " + quantidadeDePessoas.getValue() + ", Quantidade Dias: "
+                + quantidadeDeDiarias.getValue() + " Valor Total: " + valorTotalGlobal);
     }
+
+
 
     // Método para criar um bloco cinza com altura fixa
     private JPanel criarBlocoSuperior() {
@@ -261,8 +271,6 @@ public class OvernightPanel extends javax.swing.JPanel {
     }
 
 
-
-
     private void abrirCalendario(BotaoArredondado botaoData, boolean isDataEntrada) {
         JFrame calendarioFrame = new JFrame("Selecione uma Data");
         calendarioFrame.setSize(400, 400);
@@ -320,7 +328,7 @@ public class OvernightPanel extends javax.swing.JPanel {
 
         JLabel valorTotal = new JLabel("R$ 0,00"); // Valor inicial
         valorTotal.setFont(new Font("Inter", Font.BOLD, 20));
-        valorTotal.setForeground(Color.GREEN);
+        valorTotal.setForeground(Cor.VERDE_ESCURO);
 
         // Adicionar os componentes de total à parte superior
         gbc.gridx = 0;
@@ -362,7 +370,7 @@ public class OvernightPanel extends javax.swing.JPanel {
                 try {
                     int quantidadePessoas = Integer.parseInt(quantidadePessoasField.getText());
 
-                    quantidade_de_pessoas = quantidadePessoas;
+                    quantidadeDePessoas.setValue(quantidadePessoas);
 
                     // Limitar a quantidade de pessoas a 5
 
@@ -374,7 +382,8 @@ public class OvernightPanel extends javax.swing.JPanel {
 
                     // Chamar o método para calcular o novo total
                     float novoTotal = calcularNovoTotal(quantidadePessoas);
-                    valorTotal.setText(String.format("R$ %.2f", novoTotal)); // Atualizar o valor do total
+                    valorTotalGlobal.setValue(novoTotal);
+                    valorTotal.setText(String.format("R$ %.2f", novoTotal).replace(".", ",")); // Atualizar o valor do total
                 } catch (NumberFormatException ex) {
                     valorTotal.setText("R$ 0,00"); // Caso haja um valor inválido, resetar o total
                 }
@@ -392,43 +401,30 @@ public class OvernightPanel extends javax.swing.JPanel {
         return bloco;
     }
 
-    // Método de cálculo do novo total
     private float calcularNovoTotal(int quantidadePessoas) {
         int dias = Period.between(dataEntrada, dataSaida).getDays();
+        quantidadeDeDiarias.setValue(dias);
 
-        // Evitar casos onde a diferença seja zero ou negativa
         if (dias < 1) dias = 1;
 
         return dias * precosRepository.precoDiaria(quantidadePessoas);
     }
 
 
-
-
-
-
-
-
-    // Método que busca quartos disponíveis
     private List<QuartoResponse> buscaQuartosDisponiveis() {
         return quartosRepository.buscaQuartosPorStatus(StatusQuartoEnum.DISPONIVEL);
     }
 
-    // Método que abre a lista de quartos disponíveis
     private void abrirListaQuartosDisponiveis(BotaoArredondado botaoQuarto) {
-        // Criar a janela para exibir a lista de quartos
         JFrame frameLista = new JFrame("Selecione um Quarto");
         frameLista.setSize(300, 300);
         frameLista.setLocationRelativeTo(null);
 
-        // Painel para a lista de quartos
         JPanel listaPanel = new JPanel();
         listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
 
-        // Buscar os quartos disponíveis
         List<QuartoResponse> quartosDisponiveis = buscaQuartosDisponiveis();
 
-        // Adicionar os quartos disponíveis à lista com efeito de hover
         for (QuartoResponse quarto : quartosDisponiveis) {
             JPanel quartoPanel = new JPanel();
             quartoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -439,9 +435,8 @@ public class OvernightPanel extends javax.swing.JPanel {
                     + "<span style='color:rgb(" + Cor.VERDE_ESCURO.getRed() + "," + Cor.VERDE_ESCURO.getGreen() + "," + Cor.VERDE_ESCURO.getBlue() + ")'>" + quarto.status_quarto_enum() + "</span></html>");
 
             quartoLabel.setForeground(Cor.CINZA_ESCURO);
-            quartoLabel.setFont(new Font("Inter", Font.BOLD, 15)); // Aumenta o tamanho da fonte para maior visibilidade
+            quartoLabel.setFont(new Font("Inter", Font.BOLD, 15));
 
-            // Adicionar hover ao passar o mouse
             quartoPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
@@ -458,42 +453,40 @@ public class OvernightPanel extends javax.swing.JPanel {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    // Verificar se o número do quarto já está correto para evitar duplicações
                     String quartoNumero = String.valueOf(quarto.quarto_id() < 10L ? "0"+ quarto.quarto_id() : quarto.quarto_id());
                     quarto_id = quarto.quarto_id();
                     if (!botaoQuarto.getText().equals(quartoNumero)) {
-                        botaoQuarto.setText(quartoNumero); // Atualiza o texto do botão com o ID do quarto
-                        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 50)); // Aumenta o tamanho da fonte
-
-                        // Ajustar padding para centralizar corretamente
+                        botaoQuarto.setText(quartoNumero);
+                        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 50));
                         botaoQuarto.setHorizontalAlignment(SwingConstants.CENTER);
                         botaoQuarto.setVerticalAlignment(SwingConstants.CENTER);
-
-                        // Certificar-se de que o botão seja corretamente redesenhado
                         botaoQuarto.repaint();
                     }
-                    frameLista.dispose(); // Fecha a lista após a seleção
+                    frameLista.dispose();
                 }
             });
-
             quartoPanel.add(quartoLabel);
             listaPanel.add(quartoPanel);
         }
-
-        // Adicionar a lista a um JScrollPane para rolagem
         JScrollPane scrollPane = new JScrollPane(listaPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         frameLista.add(scrollPane);
-
-        frameLista.setVisible(true); // Exibe a janela
+        frameLista.setVisible(true);
     }
 
 
-    private JPanel criarBlocoVerde(int altura) {
+//    private JPanel criarBlocoAdicionarPessoas() {
+//        JPanel bloco = new JPanel();
+//        bloco.setBackground(Color.GREEN);
+//        bloco.setPreferredSize(new Dimension(800, 100));
+//        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Garante que a largura se ajuste
+//        return bloco;
+//    }
+
+    private JPanel criarBlocoPessoasAdicionadas() {
         JPanel bloco = new JPanel();
-        bloco.setBackground(Color.GREEN);
-        bloco.setPreferredSize(new Dimension(800, altura)); // Tamanho fixo
-        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, altura)); // Garante que a largura se ajuste
+        bloco.setBackground(Color.RED);
+        bloco.setLayout(new BorderLayout());
         return bloco;
     }
 
@@ -503,51 +496,108 @@ public class OvernightPanel extends javax.swing.JPanel {
         bloco.setPreferredSize(new Dimension(800, 100)); // Tamanho fixo
         bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Garante que a largura se ajuste
         bloco.setLayout(new GridBagLayout());
-        bloco.setBorder(BorderFactory.createEmptyBorder(0,40,0,40));
+        bloco.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 40));
 
         GridBagConstraints gbc = new GridBagConstraints();
-
-        // Diárias à esquerda
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.weightx = 0.1;  // Menor peso para o primeiro bloco
-        gbc.anchor = GridBagConstraints.WEST; // Alinhar à esquerda
+        gbc.weightx = 0.1;
+        gbc.anchor = GridBagConstraints.WEST;
         JLabel labelDiarias = new JLabel("Diárias: ");
         labelDiarias.setFont(new Font("Inter", Font.BOLD, 16));
         labelDiarias.setForeground(Cor.CINZA_ESCURO);
         bloco.add(labelDiarias, gbc);
 
-        gbc.gridx = 1;
-        gbc.weightx = 0.1;
-        JLabel valorDiarias = new JLabel("0");
+        JLabel valorDiarias = new JLabel(quantidadeDeDiarias.getValue().toString());
         valorDiarias.setFont(new Font("Inter", Font.BOLD, 16));
         valorDiarias.setForeground(Cor.CINZA_ESCURO);
+
+        quantidadeDeDiarias.addObserver(() -> {
+            valorDiarias.setText(quantidadeDeDiarias.getValue().toString());
+        });
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.1;
         bloco.add(valorDiarias, gbc);
 
-        // Valor diária à direita
         gbc.gridx = 2;
-        gbc.weightx = 1;  // Peso maior para "empurrar" os elementos para a direita
-        gbc.anchor = GridBagConstraints.EAST; // Alinhar à direita
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+
         JLabel labelValorDiaria = new JLabel("Valor diária: ");
         labelValorDiaria.setFont(new Font("Inter", Font.BOLD, 16));
+        labelValorDiaria.setForeground(Cor.CINZA_ESCURO);
         bloco.add(labelValorDiaria, gbc);
+
+        JLabel valorDiaria = new JLabel(precosRepository.precoDiaria(quantidadeDePessoas.getValue()).toString());
+        valorDiaria.setFont(new Font("Inter", Font.BOLD, 16));
+        valorDiaria.setForeground(Color.ORANGE);
+
+
+        quantidadeDePessoas.addObserver(() -> {
+            Float precoDiaria = precosRepository.precoDiaria(quantidadeDePessoas.getValue());
+
+            valorDiaria.setText(
+                    quantidadeDePessoas.getValue() != 0
+                            ? "R$ "+ String.format("%.2f", precoDiaria).replace(".", ",")
+                            : "R$ 0"
+            );
+        });
 
         gbc.gridx = 3;
         gbc.weightx = 0.1;
-        JLabel valorDiaria = new JLabel(quantidade_de_pessoas != 0 ? precosRepository.precoDiaria(quantidade_de_pessoas).toString() : "0");
-        valorDiaria.setFont(new Font("Inter", Font.BOLD, 16));
-        valorDiaria.setForeground(Color.ORANGE);
         bloco.add(valorDiaria, gbc);
 
-        // Botão de desconto com ícone à direita
         gbc.gridx = 4;
         gbc.weightx = 0.1;
         JButton botaoDesconto = new JButton(new ImageIcon("src/main/resources/icons/desconto.png"));
-        botaoDesconto.setPreferredSize(new Dimension(30, 30)); // Ajustar o tamanho do ícone
+        botaoDesconto.setPreferredSize(new Dimension(30, 30));
+        botaoDesconto.setBackground(Color.ORANGE);
         bloco.add(botaoDesconto, gbc);
 
         return bloco;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    public class ObservableValue<T> {
+        @Getter
+        private T value;
+        private List<Observer> observers = new ArrayList<>();
+
+        public ObservableValue(T initialValue) {
+            this.value = initialValue;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+            notifyObservers();
+        }
+
+        public void addObserver(Observer observer) {
+            observers.add(observer);
+        }
+
+        private void notifyObservers() {
+            for (Observer observer : observers) {
+                observer.update();
+            }
+        }
+
+        public interface Observer {
+            void update();
+        }
+    }
+
 
 
 
