@@ -8,13 +8,10 @@ import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
 import repository.PernoitesRepository;
-import repository.PessoaRepository;
 import repository.PrecosRepository;
 import repository.QuartosRepository;
-import request.BuscaPessoaRequest;
 import request.PernoiteRequest;
 import response.QuartoResponse;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -30,7 +27,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class OvernightPanel extends JPanel {
-
     Long quarto_id = null;
     LocalDate dataEntrada = LocalDate.now();
     LocalDate dataSaida = LocalDate.now();
@@ -39,7 +35,6 @@ public class OvernightPanel extends JPanel {
     private final ObservableValue<Float> valorTotalGlobal = new ObservableValue<>(0F);
     List<Long> pessoas = new ArrayList<>();
 
-    PessoaRepository pessoaRepository = new PessoaRepository();
     PernoitesRepository pernoitesRepository = new PernoitesRepository();
     PrecosRepository precosRepository = new PrecosRepository();
     QuartosRepository quartosRepository = new QuartosRepository();
@@ -47,8 +42,6 @@ public class OvernightPanel extends JPanel {
     public OvernightPanel() {
         setBackground(Color.WHITE);
         setLayout(new BorderLayout());
-
-        System.out.println(pernoitesRepository.buscaPernoite(35L));
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.ORANGE);
@@ -59,7 +52,6 @@ public class OvernightPanel extends JPanel {
         buttonPanel.setMinimumSize(new Dimension(20, 20));
 
         JButton adicionar = new JButton("Adicionar Pernoite");
-
         adicionar.addActionListener(e -> abrirJanelaAdicionarPernoite());
 
         buttonPanel.add(adicionar);
@@ -80,7 +72,6 @@ public class OvernightPanel extends JPanel {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(Color.WHITE);
 
-        // Blocos de Quarto e Datas e Diárias
         JPanel blocoQuartoEDatas = criarBlocoQuartoEData();
         JPanel blocoDiarias = criarBlocoDiarias();
         JPanel blocoBuscaPessoas = new BuscaPessoasPanel(pessoas);
@@ -88,12 +79,10 @@ public class OvernightPanel extends JPanel {
         mainPanel.add(blocoQuartoEDatas);
         mainPanel.add(blocoDiarias);
 
-        // Adicionar o bloco de busca de pessoas antes do botão
         JScrollPane scrollPane = new JScrollPane(blocoBuscaPessoas);
         scrollPane.setPreferredSize(new Dimension(800, 300));
-        mainPanel.add(scrollPane);  // Adicionando bloco de busca de pessoas
+        mainPanel.add(scrollPane);
 
-        // Novo bloco com botão à direita
         JPanel blocoBotao = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         blocoBotao.setBackground(Color.WHITE);
 
@@ -101,19 +90,13 @@ public class OvernightPanel extends JPanel {
         adicionarPernoite(adicionarButton, janelaAdicionar);
         blocoBotao.add(adicionarButton);
 
-
-        // Adicionar bloco do botão após a busca de pessoas
-        mainPanel.add(blocoBotao);  // Agora o botão fica abaixo da busca de pessoas
+        mainPanel.add(blocoBotao);
 
         janelaAdicionar.add(mainPanel, BorderLayout.NORTH);
         janelaAdicionar.setLocationRelativeTo(null);
         janelaAdicionar.setVisible(true);
-
-        // Log para depuração
-        System.out.println("Quarto: " + quarto_id + ", DataEntrada: " + dataEntrada + ", DataSaida: " + dataSaida
-                + ", Quantidade Pessoas: " + quantidadeDePessoas.getValue() + ", Quantidade Dias: "
-                + quantidadeDeDiarias.getValue() + " Valor Total: " + valorTotalGlobal);
     }
+
 
     public void adicionarPernoite(JButton adicionarButton, JFrame janelaAdicionar) {
         adicionarButton.setPreferredSize(new Dimension(150, 30));
@@ -163,43 +146,34 @@ public class OvernightPanel extends JPanel {
                     }
 
                 }
-
-                System.out.println("Adicionado pernoite " + new PernoiteRequest(
-                        quarto_id,dataEntrada,dataSaida, quantidadeDePessoas.value, pessoas, valorTotalGlobal.value
-                ));
             }
 
         });
     }
 
 
-
-    // Método para criar um bloco cinza com altura fixa
     private JPanel criarBlocoQuartoEData() {
         JPanel painelSuperior = new JPanel(new GridBagLayout());
         painelSuperior.setPreferredSize(new Dimension(800, 100));
         painelSuperior.setBackground(Color.WHITE);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH; // Ocupar tanto a largura quanto a altura
-        gbc.insets = new Insets(0, 10, 0, 10); // Espaçamento entre os blocos
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 10, 0, 10);
 
-        // Criar o bloco de quarto
-        JPanel blocoQuarto = new JPanel(new GridBagLayout()); // Usar GridBagLayout para o botão
+        JPanel blocoQuarto = new JPanel(new GridBagLayout());
         blocoQuarto.setBackground(Color.WHITE);
-        blocoQuarto.setPreferredSize(new Dimension(150, 100)); // Tamanho reduzido
-        blocoQuarto.setMinimumSize(new Dimension(150, 100)); // Garante que o bloco não seja maior
+        blocoQuarto.setPreferredSize(new Dimension(150, 100));
+        blocoQuarto.setMinimumSize(new Dimension(150, 100));
 
-        // Botão arredondado com texto inicial
         BotaoArredondado botaoQuarto = new BotaoArredondado("Buscar");
         botaoQuarto.setToolTipText("Selecione um quarto");
-        botaoQuarto.setPreferredSize(new Dimension(100, 70)); // Define o tamanho do botão (largura: 100px, altura: 70px)
-        botaoQuarto.setBackground(Cor.AZUL_ESCURO); // Define a cor de fundo do botão
-        botaoQuarto.setForeground(Color.WHITE); // Define a cor do texto
+        botaoQuarto.setPreferredSize(new Dimension(100, 70));
+        botaoQuarto.setBackground(Cor.AZUL_ESCURO);
+        botaoQuarto.setForeground(Color.WHITE);
         botaoQuarto.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 18)); // Definir uma fonte maior e em negrito
+        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 18));
 
-        // Adicionar o efeito de hover
         botaoQuarto.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -212,27 +186,21 @@ public class OvernightPanel extends JPanel {
             }
         });
 
-        // Ao clicar no botão, abrir a lista de quartos disponíveis
         botaoQuarto.addActionListener(e -> abrirListaQuartosDisponiveis(botaoQuarto));
 
-        // Adicionar o botão ao bloco de quarto
         blocoQuarto.add(botaoQuarto, new GridBagConstraints());
 
-        // Configurações do blocoQuarto no painel superior
         gbc.gridx = 0;
-        gbc.weightx = 0.3; // Define a proporção do bloco
+        gbc.weightx = 0.3;
         painelSuperior.add(blocoQuarto, gbc);
 
-        // Criar os dois blocos laranjas ao lado
         JPanel blocoDatas = blocoDatas();
         JPanel blocoPreco = blocoTotalEQuantidadePessoas();
 
-        // Configurações para o blocoLaranja1
         gbc.gridx = 1;
-        gbc.weightx = 0.7; // Define a proporção maior para os blocos laranja
+        gbc.weightx = 0.7;
         painelSuperior.add(blocoDatas, gbc);
 
-        // Configurações para o blocoLaranja2
         gbc.gridx = 2;
         gbc.weightx = 0.7;
         painelSuperior.add(blocoPreco, gbc);
@@ -240,34 +208,31 @@ public class OvernightPanel extends JPanel {
         return painelSuperior;
     }
 
+
     private JPanel blocoDatas() {
         JPanel bloco = new JPanel();
         bloco.setBackground(Color.WHITE);
-        bloco.setPreferredSize(new Dimension(300, 100)); // Definir um tamanho maior para os blocos
-        bloco.setMinimumSize(new Dimension(300, 100)); // Define o tamanho mínimo
-        bloco.setLayout(new GridBagLayout()); // Usar GridBagLayout para controle preciso do layout
+        bloco.setPreferredSize(new Dimension(300, 100));
+        bloco.setMinimumSize(new Dimension(300, 100));
+        bloco.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-        gbc.insets = new Insets(10, 0, 10, 10); // Espaçamento entre os componentes
+        gbc.insets = new Insets(10, 0, 10, 10);
 
-        // Ícone do calendário
         ImageIcon iconeCalendario = new ImageIcon("src/main/resources/icons/calendar.png");
 
-        // Redimensionar a imagem do ícone
         Image image = iconeCalendario.getImage();
         Image imageRedimensionada = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         ImageIcon iconeRedimensionado = new ImageIcon(imageRedimensionada);
 
         JLabel newIconeCalendario = new JLabel(iconeRedimensionado);
 
-        // Configuração para o ícone estar mais à esquerda
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridheight = 2;
-        gbc.anchor = GridBagConstraints.WEST; // Alinhar mais para a esquerda
+        gbc.anchor = GridBagConstraints.WEST;
         bloco.add(newIconeCalendario, gbc);
 
-        // Campo para Data de Entrada
         BotaoArredondado dataEntrada = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         dataEntrada.setToolTipText("Selecione uma data de Entrada");
         dataEntrada.setPreferredSize(new Dimension(180, 40)); // Define o tamanho do botão
@@ -288,8 +253,7 @@ public class OvernightPanel extends JPanel {
             }
         });
 
-        // Borda vermelha ao redor do campo de entrada
-        dataEntrada.setBorder(BorderFactory.createLineBorder(Color.RED, 3)); // Borda vermelha mais grossa
+        dataEntrada.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
 
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -297,10 +261,9 @@ public class OvernightPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         bloco.add(dataEntrada, gbc);
 
-        // Campo para Data de Saída
         BotaoArredondado dataSaida = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         dataSaida.setToolTipText("Selecione uma data de Saida");
-        dataSaida.setPreferredSize(new Dimension(180, 40)); // Define o tamanho do botão
+        dataSaida.setPreferredSize(new Dimension(180, 40));
         dataSaida.setFont(new Font("Inter", Font.BOLD, 20));
         dataSaida.setBackground(Color.WHITE);
         dataSaida.setForeground(Color.ORANGE);
@@ -318,18 +281,14 @@ public class OvernightPanel extends JPanel {
             }
         });
 
-        // Borda vermelha ao redor do campo de saída
         dataSaida.setBorder(BorderFactory.createLineBorder(Color.RED, 3)); // Borda vermelha mais grossa
 
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST; // Alinhar mais para a esquerda
+        gbc.anchor = GridBagConstraints.WEST;
         bloco.add(dataSaida, gbc);
 
-        // Evento para abrir o CustomJCalendar ao clicar na Data de Entrada
         dataEntrada.addActionListener(e -> abrirCalendario(dataEntrada, true));
-
-        // Evento para abrir o CustomJCalendar ao clicar na Data de Saída
         dataSaida.addActionListener(e -> abrirCalendario(dataSaida, false));
 
         return bloco;
@@ -339,7 +298,7 @@ public class OvernightPanel extends JPanel {
     private void abrirCalendario(BotaoArredondado botaoData, boolean isDataEntrada) {
         JFrame calendarioFrame = new JFrame("Selecione uma Data");
         calendarioFrame.setSize(400, 400);
-        calendarioFrame.setLocationRelativeTo(null); // Centraliza na tela
+        calendarioFrame.setLocationRelativeTo(null);
 
         CustomJCalendar customJCalendar = new CustomJCalendar();
         JCalendar jCalendar = customJCalendar.createCustomCalendar();
@@ -349,11 +308,8 @@ public class OvernightPanel extends JPanel {
             java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
             LocalDate localDate = sqlDate.toLocalDate();
 
-            if (isDataEntrada) {
-                dataEntrada = localDate;
-            } else {
-                dataSaida = localDate;
-            }
+            if (isDataEntrada) dataEntrada = localDate;
+            else dataSaida = localDate;
 
             botaoData.setText(localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             botaoData.setBackground(Color.WHITE);
@@ -361,35 +317,29 @@ public class OvernightPanel extends JPanel {
 
             calendarioFrame.dispose();
         });
-
         calendarioFrame.add(jCalendar);
         calendarioFrame.setVisible(true);
     }
 
 
-
-    // Método para criar o bloco total e quantidade de pessoas
     private JPanel blocoTotalEQuantidadePessoas() {
-        // Criar o painel principal com layout de GridBag
         JPanel bloco = new JPanel();
-        bloco.setBackground(Color.WHITE); // Placeholder de cor laranja
-        bloco.setPreferredSize(new Dimension(300, 100)); // Define o tamanho do bloco
-        bloco.setMinimumSize(new Dimension(300, 100)); // Define o tamanho mínimo
-        bloco.setLayout(new GridBagLayout()); // Usar GridBagLayout para controle preciso
+        bloco.setBackground(Color.WHITE);
+        bloco.setPreferredSize(new Dimension(300, 100));
+        bloco.setMinimumSize(new Dimension(300, 100));
+        bloco.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 10, 5, 10); // Definir o espaçamento
+        gbc.insets = new Insets(5, 10, 5, 10);
 
-        // Criar o label para o Total e definir o valor inicial
         JLabel labelTotal = new JLabel("Total: ");
         labelTotal.setFont(new Font("Inter", Font.BOLD, 18));
         labelTotal.setForeground(Color.DARK_GRAY);
 
-        JLabel valorTotal = new JLabel("R$ 0,00"); // Valor inicial
+        JLabel valorTotal = new JLabel("R$ 0,00");
         valorTotal.setFont(new Font("Inter", Font.BOLD, 20));
         valorTotal.setForeground(Cor.VERDE_ESCURO);
 
-        // Adicionar os componentes de total à parte superior
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
@@ -398,18 +348,15 @@ public class OvernightPanel extends JPanel {
         gbc.gridx = 1;
         bloco.add(valorTotal, gbc);
 
-        // Criar o ícone de pessoas
         ImageIcon iconePessoas = new ImageIcon("src/main/resources/icons/users.png");
         Image image = iconePessoas.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         JLabel newIconePessoas = new JLabel(new ImageIcon(image));
 
-        // Campo para quantidade de pessoas
         JTextField quantidadePessoasField = new JTextField(5);
         quantidadePessoasField.setToolTipText("Insira a quantidade de Pessoas");
         quantidadePessoasField.setFont(new Font("Inter", Font.BOLD, 18));
         quantidadePessoasField.setBorder(BorderFactory.createLineBorder(Color.GRAY.brighter(), 1, true));
 
-        // Adicionar um DocumentListener para monitorar alterações no campo de texto
         quantidadePessoasField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -432,25 +379,21 @@ public class OvernightPanel extends JPanel {
 
                     quantidadeDePessoas.setValue(quantidadePessoas);
 
-                    // Limitar a quantidade de pessoas a 5
-
                     //TODO: pega q quantidade maxima de pessoa possivel
                     if (quantidadePessoas > 5) {
                         quantidadePessoas = 5;
                         quantidadePessoasField.setText(String.valueOf(quantidadePessoas));
                     }
 
-                    // Chamar o método para calcular o novo total
                     float novoTotal = calcularNovoTotal(quantidadePessoas);
                     valorTotalGlobal.setValue(novoTotal);
-                    valorTotal.setText(String.format("R$ %.2f", novoTotal).replace(".", ",")); // Atualizar o valor do total
+                    valorTotal.setText(String.format("R$ %.2f", novoTotal).replace(".", ","));
                 } catch (NumberFormatException ex) {
-                    valorTotal.setText("R$ 0,00"); // Caso haja um valor inválido, resetar o total
+                    valorTotal.setText("R$ 0,00");
                 }
             }
         });
 
-        // Adicionar o ícone e o campo de pessoas à parte inferior
         gbc.gridx = 0;
         gbc.gridy = 1;
         bloco.add(newIconePessoas, gbc);
@@ -540,8 +483,8 @@ public class OvernightPanel extends JPanel {
     private JPanel criarBlocoDiarias() {
         JPanel bloco = new JPanel();
         bloco.setBackground(Color.WHITE);
-        bloco.setPreferredSize(new Dimension(800, 100)); // Tamanho fixo
-        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Garante que a largura se ajuste
+        bloco.setPreferredSize(new Dimension(800, 100));
+        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         bloco.setLayout(new GridBagLayout());
         bloco.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 40));
 
@@ -606,7 +549,7 @@ public class OvernightPanel extends JPanel {
     }
 
 
-    public class ObservableValue<T> {
+    public static class ObservableValue<T> {
         @Getter
         private T value;
         private List<Observer> observers = new ArrayList<>();

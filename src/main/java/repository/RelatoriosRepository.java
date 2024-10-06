@@ -23,6 +23,7 @@ public class RelatoriosRepository {
         String sql = """
         SELECT data_hora::date
         FROM relatorio
+        order by data_hora::date desc
         LIMIT ? OFFSET ?;
         """;
 
@@ -194,12 +195,6 @@ public class RelatoriosRepository {
             System.out.println(quarto.descricao());
         }
 
-
-
-
-
-//        var quarto =
-
         LocalDateTime now = LocalDateTime.now();
         Timestamp timestamp = Timestamp.valueOf(now);
 
@@ -207,8 +202,6 @@ public class RelatoriosRepository {
             statement.setTimestamp(1, timestamp);
             statement.setInt(2, request.tipo_pagamento_enum().getCodigo());
             statement.setString(3, request.relatorio());
-
-
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

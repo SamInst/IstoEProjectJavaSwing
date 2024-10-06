@@ -198,20 +198,17 @@ public class Menu extends JFrame {
 
     public static JPanel createIdentificadorPanel(String titulo, ImageIcon icon) {
         JPanel identificadorPanel = new JPanel();
-        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));  // Alinhar à esquerda
-        identificadorPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
-        identificadorPanel.setBackground(Color.BLUE);  // Cor de fundo do painel principal
+        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        identificadorPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 20));
 
-        // Criação do JLabel com ícone e texto dentro do mesmo componente
-        JLabel labelTitulo = new JLabel(titulo, resizeIcon(icon, 50, 50), JLabel.LEFT);
-        labelTitulo.setFont(new Font("Inter", Font.BOLD, 30));
+        JLabel labelTitulo = new JLabel(titulo, resizeIcon(icon, 40, 40), JLabel.LEFT);
+        labelTitulo.setFont(new Font("Inter", Font.BOLD, 25));
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setOpaque(true);
-        labelTitulo.setBackground(new Color(66, 75, 152));  // Cor de fundo
-        labelTitulo.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // Espaçamento interno
-        labelTitulo.setIconTextGap(10);  // Espaço entre ícone e texto
+        labelTitulo.setBackground(new Color(66, 75, 152));
+        labelTitulo.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        labelTitulo.setIconTextGap(10);
 
-        // Adicionando o JLabel ao painel
         identificadorPanel.add(labelTitulo);
 
         return identificadorPanel;
