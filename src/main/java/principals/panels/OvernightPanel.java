@@ -12,6 +12,7 @@ import repository.PessoaRepository;
 import repository.PrecosRepository;
 import repository.QuartosRepository;
 import request.BuscaPessoaRequest;
+import request.PernoiteRequest;
 import response.QuartoResponse;
 
 import javax.swing.*;
@@ -24,9 +25,11 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-public class OvernightPanel extends javax.swing.JPanel {
+public class OvernightPanel extends JPanel {
 
     Long quarto_id = null;
     LocalDate dataEntrada = LocalDate.now();
@@ -34,7 +37,7 @@ public class OvernightPanel extends javax.swing.JPanel {
     private final ObservableValue<Integer> quantidadeDePessoas = new ObservableValue<>(0);
     private final ObservableValue<Integer> quantidadeDeDiarias = new ObservableValue<>(0);
     private final ObservableValue<Float> valorTotalGlobal = new ObservableValue<>(0F);
-    List<Long> pessoas = null;
+    List<Long> pessoas = new ArrayList<>();
 
     PessoaRepository pessoaRepository = new PessoaRepository();
     PernoitesRepository pernoitesRepository = new PernoitesRepository();
@@ -76,9 +79,9 @@ public class OvernightPanel extends javax.swing.JPanel {
         mainPanel.setBackground(Color.WHITE);
 
         // Blocos de Quarto e Datas e Diárias
-        JPanel blocoQuartoEDatas = criarBlocoSuperior();
+        JPanel blocoQuartoEDatas = criarBlocoQuartoEData();
         JPanel blocoDiarias = criarBlocoDiarias();
-        JPanel blocoBuscaPessoas = new BuscaPessoasPanel();
+        JPanel blocoBuscaPessoas = new BuscaPessoasPanel(pessoas);
 
         mainPanel.add(blocoQuartoEDatas);
         mainPanel.add(blocoDiarias);
@@ -93,7 +96,7 @@ public class OvernightPanel extends javax.swing.JPanel {
         blocoBotao.setBackground(Color.WHITE);
 
         JButton adicionarButton = new JButton("Adicionar Pernoite");
-        adicionarButton.setPreferredSize(new Dimension(150, 30));  // Tamanho do botão
+        adicionarPernoite(adicionarButton, janelaAdicionar);
         blocoBotao.add(adicionarButton);
 
         // Adicionar bloco do botão após a busca de pessoas
@@ -109,14 +112,70 @@ public class OvernightPanel extends javax.swing.JPanel {
                 + quantidadeDeDiarias.getValue() + " Valor Total: " + valorTotalGlobal);
     }
 
+    public void adicionarPernoite(JButton adicionarButton, JFrame janelaAdicionar) {
+        adicionarButton.setPreferredSize(new Dimension(150, 30));
+
+        adicionarButton.addActionListener(e -> {
+            if (quarto_id == null){
+                JOptionPane.showMessageDialog(null,
+                        "Selecione um quarto",
+                        "Atenção",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            if (Objects.equals(dataSaida, LocalDate.now())){
+                JOptionPane.showMessageDialog(null,
+                        "Selecione uma data de saida valida",
+                        "Atenção",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            if (quantidadeDePessoas.getValue() <= 0){
+                JOptionPane.showMessageDialog(null,
+                        "Insira uma quantidade de pessoas validas",
+                        "Atenção",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            if (pessoas.isEmpty()){
+                JOptionPane.showMessageDialog(null,
+                        "Insira ao menos uma Pessoa como representante",
+                        "Atenção",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                if (pernoitesRepository.adicionarPernoite(new PernoiteRequest(
+                        quarto_id,
+                        dataEntrada,
+                        dataSaida,
+                        quantidadeDePessoas.value,
+                        pessoas,
+                        valorTotalGlobal.value))
+                ) {
+                    int result = JOptionPane.showConfirmDialog(null,
+                            "Pernoite Adicionado com Sucesso!",
+                            "Sucesso",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    if (result == JOptionPane.OK_OPTION) {
+                       janelaAdicionar.dispose();
+                    }
+
+                }
+
+                System.out.println("Adicionado pernoite " + new PernoiteRequest(
+                        quarto_id,dataEntrada,dataSaida, quantidadeDePessoas.value, pessoas, valorTotalGlobal.value
+                ));
+            }
+
+        });
+    }
+
 
 
     // Método para criar um bloco cinza com altura fixa
-    private JPanel criarBlocoSuperior() {
-        // Criar o painel superior que conterá os três blocos
+    private JPanel criarBlocoQuartoEData() {
         JPanel painelSuperior = new JPanel(new GridBagLayout());
-        painelSuperior.setPreferredSize(new Dimension(800, 100)); // Tamanho preferido para o painel superior
-        painelSuperior.setBackground(Color.WHITE); // Fundo branco para o painel superior
+        painelSuperior.setPreferredSize(new Dimension(800, 100));
+        painelSuperior.setBackground(Color.WHITE);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH; // Ocupar tanto a largura quanto a altura
@@ -130,6 +189,7 @@ public class OvernightPanel extends javax.swing.JPanel {
 
         // Botão arredondado com texto inicial
         BotaoArredondado botaoQuarto = new BotaoArredondado("Buscar");
+        botaoQuarto.setToolTipText("Selecione um quarto");
         botaoQuarto.setPreferredSize(new Dimension(100, 70)); // Define o tamanho do botão (largura: 100px, altura: 70px)
         botaoQuarto.setBackground(Cor.AZUL_ESCURO); // Define a cor de fundo do botão
         botaoQuarto.setForeground(Color.WHITE); // Define a cor do texto
@@ -206,6 +266,7 @@ public class OvernightPanel extends javax.swing.JPanel {
 
         // Campo para Data de Entrada
         BotaoArredondado dataEntrada = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        dataEntrada.setToolTipText("Selecione uma data de Entrada");
         dataEntrada.setPreferredSize(new Dimension(180, 40)); // Define o tamanho do botão
         dataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
         dataEntrada.setBackground(Color.WHITE);
@@ -230,11 +291,12 @@ public class OvernightPanel extends javax.swing.JPanel {
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.gridheight = 1;
-        gbc.anchor = GridBagConstraints.WEST; // Alinhar mais para a esquerda
+        gbc.anchor = GridBagConstraints.WEST;
         bloco.add(dataEntrada, gbc);
 
         // Campo para Data de Saída
         BotaoArredondado dataSaida = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        dataSaida.setToolTipText("Selecione uma data de Saida");
         dataSaida.setPreferredSize(new Dimension(180, 40)); // Define o tamanho do botão
         dataSaida.setFont(new Font("Inter", Font.BOLD, 20));
         dataSaida.setBackground(Color.WHITE);
@@ -276,13 +338,11 @@ public class OvernightPanel extends javax.swing.JPanel {
         calendarioFrame.setSize(400, 400);
         calendarioFrame.setLocationRelativeTo(null); // Centraliza na tela
 
-        // Criar o calendário customizado
         CustomJCalendar customJCalendar = new CustomJCalendar();
         JCalendar jCalendar = customJCalendar.createCustomCalendar();
 
-        // Ao selecionar uma data, atualizar o botão de data
         jCalendar.getDayChooser().addPropertyChangeListener("day", evt -> {
-            java.util.Date selectedDate = jCalendar.getDate();
+            Date selectedDate = jCalendar.getDate();
             java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
             LocalDate localDate = sqlDate.toLocalDate();
 
@@ -292,19 +352,15 @@ public class OvernightPanel extends javax.swing.JPanel {
                 dataSaida = localDate;
             }
 
-            // Atualizar o botão com a data selecionada formatada
             botaoData.setText(localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            botaoData.setBackground(Color.WHITE); // Pintar de laranja após a seleção
+            botaoData.setBackground(Color.WHITE);
             botaoData.setForeground(Color.ORANGE);
 
-
-            // Fechar o calendário após a seleção
             calendarioFrame.dispose();
         });
 
-        // Adicionar o calendário na janela
         calendarioFrame.add(jCalendar);
-        calendarioFrame.setVisible(true); // Exibe o calendário
+        calendarioFrame.setVisible(true);
     }
 
 
@@ -340,12 +396,13 @@ public class OvernightPanel extends javax.swing.JPanel {
         bloco.add(valorTotal, gbc);
 
         // Criar o ícone de pessoas
-        ImageIcon iconePessoas = new ImageIcon("src/main/resources/icons/users.png"); // Atualize o caminho correto
+        ImageIcon iconePessoas = new ImageIcon("src/main/resources/icons/users.png");
         Image image = iconePessoas.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         JLabel newIconePessoas = new JLabel(new ImageIcon(image));
 
         // Campo para quantidade de pessoas
         JTextField quantidadePessoasField = new JTextField(5);
+        quantidadePessoasField.setToolTipText("Insira a quantidade de Pessoas");
         quantidadePessoasField.setFont(new Font("Inter", Font.BOLD, 18));
         quantidadePessoasField.setBorder(BorderFactory.createLineBorder(Color.GRAY.brighter(), 1, true));
 
@@ -454,7 +511,10 @@ public class OvernightPanel extends javax.swing.JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     String quartoNumero = String.valueOf(quarto.quarto_id() < 10L ? "0"+ quarto.quarto_id() : quarto.quarto_id());
+                    System.out.println(quarto_id);
                     quarto_id = quarto.quarto_id();
+                    System.out.println(quarto_id);
+                    System.out.println(quarto.quarto_id());
                     if (!botaoQuarto.getText().equals(quartoNumero)) {
                         botaoQuarto.setText(quartoNumero);
                         botaoQuarto.setFont(new Font("Inter", Font.BOLD, 50));
@@ -472,22 +532,6 @@ public class OvernightPanel extends javax.swing.JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         frameLista.add(scrollPane);
         frameLista.setVisible(true);
-    }
-
-
-//    private JPanel criarBlocoAdicionarPessoas() {
-//        JPanel bloco = new JPanel();
-//        bloco.setBackground(Color.GREEN);
-//        bloco.setPreferredSize(new Dimension(800, 100));
-//        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Garante que a largura se ajuste
-//        return bloco;
-//    }
-
-    private JPanel criarBlocoPessoasAdicionadas() {
-        JPanel bloco = new JPanel();
-        bloco.setBackground(Color.RED);
-        bloco.setLayout(new BorderLayout());
-        return bloco;
     }
 
     private JPanel criarBlocoDiarias() {
@@ -559,16 +603,6 @@ public class OvernightPanel extends javax.swing.JPanel {
     }
 
 
-
-
-
-
-
-
-
-
-
-
     public class ObservableValue<T> {
         @Getter
         private T value;
@@ -596,32 +630,5 @@ public class OvernightPanel extends javax.swing.JPanel {
         public interface Observer {
             void update();
         }
-    }
-
-
-
-
-
-    private void buscarPessoa(String searchText, JList<String> listaPessoas) {
-        List<BuscaPessoaRequest> pessoas = pessoaRepository.buscarPessoaPorIdNomeOuCpf(searchText);
-        DefaultListModel<String> model = new DefaultListModel<>();
-        for (BuscaPessoaRequest pessoa : pessoas) {
-            JLabel pessoaIDLabel = new JLabel(pessoa.id().toString());
-            pessoaIDLabel.setForeground(Color.RED);
-            model.addElement("#" + pessoaIDLabel + " - " + pessoa.nome());
-        }
-        listaPessoas.setModel(model);
-    }
-
-
-    private static ImageIcon resizeIcon(String gifPath, int width, int height) {
-        // Carregar a imagem GIF
-        ImageIcon gifIcon = new ImageIcon(gifPath);
-
-        // Redimensionar a imagem
-        Image gifImage = gifIcon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
-
-        // Retornar o novo ícone com o tamanho redefinido
-        return new ImageIcon(gifImage);
     }
 }

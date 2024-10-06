@@ -18,7 +18,7 @@ public class BuscaPessoasPanel extends JPanel {
     private JPanel blocoPessoasAdicionadas;
     private List<Long> pessoasSelecionadas = new ArrayList<>();
 
-    public BuscaPessoasPanel() {
+    public BuscaPessoasPanel(List<Long> pessoas) {
         setLayout(new BorderLayout());
         setBackground(Color.RED);
 
@@ -66,7 +66,7 @@ public class BuscaPessoasPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 String pessoaSelecionada = listaSugestoes.getSelectedValue();
                 if (pessoaSelecionada != null) {
-                    adicionarPessoaSelecionada(pessoaSelecionada);
+                    adicionarPessoaSelecionada(pessoaSelecionada, pessoas);
                     listaSugestoes.setVisible(false);  // Esconder a lista de sugestões após a seleção
                     campoBusca.setText("");  // Limpar o campo de busca após a seleção
                 }
@@ -102,7 +102,7 @@ public class BuscaPessoasPanel extends JPanel {
         }
     }
 
-    private void adicionarPessoaSelecionada(String pessoaSelecionada) {
+    private void adicionarPessoaSelecionada(String pessoaSelecionada, List<Long> pessoas) {
         Long pessoaId = Long.valueOf(pessoaSelecionada.split(" - ")[0].replace("#", ""));
 
         if (pessoasSelecionadas.contains(pessoaId)) {
@@ -111,6 +111,7 @@ public class BuscaPessoasPanel extends JPanel {
         }
 
         pessoasSelecionadas.add(pessoaId);
+        pessoas.add(pessoaId);
 
         JLabel labelPessoa = new JLabel(pessoaSelecionada);
         labelPessoa.setForeground(Cor.CINZA_ESCURO);
@@ -123,6 +124,7 @@ public class BuscaPessoasPanel extends JPanel {
         botaoRemover.setBorderPainted(false);
         botaoRemover.setContentAreaFilled(false);
         botaoRemover.setFocusPainted(false);
+        botaoRemover.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         // Cria um painel para organizar a pessoa e o botão remover
         JPanel painelPessoa = new JPanel(new BorderLayout()); // Altera para BorderLayout
@@ -136,7 +138,7 @@ public class BuscaPessoasPanel extends JPanel {
                     "Remover Pessoa",
                     JOptionPane.YES_NO_OPTION);
             if (resposta == JOptionPane.YES_OPTION) {
-                removerPessoaSelecionada(pessoaId, painelPessoa);
+                removerPessoaSelecionada(pessoaId, painelPessoa, pessoas);
             }
         });
 
@@ -147,8 +149,9 @@ public class BuscaPessoasPanel extends JPanel {
     }
 
 
-    private void removerPessoaSelecionada(Long pessoaId, JPanel painelPessoa) {
+    private void removerPessoaSelecionada(Long pessoaId, JPanel painelPessoa, List<Long> pessoas) {
         pessoasSelecionadas.remove(pessoaId);
+        pessoas.remove(pessoaId);
 
         // Remove o painel da interface
         blocoPessoasAdicionadas.remove(painelPessoa);

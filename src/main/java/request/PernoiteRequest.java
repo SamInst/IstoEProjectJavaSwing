@@ -8,5 +8,6 @@ public record PernoiteRequest(
         LocalDate dataEntrada,
         LocalDate dataSaida,
         Integer quantidade_de_pessoas,
-        List<Long> pessoas
+        List<Long> pessoas,
+        Float total
 ){}
