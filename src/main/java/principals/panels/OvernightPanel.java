@@ -99,6 +99,7 @@ public class OvernightPanel extends JPanel {
         adicionarPernoite(adicionarButton, janelaAdicionar);
         blocoBotao.add(adicionarButton);
 
+
         // Adicionar bloco do botão após a busca de pessoas
         mainPanel.add(blocoBotao);  // Agora o botão fica abaixo da busca de pessoas
 
