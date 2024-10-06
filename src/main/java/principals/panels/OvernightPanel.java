@@ -48,6 +48,8 @@ public class OvernightPanel extends JPanel {
         setBackground(Color.WHITE);
         setLayout(new BorderLayout());
 
+        System.out.println(pernoitesRepository.buscaPernoite(35L));
+
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.ORANGE);
 
