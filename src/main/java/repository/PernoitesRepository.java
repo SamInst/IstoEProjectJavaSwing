@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class PernoitesRepository extends PostgresDatabaseConnect {
@@ -375,7 +376,9 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                 }
             }
 
-            return pernoites;
+            return pernoites.stream()
+                    .sorted(Comparator.comparingLong(BuscaPernoiteResponse::quarto))
+                    .toList();
 
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar os pernoites", e);
