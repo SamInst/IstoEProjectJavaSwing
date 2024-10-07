@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.RowMapper;
 import request.RelatorioRequest;
 import response.RelatorioRowmapper;
 import response.RelatoriosResponse;
-
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

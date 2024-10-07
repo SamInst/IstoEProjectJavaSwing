@@ -1,17 +1,21 @@
 package principals.panels;
 
 import com.toedter.calendar.JCalendar;
+import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
 import lombok.Getter;
-import principals.panels.subPanels.BuscaPessoasPanel;
+import principals.panels.pernoitesSubPanels.BlocosPernoitesAtivos;
+import principals.panels.pernoitesSubPanels.BuscaPessoasPanel;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
+import principals.tools.Icones;
 import repository.PernoitesRepository;
 import repository.PrecosRepository;
 import repository.QuartosRepository;
 import request.PernoiteRequest;
 import response.QuartoResponse;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -25,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import static principals.tools.Cor.VERDE_ESCURO;
 
 public class OvernightPanel extends JPanel {
     Long quarto_id = null;
@@ -40,24 +46,49 @@ public class OvernightPanel extends JPanel {
     QuartosRepository quartosRepository = new QuartosRepository();
 
     public OvernightPanel() {
-        setBackground(Color.WHITE);
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(Color.ORANGE);
+
+        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Pernoites", Icones.pernoites);
+        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
+
+        topPanel.add(identificadorPanel);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(Color.ORANGE);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         buttonPanel.setMinimumSize(new Dimension(20, 20));
 
-        JButton adicionar = new JButton("Adicionar Pernoite");
-        adicionar.addActionListener(e -> abrirJanelaAdicionarPernoite());
+        JButton btnAdicionar = new JButton("Adicionar");
+        btnAdicionar.setPreferredSize(new Dimension(125, 40));
+        btnAdicionar.addActionListener(e -> abrirJanelaAdicionarPernoite());
 
-        buttonPanel.add(adicionar);
-        topPanel.add(buttonPanel, BorderLayout.WEST);
+        JLabel hopedados = new JLabel("Hospedados: " + pernoitesRepository.hospedados());
+        hopedados.setFont(new Font("Inter", Font.BOLD, 30));
+        hopedados.setForeground(VERDE_ESCURO);
+        hopedados.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
+
+        topPanel.add(hopedados, BorderLayout.EAST);
+
+        buttonPanel.add(btnAdicionar);
+        identificadorPanel.add(buttonPanel, BorderLayout.WEST);
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
+
+        JPanel pernoitesPanel = new JPanel();
+        pernoitesPanel.setBackground(Color.RED);
+        pernoitesPanel.setLayout(new BoxLayout(pernoitesPanel, BoxLayout.Y_AXIS));
+
         add(topPanel, BorderLayout.NORTH);
+
+        for (int i = 0; i < StatusPernoiteEnum.values().length; i++){
+            StatusPernoiteEnum statusPernoite = StatusPernoiteEnum.values()[i];
+            JPanel statusPanel = new JPanel();
+            pernoitesPanel.add(new BlocosPernoitesAtivos().blocoPernoitesAtivos(statusPanel, pernoitesRepository, statusPernoite));
+        }
+
+        JScrollPane scrollPane = new JScrollPane(pernoitesPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
 
@@ -219,9 +250,7 @@ public class OvernightPanel extends JPanel {
 
         gbc.insets = new Insets(10, 0, 10, 10);
 
-        ImageIcon iconeCalendario = new ImageIcon("src/main/resources/icons/calendar.png");
-
-        Image image = iconeCalendario.getImage();
+        Image image = Icones.calendario.getImage();
         Image imageRedimensionada = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         ImageIcon iconeRedimensionado = new ImageIcon(imageRedimensionada);
 
@@ -348,8 +377,7 @@ public class OvernightPanel extends JPanel {
         gbc.gridx = 1;
         bloco.add(valorTotal, gbc);
 
-        ImageIcon iconePessoas = new ImageIcon("src/main/resources/icons/users.png");
-        Image image = iconePessoas.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        Image image = Icones.usuarios.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         JLabel newIconePessoas = new JLabel(new ImageIcon(image));
 
         JTextField quantidadePessoasField = new JTextField(5);
@@ -540,7 +568,7 @@ public class OvernightPanel extends JPanel {
 
         gbc.gridx = 4;
         gbc.weightx = 0.1;
-        JButton botaoDesconto = new JButton(new ImageIcon("src/main/resources/icons/desconto.png"));
+        JButton botaoDesconto = new JButton(Icones.desconto);
         botaoDesconto.setPreferredSize(new Dimension(30, 30));
         botaoDesconto.setBackground(Color.ORANGE);
         bloco.add(botaoDesconto, gbc);

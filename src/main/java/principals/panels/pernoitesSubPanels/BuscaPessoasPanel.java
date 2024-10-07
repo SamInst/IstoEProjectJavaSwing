@@ -1,4 +1,4 @@
-package principals.panels.subPanels;
+package principals.panels.pernoitesSubPanels;
 
 import principals.tools.Cor;
 import repository.PessoaRepository;
@@ -28,6 +28,7 @@ public class BuscaPessoasPanel extends JPanel {
 
         campoBusca = new JTextField("Buscar pessoas por nome, cpf ou ID");
         campoBusca.setForeground(Cor.CINZA_ESCURO);
+        campoBusca.setFont(new Font("Inter", Font.BOLD, 12));
         campoBusca.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
         campoBusca.setPreferredSize(new Dimension(400, 30));
         campoBusca.addFocusListener(new FocusListener() {

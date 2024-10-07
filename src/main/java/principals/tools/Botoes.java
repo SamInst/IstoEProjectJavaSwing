@@ -6,15 +6,6 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.Executors;
 
 public class Botoes {
-    public static ImageIcon dashboard_icon = new ImageIcon("src/main/resources/icons/menu/dashboard.png");
-    public static ImageIcon quartos_icon = new ImageIcon("src/main/resources/icons/menu/rooms.png");
-    public static ImageIcon entradas_icon = new ImageIcon("src/main/resources/icons/menu/entry.png");
-    public static ImageIcon pernoites_icon = new ImageIcon("src/main/resources/icons/menu/overnight.png");
-    public static ImageIcon relatorios_icon = new ImageIcon("src/main/resources/icons/menu/reports.png");
-    public static ImageIcon clientes_icon = new ImageIcon("src/main/resources/icons/menu/customers.png");
-    public static ImageIcon itens_icon = new ImageIcon("src/main/resources/icons/menu/itens.png");
-    public static ImageIcon reservations_icon = new ImageIcon("src/main/resources/icons/menu/reservations.png");
-    public static ImageIcon price_icon = new ImageIcon("src/main/resources/icons/menu/price.png");
 
     public static JButton botaoEstilizado(String titulo, int tamanhoTitulo, String pathIcon, int larguraIcone, int alturaIcone, Color color) {
         // Carregar o ícone do botão a partir do caminho

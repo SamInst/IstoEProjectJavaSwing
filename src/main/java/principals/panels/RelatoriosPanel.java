@@ -1,10 +1,7 @@
 package principals.panels;
 
 import com.toedter.calendar.JCalendar;
-import principals.tools.Botoes;
-import principals.tools.Converter;
-import principals.tools.Cor;
-import principals.tools.CustomJCalendar;
+import principals.tools.*;
 import repository.RelatoriosRepository;
 import response.RelatoriosResponse;
 import javax.swing.*;
@@ -23,41 +20,6 @@ public class RelatoriosPanel extends JPanel {
     JButton btnPesquisar = new JButton("Pesquisar");
     JButton btnAdicionar = new JButton("Adicionar");
 
-    public void sumarioPanel(JPanel sumarioPanel){
-        sumarioPanel.setLayout(new BoxLayout(sumarioPanel, BoxLayout.Y_AXIS));
-
-        JButton btnSumarioAzul = new JButton();
-        btnSumarioAzul.setPreferredSize(new Dimension(20, 20));
-        btnSumarioAzul.setBackground(AZUL_ESCURO);
-
-        JLabel sumario = new JLabel("Cartão/PIX/Transferências");
-        JPanel cartaoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        cartaoPanel.add(btnSumarioAzul);
-        cartaoPanel.add(sumario);
-
-        JButton btnSumarioVerde = new JButton();
-        btnSumarioVerde.setPreferredSize(new Dimension(20, 20));
-        btnSumarioVerde.setBackground(VERDE_ESCURO);
-
-        JLabel sumarioDinheiro = new JLabel("Dinheiro");
-        JPanel dinheiroPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        dinheiroPanel.add(btnSumarioVerde);
-        dinheiroPanel.add(sumarioDinheiro);
-
-        JButton btnSumarioVermelho = new JButton();
-        btnSumarioVermelho.setPreferredSize(new Dimension(20, 20));
-        btnSumarioVermelho.setBackground(VERMELHO);
-
-        JLabel sumarioRetirada = new JLabel("Retirada");
-        JPanel retiradaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        retiradaPanel.add(btnSumarioVermelho);
-        retiradaPanel.add(sumarioRetirada);
-
-        sumarioPanel.add(cartaoPanel);
-        sumarioPanel.add(dinheiroPanel);
-        sumarioPanel.add(retiradaPanel);
-    }
-
     public RelatoriosPanel() {
         setLayout(new BorderLayout());
 
@@ -65,7 +27,7 @@ public class RelatoriosPanel extends JPanel {
 
         JPanel topPanel = new JPanel(new BorderLayout());
 
-        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Relatórios", Botoes.relatorios_icon);
+        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Relatórios", Icones.relatorios);
         identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
 
         topPanel.add(identificadorPanel);
@@ -147,6 +109,43 @@ public class RelatoriosPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+
+    public void sumarioPanel(JPanel sumarioPanel){
+        sumarioPanel.setLayout(new BoxLayout(sumarioPanel, BoxLayout.Y_AXIS));
+
+        JButton btnSumarioAzul = new JButton();
+        btnSumarioAzul.setPreferredSize(new Dimension(20, 20));
+        btnSumarioAzul.setBackground(AZUL_ESCURO);
+
+        JLabel sumario = new JLabel("Cartão/PIX/Transferências");
+        JPanel cartaoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        cartaoPanel.add(btnSumarioAzul);
+        cartaoPanel.add(sumario);
+
+        JButton btnSumarioVerde = new JButton();
+        btnSumarioVerde.setPreferredSize(new Dimension(20, 20));
+        btnSumarioVerde.setBackground(VERDE_ESCURO);
+
+        JLabel sumarioDinheiro = new JLabel("Dinheiro");
+        JPanel dinheiroPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        dinheiroPanel.add(btnSumarioVerde);
+        dinheiroPanel.add(sumarioDinheiro);
+
+        JButton btnSumarioVermelho = new JButton();
+        btnSumarioVermelho.setPreferredSize(new Dimension(20, 20));
+        btnSumarioVermelho.setBackground(VERMELHO);
+
+        JLabel sumarioRetirada = new JLabel("Retirada");
+        JPanel retiradaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        retiradaPanel.add(btnSumarioVermelho);
+        retiradaPanel.add(sumarioRetirada);
+
+        sumarioPanel.add(cartaoPanel);
+        sumarioPanel.add(dinheiroPanel);
+        sumarioPanel.add(retiradaPanel);
+    }
+
+
     public RelatoriosResponse relatorios() {
         RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
         return relatoriosRepository.relatoriosResponse();
@@ -227,6 +226,7 @@ public class RelatoriosPanel extends JPanel {
         janelaPesquisar.setLocationRelativeTo(null);
         janelaPesquisar.setVisible(true);
     }
+
 
     public void relatoriosDoDia(List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatorioDoDiaList, JPanel relatoriosDoDiaPanel){
         for (RelatoriosResponse.Relatorios.RelatorioDoDia relatorioDoDia : relatorioDoDiaList) {

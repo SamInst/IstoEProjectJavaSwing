@@ -1,6 +1,7 @@
 package principals.panels;
 
 import principals.tools.Botoes;
+import principals.tools.Icones;
 import principals.tools.Tool;
 import repository.PessoaRepository;
 import response.PessoaResponse;
@@ -41,7 +42,7 @@ public class RoomsPanel extends JPanel {
         topRightPanel.add(btnAdicionar2);
 
         // Label Título à esquerda
-        JLabel labelTitulo = new JLabel("Quartos", Tool.resizeIcon(Botoes.quartos_icon, 50, 50), JLabel.LEFT);
+        JLabel labelTitulo = new JLabel("Quartos", Tool.resizeIcon(Icones.quartos, 50, 50), JLabel.LEFT);
         labelTitulo.setFont(new Font("Inter", Font.BOLD, 30));
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setOpaque(true);

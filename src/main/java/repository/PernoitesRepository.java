@@ -6,12 +6,14 @@ import enums.StatusPernoiteEnum;
 import enums.TipoPagamentoEnum;
 import org.springframework.transaction.annotation.Transactional;
 import request.PernoiteRequest;
+import response.BuscaPernoiteResponse;
 import response.DiariaResponse;
 import response.PernoiteResponse;
 import response.QuartoResponse;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +127,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         String sql_consumos = "SELECT * FROM consumo_diaria join item i on i.id = consumo_diaria.item_id WHERE diaria_id = ?";
 
         try (Connection connection = connect()) {
-            // 1. Obter os dados da tabela "pernoite"
             PernoiteResponse pernoiteResponse = null;
             try (PreparedStatement pernoiteStmt = connection.prepareStatement(sql_pernoite)) {
                 pernoiteStmt.setLong(1, pernoiteId);
@@ -258,6 +259,161 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
 
 
 
+    public List<BuscaPernoiteResponse> buscaPernoitesPorStatus(StatusPernoiteEnum statusPernoite) {
+        String sqlPernoite = """
+        SELECT
+           p.id as pernoite_id,
+           p.ativo,
+           p.quarto_id,
+           p.hora_chegada,
+           p.data_entrada,
+           p.data_saida,
+           p.valot_total,
+           p.status_pernoite_enum,
+           COUNT(d.id) AS quantidade_diarias
+        FROM pernoite p
+        LEFT JOIN diaria d ON d.pernoite_id = p.id
+        WHERE p.status_pernoite_enum = ?
+        GROUP BY p.id
+        """;
+
+        String sqlQuantidadePessoas = """
+        SELECT COUNT(DISTINCT dh.hospedes_id) AS quantidade_pessoas
+        FROM diaria_hospedes dh
+        JOIN diaria d ON dh.diaria_id = d.id
+        WHERE d.pernoite_id = ?;
+        
+        """;
+
+        String sqlQuantidadeConsumo = """
+        SELECT COUNT(cd.id * cd.quantidade) AS quantidade_consumo
+        FROM consumo_diaria cd
+        JOIN diaria d ON cd.diaria_id = d.id
+        WHERE d.pernoite_id = ?
+        """;
+
+        String sqlRepresentante = """
+        SELECT p.id, p.nome, p.telefone
+        FROM pessoa p
+        JOIN diaria_hospedes dh ON p.id = dh.hospedes_id
+        JOIN diaria d ON dh.diaria_id = d.id
+        WHERE d.pernoite_id = ?
+        LIMIT 1
+        """;
+
+        List<BuscaPernoiteResponse> pernoites = new ArrayList<>();
+
+        try (Connection connection = connect()) {
+            // Obter informações dos pernoites de acordo com o status fornecido
+            try (PreparedStatement pernoiteStmt = connection.prepareStatement(sqlPernoite)) {
+                pernoiteStmt.setInt(1, statusPernoite.getValue());
+                ResultSet rsPernoite = pernoiteStmt.executeQuery();
+
+                while (rsPernoite.next()) {
+                    long pernoiteIdResult = rsPernoite.getLong("pernoite_id");
+                    boolean ativo = rsPernoite.getBoolean("ativo");
+                    long quarto = rsPernoite.getLong("quarto_id");
+                    LocalTime horaChegada = rsPernoite.getTime("hora_chegada").toLocalTime();
+                    LocalDate dataEntrada = rsPernoite.getDate("data_entrada").toLocalDate();
+                    LocalDate dataSaida = rsPernoite.getDate("data_saida").toLocalDate();
+                    float valorTotal = rsPernoite.getFloat("valot_total");
+                    String statusPernoiteStr = rsPernoite.getString("status_pernoite_enum");
+                    int quantidadeDiarias = rsPernoite.getInt("quantidade_diarias");
+
+                    // Obter quantidade de pessoas associadas ao pernoite
+                    int quantidadePessoas = 0;
+                    try (PreparedStatement pessoasStmt = connection.prepareStatement(sqlQuantidadePessoas)) {
+                        pessoasStmt.setLong(1, pernoiteIdResult);
+                        ResultSet rsPessoas = pessoasStmt.executeQuery();
+                        if (rsPessoas.next()) {
+                            quantidadePessoas = rsPessoas.getInt("quantidade_pessoas");
+                        }
+                    }
+
+                    // Obter quantidade de itens de consumo
+                    int quantidadeConsumo = 0;
+                    try (PreparedStatement consumoStmt = connection.prepareStatement(sqlQuantidadeConsumo)) {
+                        consumoStmt.setLong(1, pernoiteIdResult);
+                        ResultSet rsConsumo = consumoStmt.executeQuery();
+                        if (rsConsumo.next()) {
+                            quantidadeConsumo = rsConsumo.getInt("quantidade_consumo");
+                        }
+                    }
+
+                    // Obter representante (primeira pessoa associada ao pernoite)
+                    BuscaPernoiteResponse.Representante representante = null;
+                    try (PreparedStatement representanteStmt = connection.prepareStatement(sqlRepresentante)) {
+                        representanteStmt.setLong(1, pernoiteIdResult);
+                        ResultSet rsRepresentante = representanteStmt.executeQuery();
+                        if (rsRepresentante.next()) {
+                            representante = new BuscaPernoiteResponse.Representante(
+                                    rsRepresentante.getLong("id"),
+                                    rsRepresentante.getString("nome"),
+                                    rsRepresentante.getString("telefone")
+                            );
+                        }
+                    }
+
+                    // Montar o objeto BuscaPernoiteResponse
+                    BuscaPernoiteResponse pernoiteResponse = new BuscaPernoiteResponse(
+                            pernoiteIdResult,
+                            ativo,
+                            quarto,
+                            horaChegada,
+                            dataEntrada,
+                            dataSaida,
+                            valorTotal,
+                            quantidadePessoas,
+                            quantidadeDiarias,
+                            quantidadeConsumo,
+                            statusPernoiteStr,
+                            representante
+                    );
+
+                    // Adicionar o pernoite à lista de resultados
+                    pernoites.add(pernoiteResponse);
+                }
+            }
+
+            return pernoites;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar os pernoites", e);
+        }
+    }
 
 
-}
+    public Integer hospedados() {
+        String sql = """
+        SELECT COUNT(DISTINCT dh.hospedes_id) AS quantidade_pessoas
+        FROM diaria_hospedes dh
+        JOIN diaria d ON dh.diaria_id = d.id
+        JOIN pernoite p ON p.id = d.pernoite_id
+        WHERE p.ativo = true;
+    """;
+
+        try (Connection connection = connect();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("quantidade_pessoas");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar a quantidade de hospedados", e);
+        }
+
+        return 0;
+    }
+
+
+
+
+
+
+
+
+    }

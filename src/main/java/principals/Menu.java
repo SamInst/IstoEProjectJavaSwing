@@ -3,7 +3,8 @@ package principals;
 
 
 import principals.panels.*;
-import principals.tools.Botoes;
+import principals.tools.Icones;
+import principals.tools.LabelArredondado;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,15 +36,15 @@ public class Menu extends JFrame {
 
 
         // Botões do menu com ícones e fonte ajustada
-        JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(Botoes.dashboard_icon, 24, 24));
-        JButton btnQuartos = createMenuButton("Quartos", resizeIcon(Botoes.quartos_icon, 24, 24));
-        JButton btnEntradas = createMenuButton("Entradas", resizeIcon(Botoes.entradas_icon, 24, 24));
-        JButton btnPernoites = createMenuButton("Pernoites", resizeIcon(Botoes.pernoites_icon, 24, 24));
-        JButton btnRelatorio = createMenuButton("Relatorio", resizeIcon(Botoes.relatorios_icon, 24, 24));
-        JButton btnClientes = createMenuButton("Clientes", resizeIcon(Botoes.clientes_icon, 24, 24));
-        JButton btnItens = createMenuButton("Itens",  resizeIcon(Botoes.itens_icon, 24, 24));
-        JButton btnReservas = createMenuButton("Reservas", resizeIcon(Botoes.reservations_icon, 24, 24));
-        JButton btnPrice = createMenuButton("Precos",  resizeIcon(Botoes.price_icon, 24, 24));
+        JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(Icones.dashboard, 24, 24));
+        JButton btnQuartos = createMenuButton("Quartos", resizeIcon(Icones.quartos, 24, 24));
+        JButton btnEntradas = createMenuButton("Entradas", resizeIcon(Icones.entradas, 24, 24));
+        JButton btnPernoites = createMenuButton("Pernoites", resizeIcon(Icones.pernoites, 24, 24));
+        JButton btnRelatorio = createMenuButton("Relatorio", resizeIcon(Icones.relatorios, 24, 24));
+        JButton btnClientes = createMenuButton("Clientes", resizeIcon(Icones.clientes, 24, 24));
+        JButton btnItens = createMenuButton("Itens",  resizeIcon(Icones.itens, 24, 24));
+        JButton btnReservas = createMenuButton("Reservas", resizeIcon(Icones.reservas, 24, 24));
+        JButton btnPrice = createMenuButton("Precos",  resizeIcon(Icones.preco, 24, 24));
 
         // Adiciona botões ao menu
         sideMenu.add(btnDashboard);
@@ -201,18 +202,21 @@ public class Menu extends JFrame {
         identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         identificadorPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 20));
 
-        JLabel labelTitulo = new JLabel(titulo, resizeIcon(icon, 40, 40), JLabel.LEFT);
+        // Usando a classe LabelArredondado ao invés de JLabel
+        LabelArredondado labelTitulo = new LabelArredondado(titulo);
+        labelTitulo.setIcon(resizeIcon(icon, 40, 40));  // Definir o ícone com o tamanho ajustado
         labelTitulo.setFont(new Font("Inter", Font.BOLD, 25));
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setOpaque(true);
-        labelTitulo.setBackground(new Color(66, 75, 152));
+        labelTitulo.setBackground(new Color(66, 75, 152));  // Cor de fundo da label
         labelTitulo.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        labelTitulo.setIconTextGap(10);
+        labelTitulo.setIconTextGap(10);  // Espaço entre o ícone e o texto
 
         identificadorPanel.add(labelTitulo);
 
         return identificadorPanel;
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Menu::new);

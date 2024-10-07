@@ -13,4 +13,14 @@ public class Converter {
         }
         return tipoPagamento;
     }
+
+    public static String converterStatusPernoite(String statusPernoite) {
+        switch (statusPernoite) {
+            case "0" ->  statusPernoite = "ATIVO";
+            case "1" -> statusPernoite = "DIARIA ENCERRADA";
+            case "2" ->  statusPernoite = "FINALIZADO";
+            default ->  statusPernoite = "DESCONHECIDO";
+        }
+        return statusPernoite;
+    }
 }
