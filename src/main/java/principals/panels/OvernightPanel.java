@@ -47,6 +47,7 @@ public class OvernightPanel extends JPanel {
 
     public OvernightPanel() {
         setLayout(new BorderLayout());
+        System.out.println(pernoitesRepository.buscaPernoite(35L));
 
         JPanel topPanel = new JPanel(new BorderLayout());
 

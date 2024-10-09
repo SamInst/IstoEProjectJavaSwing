@@ -11,8 +11,12 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
+import static principals.tools.Tool.resizeIcon;
 
 public class BlocosPernoitesAtivos {
 
@@ -27,7 +31,7 @@ public class BlocosPernoitesAtivos {
         case ATIVO -> statusTitulo = "Ativo";
             case DIARIA_ENCERRADA -> {
                 statusTitulo = "Diária Encerrada";
-                cor = Cor.VERMELHO;
+                cor = new Color(0xA83131);
             }
             default -> {
                 statusTitulo = "Finalizados";
@@ -47,7 +51,7 @@ public class BlocosPernoitesAtivos {
         statusPanel.add(headerPanel, BorderLayout.NORTH);
 
         JPanel pernoitesPanel = new JPanel();
-        pernoitesPanel.setLayout(new GridLayout(0, 2, 10, 10)); // 2 colunas, espaçamento de 10px
+        pernoitesPanel.setLayout(new GridLayout(0, 2, 10, 10));
         pernoitesPanel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
 
         Color finalCor = cor;
@@ -58,6 +62,7 @@ public class BlocosPernoitesAtivos {
             pernoiteButton.setBackground(Color.WHITE);
             pernoiteButton.setBorderPainted(false);
             pernoiteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            pernoiteButton.addActionListener(e -> BuscaPernoiteIndividual.buscaPernoiteIndividual(null));
 
             BotaoArredondado botaoQuarto = new BotaoArredondado(pernoite.quarto().toString());
             botaoQuarto.setLayout(null);
@@ -91,42 +96,48 @@ public class BlocosPernoitesAtivos {
             JLabel labelDataEntrada = new JLabel(pernoite.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
             labelDataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
-            labelDataEntrada.setForeground(Cor.CINZA_ESCURO);
+            labelDataEntrada.setForeground(new Color(0xF5841B));
             labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
 
             JLabel labelDataSaida = new JLabel(pernoite.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataSaida.setToolTipText("Data de saida");
-            labelDataSaida.setForeground(Cor.CINZA_ESCURO);
+            labelDataSaida.setForeground(new Color(0xF5841B));
             labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
 
             leftPanel.add(labelCalendario);
             leftPanel.add(labelDataEntrada);
             leftPanel.add(labelDataSaida);
 
-
-
             JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
             rightPanel.setOpaque(false);
 
-            JLabel totalTextoLabel = new JLabel("Total: ");
+            var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays();
+
+            JLabel diariaAtualIcon = new JLabel(resizeIcon(Icones.diaria_atual_laranja, 20, 18));
+            diariaAtualIcon.setToolTipText("Diaria atual");
+            JLabel totalTextoLabel = new JLabel(diariaAtual + "  ");
+            totalTextoLabel.setToolTipText("Diaria atual");
             totalTextoLabel.setFont(new Font("Inter", Font.BOLD, 23));
-            totalTextoLabel.setForeground(Cor.CINZA_CLARO);
+            totalTextoLabel.setForeground(new Color(0xF5841B));
 
             NumberFormat nf = NumberFormat.getInstance(new Locale("pt", "BR"));
             nf.setMinimumFractionDigits(2);
             nf.setMaximumFractionDigits(2);
 
-            JLabel totalLabel = new JLabel("R$ " + nf.format(pernoite.valor_total()));            totalLabel.setFont(new Font("Inter", Font.BOLD, 23));
+            JLabel totalLabel = new JLabel("R$ " + nf.format(pernoite.valor_total()));
+            totalLabel.setFont(new Font("Inter", Font.BOLD, 23));
             totalLabel.setForeground(Cor.VERDE_ESCURO);
 
-//            rightPanel.add(totalTextoLabel);
-            rightPanel.add(totalLabel);
+            if (pernoite.status_pernoite().equals("0")) {
+                rightPanel.add(diariaAtualIcon);
+                rightPanel.add(totalTextoLabel);
+            }
+
+            rightPanel.add(totalLabel, BorderLayout.EAST);
 
             blocoInfoPanelSuperior.add(leftPanel, BorderLayout.WEST);
             blocoInfoPanelSuperior.add(rightPanel, BorderLayout.EAST);
-
-
 
             JPanel blocoInfoPanelInferior = new JPanel(new BorderLayout());
             blocoInfoPanelInferior.setBackground(Color.WHITE);
@@ -224,9 +235,5 @@ public class BlocosPernoitesAtivos {
         return statusPanel;
     }
 
-    private static ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
-        Image img = icon.getImage();
-        Image resizedImage = img.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
-        return new ImageIcon(resizedImage);
-    }
+
 }

@@ -1,16 +1,13 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
-import enums.StatusPagamentoEnum;
 import enums.StatusPernoiteEnum;
-import enums.TipoPagamentoEnum;
 import org.springframework.transaction.annotation.Transactional;
+import principals.tools.Converter;
 import request.PernoiteRequest;
 import response.BuscaPernoiteResponse;
 import response.DiariaResponse;
 import response.PernoiteResponse;
-import response.QuartoResponse;
-
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,12 +16,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static principals.tools.Converter.*;
+
 public class PernoitesRepository extends PostgresDatabaseConnect {
     PrecosRepository precosRepository = new PrecosRepository();
+    Connection connection = connect();
 
     @Transactional
     public Boolean adicionarPernoite(PernoiteRequest request) {
-        Boolean adicionado = true;
+        boolean adicionado = true;
         String pernoite_sql = """
         INSERT INTO pernoite (
             quarto_id,
@@ -58,7 +58,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         VALUES (?, ?);
         """;
 
-        try (Connection connection = connect()) {
             try (PreparedStatement pernoiteStmt = connection.prepareStatement(pernoite_sql, Statement.RETURN_GENERATED_KEYS)) {
                 pernoiteStmt.setLong(1, request.quarto_id());
                 pernoiteStmt.setDate(2, java.sql.Date.valueOf(request.dataEntrada()));
@@ -110,132 +109,22 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                     adicionado = false;
                     throw new SQLException("Falha ao obter o ID do pernoite.");
                 }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            adicionado = false;
-            e.printStackTrace();
-        }
         return adicionado;
     }
 
 
     public PernoiteResponse buscaPernoite(Long pernoiteId) {
         String sql_pernoite = "SELECT * FROM pernoite WHERE id = ?";
-        String sql_diaria = "SELECT * FROM diaria WHERE pernoite_id = ?";
-        String sql_pessoa = "SELECT p.id, p.nome, p.cpf, p.telefone FROM pessoa p " +
-                "JOIN diaria_hospedes dh ON dh.hospedes_id = p.id WHERE diaria_id = ?";
-        String sql_pagamentos = "SELECT * FROM diaria_pagamento WHERE diaria_id = ?";
-        String sql_consumos = "SELECT * FROM consumo_diaria join item i on i.id = consumo_diaria.item_id WHERE diaria_id = ?";
 
-        try (Connection connection = connect()) {
             PernoiteResponse pernoiteResponse = null;
             try (PreparedStatement pernoiteStmt = connection.prepareStatement(sql_pernoite)) {
                 pernoiteStmt.setLong(1, pernoiteId);
                 ResultSet rsPernoite = pernoiteStmt.executeQuery();
 
                 if (rsPernoite.next()) {
-                    // 2. Buscar as diárias associadas ao pernoite
-                    List<DiariaResponse> diarias = new ArrayList<>();
-                    try (PreparedStatement diariaStmt = connection.prepareStatement(sql_diaria)) {
-                        diariaStmt.setLong(1, pernoiteId);
-                        ResultSet rsDiaria = diariaStmt.executeQuery();
-
-                        while (rsDiaria.next()) {
-                            long diariaId = rsDiaria.getLong("id");
-                            LocalDate dataEntrada = rsDiaria.getDate("data_inicio").toLocalDate();
-                            LocalDate dataSaida = rsDiaria.getDate("data_fim").toLocalDate();
-                            Float valorDiaria = rsDiaria.getFloat("valor_diaria");
-
-                            // 3. Buscar as pessoas associadas à diária
-                            List<DiariaResponse.Pessoa> pessoas = new ArrayList<>();
-                            try (PreparedStatement pessoaStmt = connection.prepareStatement(sql_pessoa)) {
-                                pessoaStmt.setLong(1, diariaId);
-                                ResultSet rsPessoa = pessoaStmt.executeQuery();
-
-                                while (rsPessoa.next()) {
-                                    pessoas.add(new DiariaResponse.Pessoa(
-                                            rsPessoa.getLong("id"),
-                                            rsPessoa.getString("nome"),
-                                            rsPessoa.getString("cpf"),
-                                            rsPessoa.getString("telefone")
-                                    ));
-                                }
-                            }
-
-                            // 4. Buscar os pagamentos associados à diária
-                            List<DiariaResponse.Pagamento> pagamentos = new ArrayList<>();
-                            try (PreparedStatement pagamentoStmt = connection.prepareStatement(sql_pagamentos)) {
-                                pagamentoStmt.setLong(1, diariaId);
-                                ResultSet rsPagamento = pagamentoStmt.executeQuery();
-
-
-
-                                while (rsPagamento.next()) {
-                                    String tipoPagamento = switch (rsPagamento.getString("tipo_pagamento_enum")) {
-                                        case "0" -> "PIX";
-                                        case "1" -> "DINHEIRO";
-                                        case "2" -> "CARTAO DE CREDITO";
-                                        case "3" -> "CARTAO DE DEBITO";
-                                        case "4" -> "TRANSFERENCIA BANCARIA";
-                                        case "5" -> "CARTAO VIRTUAL";
-                                        default -> "DESCONHECIDO";
-                                    };
-
-                                    String statusPAgamento = switch (rsPagamento.getString("status_pagamento_enum")){
-                                        case "0" -> "PENDENTE";
-                                        case "1" -> "PAGO";
-                                        default -> "DESCONHECIDO";
-                                    };
-                                    pagamentos.add(new DiariaResponse.Pagamento(
-                                            rsPagamento.getLong("id"),
-                                            rsPagamento.getTimestamp("data_hora_pagamento").toLocalDateTime(),
-                                            tipoPagamento,
-                                            statusPAgamento,
-                                            rsPagamento.getFloat("valor")
-                                    ));
-                                }
-                            }
-
-                            // 5. Buscar os consumos associados à diária
-                            List<DiariaResponse.Consumo.Itens> itens = new ArrayList<>();
-                            List<DiariaResponse.Consumo> consumos = new ArrayList<>();
-                            float totalConsumo = 0f;
-                            try (PreparedStatement consumoStmt = connection.prepareStatement(sql_consumos)) {
-                                consumoStmt.setLong(1, diariaId);
-                                ResultSet rsConsumo = consumoStmt.executeQuery();
-
-                                while (rsConsumo.next()) {
-                                    float valorItem = rsConsumo.getFloat("valor");
-                                    int quantidade = rsConsumo.getInt("quantidade");
-                                    totalConsumo += valorItem * quantidade;
-
-                                    itens.add(new DiariaResponse.Consumo.Itens(
-                                            rsConsumo.getTimestamp("data_hora_consumo").toLocalDateTime(),
-                                            rsConsumo.getLong("item_id"),
-                                            rsConsumo.getString("descricao"),
-                                            valorItem
-                                    ));
-                                }
-                            }
-
-                            // Adicionar o consumo (agora em uma lista)
-                            consumos.add(new DiariaResponse.Consumo(totalConsumo, itens));
-
-                            // Montar a resposta da diária
-                            DiariaResponse diariaResponse = new DiariaResponse(
-                                    diariaId,
-                                    dataEntrada,
-                                    dataSaida,
-                                    valorDiaria,
-                                    pagamentos,
-                                    consumos, // Agora uma lista de consumos
-                                    pessoas
-                            );
-                            diarias.add(diariaResponse);
-                        }
-                    }
-
-                    // Montar a resposta do pernoite
                     pernoiteResponse = new PernoiteResponse(
                             pernoiteId,
                             rsPernoite.getBoolean("ativo"),
@@ -246,16 +135,11 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                             rsPernoite.getFloat("valot_total"),
                             rsPernoite.getInt("quantidade_pessoa"),
                             rsPernoite.getString("status_pernoite_enum"),
-                            diarias
+                            buscaDiariasPorPernoite(pernoiteId)
                     );
                 }
-            }
-
-            return pernoiteResponse;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            } catch (SQLException e) { throw new RuntimeException(e); }
+        return pernoiteResponse;
     }
 
 
@@ -304,8 +188,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
 
         List<BuscaPernoiteResponse> pernoites = new ArrayList<>();
 
-        try (Connection connection = connect()) {
-            // Obter informações dos pernoites de acordo com o status fornecido
             try (PreparedStatement pernoiteStmt = connection.prepareStatement(sqlPernoite)) {
                 pernoiteStmt.setInt(1, statusPernoite.getValue());
                 ResultSet rsPernoite = pernoiteStmt.executeQuery();
@@ -321,7 +203,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                     String statusPernoiteStr = rsPernoite.getString("status_pernoite_enum");
                     int quantidadeDiarias = rsPernoite.getInt("quantidade_diarias");
 
-                    // Obter quantidade de pessoas associadas ao pernoite
                     int quantidadePessoas = 0;
                     try (PreparedStatement pessoasStmt = connection.prepareStatement(sqlQuantidadePessoas)) {
                         pessoasStmt.setLong(1, pernoiteIdResult);
@@ -331,7 +212,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                         }
                     }
 
-                    // Obter quantidade de itens de consumo
                     int quantidadeConsumo = 0;
                     try (PreparedStatement consumoStmt = connection.prepareStatement(sqlQuantidadeConsumo)) {
                         consumoStmt.setLong(1, pernoiteIdResult);
@@ -341,7 +221,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                         }
                     }
 
-                    // Obter representante (primeira pessoa associada ao pernoite)
                     BuscaPernoiteResponse.Representante representante = null;
                     try (PreparedStatement representanteStmt = connection.prepareStatement(sqlRepresentante)) {
                         representanteStmt.setLong(1, pernoiteIdResult);
@@ -355,7 +234,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                         }
                     }
 
-                    // Montar o objeto BuscaPernoiteResponse
                     BuscaPernoiteResponse pernoiteResponse = new BuscaPernoiteResponse(
                             pernoiteIdResult,
                             ativo,
@@ -371,18 +249,15 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                             representante
                     );
 
-                    // Adicionar o pernoite à lista de resultados
                     pernoites.add(pernoiteResponse);
                 }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
 
-            return pernoites.stream()
+        return pernoites.stream()
                     .sorted(Comparator.comparingLong(BuscaPernoiteResponse::quarto))
                     .toList();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar os pernoites", e);
-        }
     }
 
 
@@ -395,7 +270,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         WHERE p.ativo = true;
     """;
 
-        try (Connection connection = connect();
+        try (
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             ResultSet rs = stmt.executeQuery();
@@ -410,6 +285,100 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         }
 
         return 0;
+    }
+
+
+
+    public List<DiariaResponse> buscaDiariasPorPernoite(Long pernoiteId){
+        List<DiariaResponse> diarias = new ArrayList<>();
+
+        String sql_diaria = "SELECT * FROM diaria WHERE pernoite_id = ?";
+        String sql_pessoa = "SELECT p.id, p.nome, p.cpf, p.telefone FROM pessoa p JOIN diaria_hospedes dh ON dh.hospedes_id = p.id WHERE diaria_id = ?";
+        String sql_pagamentos = "SELECT * FROM diaria_pagamento WHERE diaria_id = ?";
+        String sql_consumos = "SELECT * FROM consumo_diaria join item i on i.id = consumo_diaria.item_id WHERE diaria_id = ?";
+
+        try (PreparedStatement diariaStmt = connection.prepareStatement(sql_diaria)) {
+            diariaStmt.setLong(1, pernoiteId);
+            ResultSet rsDiaria = diariaStmt.executeQuery();
+
+            while (rsDiaria.next()) {
+                long diariaId = rsDiaria.getLong("id");
+                LocalDate dataEntrada = rsDiaria.getDate("data_inicio").toLocalDate();
+                LocalDate dataSaida = rsDiaria.getDate("data_fim").toLocalDate();
+                Float valorDiaria = rsDiaria.getFloat("valor_diaria");
+
+                List<DiariaResponse.Pessoa> pessoas = new ArrayList<>();
+                try (PreparedStatement pessoaStmt = connection.prepareStatement(sql_pessoa)) {
+                    pessoaStmt.setLong(1, diariaId);
+                    ResultSet rsPessoa = pessoaStmt.executeQuery();
+
+                    while (rsPessoa.next()) {
+                        pessoas.add(new DiariaResponse.Pessoa(
+                                rsPessoa.getLong("id"),
+                                rsPessoa.getString("nome"),
+                                rsPessoa.getString("cpf"),
+                                rsPessoa.getString("telefone")
+                        ));
+                    }
+                }
+
+                List<DiariaResponse.Pagamento> pagamentos = new ArrayList<>();
+
+                try (PreparedStatement pagamentoStmt = connection.prepareStatement(sql_pagamentos)) {
+                    pagamentoStmt.setLong(1, diariaId);
+                    ResultSet rsPagamento = pagamentoStmt.executeQuery();
+
+                    while (rsPagamento.next()) {
+                        pagamentos.add(new DiariaResponse.Pagamento(
+                                rsPagamento.getLong("id"),
+                                rsPagamento.getTimestamp("data_hora_pagamento").toLocalDateTime(),
+                                converterTipoPagamento(rsPagamento.getString("status_pagamento_enum")),
+                                converterStatusPagamento(rsPagamento.getString("status_pagamento_enum")),
+                                rsPagamento.getFloat("valor")
+                        ));
+                    }
+                }
+
+                List<DiariaResponse.Consumo.Itens> itens = new ArrayList<>();
+                List<DiariaResponse.Consumo> consumos = new ArrayList<>();
+
+                float totalConsumo = 0f;
+
+                try (PreparedStatement consumoStmt = connection.prepareStatement(sql_consumos)) {
+                    consumoStmt.setLong(1, diariaId);
+                    ResultSet rsConsumo = consumoStmt.executeQuery();
+
+                    while (rsConsumo.next()) {
+                        float valorItem = rsConsumo.getFloat("valor");
+                        int quantidade = rsConsumo.getInt("quantidade");
+                        totalConsumo += valorItem * quantidade;
+
+                        itens.add(new DiariaResponse.Consumo.Itens(
+                                rsConsumo.getTimestamp("data_hora_consumo").toLocalDateTime(),
+                                rsConsumo.getLong("item_id"),
+                                rsConsumo.getString("descricao"),
+                                valorItem
+                        ));
+                    }
+                }
+
+                consumos.add(new DiariaResponse.Consumo(totalConsumo, itens));
+
+                DiariaResponse diariaResponse = new DiariaResponse(
+                        diariaId,
+                        dataEntrada,
+                        dataSaida,
+                        valorDiaria,
+                        pagamentos,
+                        consumos,
+                        pessoas
+                );
+                diarias.add(diariaResponse);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return diarias;
     }
 
 

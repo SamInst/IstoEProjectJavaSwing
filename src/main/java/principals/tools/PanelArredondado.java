@@ -14,21 +14,15 @@ public class PanelArredondado extends JPanel {
         super.paintComponent(g); // Chamando super.paintComponent() para garantir que qualquer desenho de fundo padrão seja feito corretamente
 
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);  // Suaviza as bordas
-
-        // Definir a cor de fundo do JPanel
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
-
-        // Desenhar o fundo arredondado
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);  // Definir os raios de arredondamento (30, 30)
-
-        g2.dispose();  // Liberar o contexto gráfico
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+        g2.dispose();
     }
 
     @Override
     public Insets getInsets() {
-        // Ajustar as margens internas para dar espaço ao arredondamento
-        return new Insets(10, 20, 10, 20);  // Margens personalizadas
+        return new Insets(10, 20, 10, 20);
     }
 
     @Override

@@ -17,4 +17,11 @@ public class Icones {
     public static ImageIcon desconto = new ImageIcon("src/main/resources/icons/desconto.png");
     public static ImageIcon sacola = new ImageIcon("src/main/resources/icons/sacola.png");
     public static ImageIcon diarias_quantidade = new ImageIcon("src/main/resources/icons/diarias_quantidade.png");
+    public static ImageIcon diaria_atual = new ImageIcon("src/main/resources/icons/diaria_atual.png");
+    public static ImageIcon diaria_atual_laranja = new ImageIcon("src/main/resources/icons/diaria_atual_laranja.png");
+    public static ImageIcon esquerda = new ImageIcon("src/main/resources/icons/esquerda.png");
+    public static ImageIcon direita = new ImageIcon("src/main/resources/icons/direita.png");
+    public static ImageIcon sacola_branca = new ImageIcon("src/main/resources/icons/sacola branca.png");
+    public static ImageIcon pessoas_branco = new ImageIcon("src/main/resources/icons/pessoas_branco.png");
+    public static ImageIcon pagamento = new ImageIcon("src/main/resources/icons/pagamento.png");
 }
