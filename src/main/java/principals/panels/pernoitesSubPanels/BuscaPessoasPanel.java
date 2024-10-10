@@ -127,9 +127,9 @@ public class BuscaPessoasPanel extends JPanel {
         botaoRemover.setFocusPainted(false);
         botaoRemover.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Cria um painel para organizar a pessoa e o botão remover
+        // Cria um painel para organizar a pessoas e o botão remover
         JPanel painelPessoa = new JPanel(new BorderLayout()); // Altera para BorderLayout
-        painelPessoa.add(labelPessoa, BorderLayout.CENTER); // Nome da pessoa no centro
+        painelPessoa.add(labelPessoa, BorderLayout.CENTER); // Nome da pessoas no centro
         painelPessoa.add(botaoRemover, BorderLayout.EAST);  // Botão remover à direita
 
         // Ação ao clicar no botão remover

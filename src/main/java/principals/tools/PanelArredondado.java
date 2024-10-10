@@ -19,35 +19,5 @@ public class PanelArredondado extends JPanel {
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
         g2.dispose();
     }
-
-    @Override
-    public Insets getInsets() {
-        return new Insets(10, 20, 10, 20);
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        // Ajustar o tamanho preferido do painel, se necessário
-        Dimension d = super.getPreferredSize();
-        d.setSize(d.width + 40, d.height + 20);  // Adicionar espaço para as bordas arredondadas
-        return d;
-    }
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Painel Arredondado");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
-
-        PanelArredondado painel = new PanelArredondado();
-        painel.setBackground(new Color(70, 130, 180));  // Definir a cor de fundo
-        painel.setLayout(new FlowLayout());  // Definir um layout (opcional)
-        painel.add(new JLabel("Painel com bordas arredondadas"));
-        painel.add(new JButton("Botão dentro do painel"));
-
-        frame.setLayout(new FlowLayout());
-        frame.add(painel);
-
-        frame.setVisible(true);
-    }
 }
 

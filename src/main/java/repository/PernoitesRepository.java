@@ -306,6 +306,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                 LocalDate dataEntrada = rsDiaria.getDate("data_inicio").toLocalDate();
                 LocalDate dataSaida = rsDiaria.getDate("data_fim").toLocalDate();
                 Float valorDiaria = rsDiaria.getFloat("valor_diaria");
+                Integer numero = rsDiaria.getInt("numero_diaria");
 
                 List<DiariaResponse.Pessoa> pessoas = new ArrayList<>();
                 try (PreparedStatement pessoaStmt = connection.prepareStatement(sql_pessoa)) {
@@ -340,7 +341,6 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                 }
 
                 List<DiariaResponse.Consumo.Itens> itens = new ArrayList<>();
-                List<DiariaResponse.Consumo> consumos = new ArrayList<>();
 
                 float totalConsumo = 0f;
 
@@ -362,15 +362,14 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                     }
                 }
 
-                consumos.add(new DiariaResponse.Consumo(totalConsumo, itens));
-
                 DiariaResponse diariaResponse = new DiariaResponse(
                         diariaId,
+                        numero,
                         dataEntrada,
                         dataSaida,
                         valorDiaria,
                         pagamentos,
-                        consumos,
+                        new DiariaResponse.Consumo(totalConsumo, itens),
                         pessoas
                 );
                 diarias.add(diariaResponse);

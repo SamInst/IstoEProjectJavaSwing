@@ -268,7 +268,7 @@ public class PersonIdentificationForm {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Erro");
             alert.setHeaderText(null);
-            alert.setContentText("Erro ao cadastrar pessoa: " + e.getMessage());
+            alert.setContentText("Erro ao cadastrar pessoas: " + e.getMessage());
             alert.showAndWait();
             e.printStackTrace();
         }

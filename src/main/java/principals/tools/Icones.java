@@ -24,4 +24,5 @@ public class Icones {
     public static ImageIcon sacola_branca = new ImageIcon("src/main/resources/icons/sacola branca.png");
     public static ImageIcon pessoas_branco = new ImageIcon("src/main/resources/icons/pessoas_branco.png");
     public static ImageIcon pagamento = new ImageIcon("src/main/resources/icons/pagamento.png");
+    public static ImageIcon usuario = new ImageIcon("src/main/resources/icons/usuario_solo.png");
 }

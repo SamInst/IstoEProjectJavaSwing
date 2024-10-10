@@ -81,7 +81,7 @@ public class Rooms {
         statusBox.setAlignment(Pos.CENTER);
         Label lblPessoas = new Label(String.valueOf(quarto.quantidadePessoa()));
         lblPessoas.setStyle("-fx-font-size: 14px;");
-        Label lblIconPessoa = new Label("\uD83D\uDC64");  // Ícone de pessoa
+        Label lblIconPessoa = new Label("\uD83D\uDC64");  // Ícone de pessoas
         statusBox.getChildren().addAll(lblIconPessoa, lblPessoas);
 
         // Criar o botão de status

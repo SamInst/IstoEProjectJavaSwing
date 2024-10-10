@@ -408,7 +408,7 @@ public class OvernightPanel extends JPanel {
 
                     quantidadeDePessoas.setValue(quantidadePessoas);
 
-                    //TODO: pega q quantidade maxima de pessoa possivel
+                    //TODO: pega q quantidade maxima de pessoas possivel
                     if (quantidadePessoas > 5) {
                         quantidadePessoas = 5;
                         quantidadePessoasField.setText(String.valueOf(quantidadePessoas));

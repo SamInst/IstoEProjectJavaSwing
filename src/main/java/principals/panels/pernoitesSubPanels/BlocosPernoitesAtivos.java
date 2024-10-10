@@ -62,7 +62,9 @@ public class BlocosPernoitesAtivos {
             pernoiteButton.setBackground(Color.WHITE);
             pernoiteButton.setBorderPainted(false);
             pernoiteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            pernoiteButton.addActionListener(e -> BuscaPernoiteIndividual.buscaPernoiteIndividual(null));
+            pernoiteButton.addActionListener(e ->
+                    new BuscaPernoiteIndividual().buscaPernoiteIndividual(pernoitesRepository.buscaPernoite(pernoite.pernoite_id()))
+            );
 
             BotaoArredondado botaoQuarto = new BotaoArredondado(pernoite.quarto().toString());
             botaoQuarto.setLayout(null);

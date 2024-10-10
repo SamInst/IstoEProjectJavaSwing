@@ -50,7 +50,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
     public List<BuscaPessoaRequest> buscarPessoaPorNomeCpfOuID(BuscaPessoaRequest request) {
         List<BuscaPessoaRequest> pessoas = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM pessoa WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT * FROM pessoas WHERE 1=1");
 
         if (request.id() != null) {
             sql.append(" AND id = ?");
@@ -97,7 +97,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
     public List<BuscaPessoaRequest> buscarPessoaPorIdNomeOuCpf(String input) {
 
         List<BuscaPessoaRequest> pessoas = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM pessoa WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT * FROM pessoas WHERE 1=1");
 
         boolean isNumeric = input.matches("\\d+");
 

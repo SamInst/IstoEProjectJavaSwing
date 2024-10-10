@@ -6,12 +6,13 @@ import java.util.List;
 
 public record DiariaResponse(
         Long diaria_id,
+        Integer numero,
         LocalDate data_entrada,
         LocalDate data_saida,
         Float valor_diaria,
         List<Pagamento> pagamento,
-        List<Consumo> consumo,
-        List<Pessoa> pessoa
+        Consumo consumo,
+        List<Pessoa> pessoas
 ) {
     public record Pagamento(
             Long pagamento_id,
