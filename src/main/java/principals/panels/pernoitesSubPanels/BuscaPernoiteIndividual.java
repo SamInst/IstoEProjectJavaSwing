@@ -280,24 +280,25 @@ public class BuscaPernoiteIndividual {
 
     }
 
-    public JPanel blocoListaDePessoas(JPanel blocoListaPessoas, DiariaResponse diaria){
-        blocoListaPessoas.setLayout(new FlowLayout(FlowLayout.LEFT));
-        blocoListaPessoas.setPreferredSize(new Dimension(500, 0));
-        blocoListaPessoas.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+    public JPanel blocoListaDePessoas(JPanel blocoListaPessoas, DiariaResponse diaria) {
+        blocoListaPessoas.setLayout(new BoxLayout(blocoListaPessoas, BoxLayout.Y_AXIS));
+        blocoListaPessoas.setBorder(BorderFactory.createEmptyBorder(5, 5, 20, 5));  // Margem ao redor do bloco todo
+        blocoListaPessoas.setBackground(Color.WHITE);
 
         diaria.pessoas().forEach(pessoa -> {
             ImageIcon iconePessoas = resizeIcon(Icones.usuario, 25, 25);
             JLabel pessoaIcone = new JLabel(iconePessoas);
 
             PanelArredondado pessoaPanel = new PanelArredondado();
-            pessoaPanel.setBackground(Color.WHITE);
             pessoaPanel.setLayout(new BorderLayout());
-            pessoaPanel.setPreferredSize(new Dimension(545, 40));
-            pessoaPanel.setBorder(BorderFactory.createEmptyBorder(1, 6, 1, 15));
-            pessoaPanel.setBackground(Cor.BRANCO);
+            pessoaPanel.setPreferredSize(new Dimension(545, 40));  // Tamanho fixo para os paineis de pessoas
+            pessoaPanel.setMaximumSize(new Dimension(545, 40));
+            pessoaPanel.setMinimumSize(new Dimension(545, 40));
 
             JPanel pessoaInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            pessoaInfoPanel.setBackground(Color.WHITE);
+            pessoaInfoPanel.setOpaque(false);
+            pessoaInfoPanel.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
+
             JLabel id = new JLabel(" #" + pessoa.pessoa_id());
             id.setFont(new Font("Inter", Font.BOLD, 15));
             id.setForeground(Color.RED);
@@ -313,16 +314,24 @@ public class BuscaPernoiteIndividual {
             JLabel telefone = new JLabel(pessoa.telefone());
             telefone.setFont(new Font("Inter", Font.BOLD, 15));
             telefone.setForeground(Cor.CINZA_ESCURO);
+            telefone.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
             pessoaPanel.add(pessoaInfoPanel, BorderLayout.WEST);
             pessoaPanel.add(telefone, BorderLayout.EAST);
 
-            blocoListaPessoas.add(pessoaPanel, BorderLayout.WEST);
-            blocoListaPessoas.revalidate();
-            blocoListaPessoas.repaint();
+            // Adiciona o painel de cada pessoa
+            blocoListaPessoas.add(pessoaPanel);
+
+            // Adiciona um espaço rígido de 10 pixels entre os painéis
+            blocoListaPessoas.add(Box.createRigidArea(new Dimension(0, 3)));
         });
+
+        blocoListaPessoas.revalidate();
+        blocoListaPessoas.repaint();
         return blocoListaPessoas;
     }
+
+
 
 
     public JPanel blocoListaDePagamentos(JPanel blocoListaDePagamentos, DiariaResponse diaria){
