@@ -356,6 +356,8 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                         itens.add(new DiariaResponse.Consumo.Itens(
                                 rsConsumo.getTimestamp("data_hora_consumo").toLocalDateTime(),
                                 rsConsumo.getLong("item_id"),
+                                quantidade,
+                                rsConsumo.getInt("categoria"),
                                 rsConsumo.getString("descricao"),
                                 valorItem
                         ));

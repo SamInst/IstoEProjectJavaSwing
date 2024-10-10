@@ -25,4 +25,8 @@ public class Icones {
     public static ImageIcon pessoas_branco = new ImageIcon("src/main/resources/icons/pessoas_branco.png");
     public static ImageIcon pagamento = new ImageIcon("src/main/resources/icons/pagamento.png");
     public static ImageIcon usuario = new ImageIcon("src/main/resources/icons/usuario_solo.png");
+    public static ImageIcon bancario = new ImageIcon("src/main/resources/icons/bancario.png");
+    public static ImageIcon cartao = new ImageIcon("src/main/resources/icons/cartao.png");
+    public static ImageIcon dinheiro = new ImageIcon("src/main/resources/icons/dinheiro.png");
+    public static ImageIcon pix = new ImageIcon("src/main/resources/icons/pix.png");
 }

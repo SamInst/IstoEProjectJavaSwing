@@ -29,6 +29,8 @@ public record DiariaResponse(
         public record Itens(
                 LocalDateTime data_hora_consumo,
                 Long item_id,
+                Integer quantidade,
+                Integer categoria,
                 String item,
                 Float valor_item
         ){}

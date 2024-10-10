@@ -319,7 +319,6 @@ public class BuscaPernoiteIndividual {
             pessoaPanel.add(pessoaInfoPanel, BorderLayout.WEST);
             pessoaPanel.add(telefone, BorderLayout.EAST);
 
-            // Adiciona o painel de cada pessoa
             blocoListaPessoas.add(pessoaPanel);
 
             // Adiciona um espaço rígido de 10 pixels entre os painéis
@@ -335,34 +334,47 @@ public class BuscaPernoiteIndividual {
 
 
     public JPanel blocoListaDePagamentos(JPanel blocoListaDePagamentos, DiariaResponse diaria){
-        blocoListaDePagamentos.setLayout(new FlowLayout(FlowLayout.LEFT));
-        blocoListaDePagamentos.setPreferredSize(new Dimension(500, 0));
-//        blocoListaDePagamentos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        blocoListaDePagamentos.setLayout(new BoxLayout(blocoListaDePagamentos, BoxLayout.Y_AXIS));
+        blocoListaDePagamentos.setBorder(BorderFactory.createEmptyBorder(5, 5, 20, 5));
         blocoListaDePagamentos.setBackground(Color.WHITE);
 
-
         diaria.pagamento().forEach(pagamento -> {
-            ImageIcon iconePagamento = resizeIcon(Icones.usuario, 25, 25);
-            JLabel pagamentoIcone = new JLabel(iconePagamento);
+            JLabel pagamentoIcone = new JLabel(Converter.converterIconePagamento(pagamento.tipo_pagamento()));
 
-            JPanel pessoaPanel = new JPanel();
-            pessoaPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-            pessoaPanel.setPreferredSize(new Dimension(550, 40));
+            PanelArredondado pagamentoPanel = new PanelArredondado();
+            pagamentoPanel.setLayout(new BorderLayout());
+            pagamentoPanel.setPreferredSize(new Dimension(545, 40));
+            pagamentoPanel.setMaximumSize(new Dimension(545, 40));
+            pagamentoPanel.setMinimumSize(new Dimension(545, 40));
 
-            JLabel id_pagamento = new JLabel(" # " + pagamento.pagamento_id());
-            id_pagamento.setFont(new Font("Inter", Font.BOLD, 15));
-            id_pagamento.setForeground(Color.RED);
+            JPanel pagamentoInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            pagamentoInfoPanel.setOpaque(false);
+            pagamentoInfoPanel.setBorder(BorderFactory.createEmptyBorder(1,10,0,0));
+
+            JLabel id = new JLabel(" #" + pagamento.pagamento_id());
+            id.setFont(new Font("Inter", Font.BOLD, 15));
+            id.setForeground(Color.RED);
+
             JLabel tipoPagamento = new JLabel(pagamento.tipo_pagamento() + "  ");
             tipoPagamento.setFont(new Font("Inter", Font.BOLD, 15));
+            tipoPagamento.setForeground(Cor.CINZA_ESCURO);
+
+            pagamentoInfoPanel.add(pagamentoIcone);
+//            pagamentoInfoPanel.add(id);
+            pagamentoInfoPanel.add(tipoPagamento);
+
             JLabel valor = new JLabel("R$ " + pagamento.valor_pagamento());
             valor.setFont(new Font("Inter", Font.BOLD, 15));
+            valor.setForeground(Cor.CINZA_ESCURO);
+            valor.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
-            pessoaPanel.add(pagamentoIcone);
-            pessoaPanel.add(id_pagamento);
-            pessoaPanel.add(tipoPagamento);
-            pessoaPanel.add(valor, FlowLayout.RIGHT);
+            pagamentoPanel.add(pagamentoInfoPanel, BorderLayout.WEST);
+            pagamentoPanel.add(valor, BorderLayout.EAST);
 
-            blocoListaDePagamentos.add(pessoaPanel, BorderLayout.WEST);
+            blocoListaDePagamentos.add(pagamentoPanel);
+
+            // Adiciona um espaço rígido de 10 pixels entre os painéis
+            blocoListaDePagamentos.add(Box.createRigidArea(new Dimension(0, 3)));
         });
 
         blocoListaDePagamentos.revalidate();
@@ -425,7 +437,7 @@ public class BuscaPernoiteIndividual {
         PanelArredondado panelConsumo = new PanelArredondado();
         panelConsumo.add(consumoIcone);
         panelConsumo.setBackground(Cor.AZUL_ESCURO);
-        panelConsumo.add(labelTotalConsumo, BorderLayout.EAST);
+        panelConsumo.add(labelTotalConsumo);
 
 
 
@@ -442,40 +454,63 @@ public class BuscaPernoiteIndividual {
     }
 
     public JPanel blocoListaDeConsumos(JPanel blocoListaDeConsumos, DiariaResponse.Consumo consumos){
-        blocoListaDeConsumos.setLayout(new FlowLayout(FlowLayout.LEFT));
-        blocoListaDeConsumos.setPreferredSize(new Dimension(500, 0));
-//        blocoListaDeConsumos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        blocoListaDeConsumos.setLayout(new BoxLayout(blocoListaDeConsumos, BoxLayout.Y_AXIS));
+        blocoListaDeConsumos.setBorder(BorderFactory.createEmptyBorder(5, 5, 20, 5));
         blocoListaDeConsumos.setBackground(Color.WHITE);
 
         consumos.itens().forEach(item -> {
-            ImageIcon iconeConsumo = resizeIcon(Icones.usuario, 25, 25);
-            JLabel pagamentoIcone = new JLabel(iconeConsumo);
+            JLabel itemIcone = new JLabel(resizeIcon(Icones.diarias_quantidade, 25,25));
 
-            JPanel consumoPanel = new JPanel();
-            consumoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-            consumoPanel.setPreferredSize(new Dimension(550, 40));
+            PanelArredondado itemPanel = new PanelArredondado();
+            itemPanel.setLayout(new BorderLayout());
+            itemPanel.setPreferredSize(new Dimension(545, 40));
+            itemPanel.setMaximumSize(new Dimension(545, 40));
+            itemPanel.setMinimumSize(new Dimension(545, 40));
 
-            JLabel itemID = new JLabel(" #" + item.item_id());
-            itemID.setFont(new Font("Inter", Font.BOLD, 15));
-            itemID.setForeground(Color.RED);
+            JPanel itemInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            itemInfoPanel.setOpaque(false);
+            itemInfoPanel.setBorder(BorderFactory.createEmptyBorder(1,10,0,0));
+
+//            JLabel id = new JLabel(" #" + item.pagamento_id());
+//            id.setFont(new Font("Inter", Font.BOLD, 15));
+//            id.setForeground(Color.RED);
 
             JLabel itemLabel = new JLabel(item.item());
             itemLabel.setFont(new Font("Inter", Font.BOLD, 15));
+            itemLabel.setForeground(Cor.CINZA_ESCURO);
+
+            itemInfoPanel.add(itemIcone);
+//            pagamentoInfoPanel.add(id);
+            itemInfoPanel.add(itemLabel);
+
+            JPanel valorQuantidadePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0)); // Painel para quantidade e valor lado a lado
+            valorQuantidadePanel.setOpaque(false); // Tornar o painel transparente, se necessário
+            valorQuantidadePanel.setBorder(BorderFactory.createEmptyBorder(10,0,0,10));
 
             JLabel valor = new JLabel("R$ " + item.valor_item());
             valor.setFont(new Font("Inter", Font.BOLD, 15));
+            valor.setForeground(Cor.CINZA_ESCURO);
 
-            consumoPanel.add(pagamentoIcone);
-            consumoPanel.add(itemID);
-            consumoPanel.add(itemLabel);
-            consumoPanel.add(valor, FlowLayout.RIGHT);
+            JLabel quantidade = new JLabel("x" + item.quantidade()); // Ajuste para 'x1'
+            quantidade.setFont(new Font("Inter", Font.BOLD, 15));
+            quantidade.setForeground(Cor.CINZA_ESCURO);
 
-            blocoListaDeConsumos.add(consumoPanel, BorderLayout.WEST);
+            valorQuantidadePanel.add(quantidade);
+            valorQuantidadePanel.add(valor);
+
+            itemPanel.add(itemInfoPanel, BorderLayout.WEST);
+            itemPanel.add(valorQuantidadePanel, BorderLayout.EAST); // Adiciona o novo painel alinhado à direita
+
+
+
+            blocoListaDeConsumos.add(itemPanel);
+
+            // Adiciona um espaço rígido de 10 pixels entre os painéis
+            blocoListaDeConsumos.add(Box.createRigidArea(new Dimension(0, 3)));
         });
 
-
-    blocoListaDeConsumos.revalidate();
-    blocoListaDeConsumos.repaint();
+        blocoListaDeConsumos.revalidate();
+        blocoListaDeConsumos.repaint();
         return blocoListaDeConsumos;
     }
 
@@ -501,7 +536,7 @@ public class BuscaPernoiteIndividual {
         janelaAdicionar.setVisible(true);
 
         JPanel background = new JPanel();
-        background.setBackground(Color.RED);
+        background.setBackground(Color.WHITE);
         background.setLayout(new BoxLayout(background, BoxLayout.Y_AXIS));
 
         JPanel blocoBranco = blocoBranco(new JPanel(), response);
@@ -511,7 +546,7 @@ public class BuscaPernoiteIndividual {
         background.add(blocoBranco);
         background.add(linhaCinza);
 
-        var diaria = response.diarias().get(1);
+        var diaria = response.diarias().get(0);
 
         JPanel blocoVisualizaDiarias = blocoVisualizarDiarias(new JPanel(), response, diaria);
         JPanel espacoBranco = espacoBranco(new JPanel());
