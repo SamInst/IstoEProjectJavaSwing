@@ -80,9 +80,11 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
         addHoverAndSelectionEffect(btnPrice, new PricePanel());
 
-        showPanel(new DashBoardPanel());
+        showPanel(new OvernightPanel());
         setVisible(true);
     }
+
+
 
     private JPanel createEmployeeInfoPanel() {
         JPanel employeePanel = new JPanel();

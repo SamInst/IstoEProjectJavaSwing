@@ -3,18 +3,138 @@ package principals.panels.pernoitesSubPanels;
 import principals.tools.*;
 import response.DiariaResponse;
 import response.PernoiteResponse;
-
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.concurrent.atomic.AtomicReference;
 import static principals.tools.Tool.resizeIcon;
 
 public class BuscaPernoiteIndividual {
+    JButton labelEsquerdaIcone;
+    JButton labelDireitaIcone;
+
+    public void buscaPernoiteIndividual(PernoiteResponse response) {
+        ImageIcon iconeEsquerda = resizeIcon(Icones.esquerda, 20, 20);
+        labelEsquerdaIcone = new JButton(iconeEsquerda);
+        labelEsquerdaIcone.setOpaque(true);
+        labelEsquerdaIcone.setBorderPainted(false);
+        labelEsquerdaIcone.setBackground(Color.WHITE);
+        labelEsquerdaIcone.setFocusPainted(false);
+        labelEsquerdaIcone.setPreferredSize(new Dimension(30, 30));
+        labelEsquerdaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        ImageIcon iconeDireita = resizeIcon(Icones.direita, 20, 20);
+        labelDireitaIcone = new JButton(iconeDireita);
+        labelDireitaIcone.setOpaque(true);
+        labelDireitaIcone.setBorderPainted(false);
+        labelDireitaIcone.setBackground(Color.WHITE);
+        labelDireitaIcone.setFocusPainted(false);
+        labelDireitaIcone.setPreferredSize(new Dimension(30, 30));
+        labelDireitaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JFrame janelaAdicionar = new JFrame("Pernoite");
+        janelaAdicionar.setLayout(new BorderLayout());
+        janelaAdicionar.setMinimumSize(new Dimension(580, 400));
+        janelaAdicionar.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        janelaAdicionar.setLocationRelativeTo(null);
+        janelaAdicionar.setVisible(true);
+
+        JPanel background = new JPanel();
+        background.setBackground(Color.WHITE);
+        background.setLayout(new BoxLayout(background, BoxLayout.Y_AXIS));
+
+        JPanel blocoBranco = blocoBranco(new JPanel(), response);
+        JPanel linhaCinza = linhaCinza(new JPanel());
+        JPanel linhaCinza2 = linhaCinza(new JPanel());
+
+        background.add(blocoBranco);
+        background.add(linhaCinza);
+
+        AtomicInteger i = new AtomicInteger();
+        AtomicReference<DiariaResponse> diaria = new AtomicReference<>(response.diarias().get(i.get()));
+
+        var diariaAtual = Period.between(response.data_entrada(), response.data_saida().isBefore(LocalDate.now()) ? response.data_saida() : LocalDate.now()).getDays() - 1;
+
+        diaria.set(response.diarias().get(diariaAtual));
+        i.set(diariaAtual);
+        if (diaria.get().data_entrada().equals(response.data_entrada())) labelEsquerdaIcone.setEnabled(false);
+        if (diaria.get().data_saida().equals(response.data_saida())) labelDireitaIcone.setEnabled(false);
+        System.out.println(diaria.get().numero());
+
+        labelDireitaIcone.addActionListener(e -> {
+
+            labelEsquerdaIcone.setEnabled(true);
+
+            if (diaria.get().data_saida().isEqual(response.data_saida())){
+                labelDireitaIcone.setEnabled(false);
+            }
+            else {
+                i.getAndIncrement();
+                diaria.set(response.diarias().get(i.get()));
+                System.out.println(diaria.get().numero());
+                System.out.println(diaria.get().data_saida());
+
+                if (diaria.get().data_saida().isEqual(response.data_saida())){
+                    i.getAndDecrement();
+                    labelDireitaIcone.setEnabled(false);
+                }
+            }
+        });
+
+        labelEsquerdaIcone.addActionListener(e -> {
+            if (diaria.get().data_entrada().equals(response.data_entrada())) {
+                labelEsquerdaIcone.setEnabled(false);
+            }
+
+            else {
+                labelDireitaIcone.setEnabled(true);
+                diaria.set(response.diarias().get(i.get()));
+                i.getAndDecrement();
+
+                System.out.println(diaria.get().numero());
+                System.out.println(diaria.get().data_entrada());
+                if (diaria.get().numero() == 1) {
+                    i.getAndIncrement();
+                    labelEsquerdaIcone.setEnabled(false);
+                    labelDireitaIcone.setEnabled(true);
+                }
+            }
+        });
+
+        JPanel blocoVisualizaDiarias = blocoVisualizarDiarias(new JPanel(), response, diaria.get());
+        JPanel espacoBranco = espacoBranco(new JPanel());
+        JPanel blocoPessoas = blocoPessoas(new JPanel());
+        JPanel blocoListaDePessoas = blocoListaDePessoas(new JPanel(), diaria.get());
+        JPanel blocoPagamentos = blocoPagamentos(new JPanel());
+        JPanel blocoListaDePagamentos = blocoListaDePagamentos(new JPanel(), diaria.get());
+        JPanel blocoConsumo = blocoConsumo(new JPanel(), diaria.get().consumo());
+        JPanel blocoListaConsumo = blocoListaDeConsumos(new JPanel(), diaria.get().consumo());
+        JPanel blocoOpcoes = blocoBotoesOpcoes(new JPanel());
+
+        background.add(blocoVisualizaDiarias);
+        background.add(linhaCinza2);
+        background.add(espacoBranco);
+        background.add(blocoPessoas);
+        background.add(blocoListaDePessoas);
+        background.add(blocoPagamentos);
+        background.add(blocoListaDePagamentos);
+        background.add(blocoConsumo);
+        background.add(blocoListaConsumo);
+        background.add(blocoOpcoes);
+
+        janelaAdicionar.add(background, BorderLayout.CENTER);
+        janelaAdicionar.pack();
+
+        janelaAdicionar.revalidate();
+        janelaAdicionar.repaint();
+    }
+
+
 
     public JPanel blocoBranco(JPanel blocoBranco, PernoiteResponse pernoite) {
         blocoBranco.setPreferredSize(new Dimension(500, 100));
@@ -126,27 +246,13 @@ public class BuscaPernoiteIndividual {
         JLabel labelDiariaIcone = new JLabel(iconeDiaria);
         labelDiariaIcone.setBorder(BorderFactory.createEmptyBorder(0,0,0,10));
 
-        ImageIcon iconeEsquerda = resizeIcon(Icones.esquerda, 20, 20);
-        JButton labelEsquerdaIcone = new JButton(iconeEsquerda);
-        labelEsquerdaIcone.setOpaque(true);
-        labelEsquerdaIcone.setBorderPainted(false);
-        labelEsquerdaIcone.setBackground(Color.WHITE);
-        labelEsquerdaIcone.setFocusPainted(false);
-        labelEsquerdaIcone.setPreferredSize(new Dimension(30, 30));
-        labelEsquerdaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         labelDiariaIcone.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
         JLabel numeroDiaria = new JLabel(diaria.numero().toString());
         numeroDiaria.setFont(new Font("Inter", Font.BOLD, 20));
 
-        ImageIcon iconeDireita = resizeIcon(Icones.direita, 20, 20);
-        JButton labelDireitaIcone = new JButton(iconeDireita);
-        labelDireitaIcone.setOpaque(true);
-        labelDireitaIcone.setBorderPainted(false);
-        labelDireitaIcone.setBackground(Color.WHITE);
-        labelDireitaIcone.setFocusPainted(false);
-        labelDireitaIcone.setPreferredSize(new Dimension(30, 30));
-        labelDireitaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         labelDiariaIcone.setBorder(BorderFactory.createEmptyBorder(0,0,0,10));
 
         LabelArredondado labelDataEntrada = new LabelArredondado(diaria.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -156,64 +262,26 @@ public class BuscaPernoiteIndividual {
         labelDataEntrada.setOpaque(false);
         labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
 
-//        LabelArredondado labelDataSaida = new LabelArredondado(diaria.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-//        labelDataSaida.setToolTipText("Data de saida");
-//        labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
-//        labelDataSaida.setForeground(Cor.CINZA_ESCURO);
-//        labelDataSaida.setOpaque(false);
-//        labelDataSaida.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
+        LabelArredondado labelDataSaida = new LabelArredondado(diaria.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        labelDataSaida.setToolTipText("Data de saida");
+        labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
+        labelDataSaida.setForeground(Cor.CINZA_ESCURO);
+        labelDataSaida.setOpaque(false);
+        labelDataSaida.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
 
-        JLabel valorDiaria = new JLabel("             valor diária: R$" + diaria.valor_diaria());
-        valorDiaria.setFont(new Font("Inter", Font.BOLD, 20));
-        valorDiaria.setForeground(new Color(0xF5841B));
+//        JLabel valorDiaria = new JLabel("             valor diária: R$" + diaria.valor_diaria());
+//        valorDiaria.setFont(new Font("Inter", Font.BOLD, 20));
+//        valorDiaria.setForeground(new Color(0xF5841B));
 
         blocoVisualizaDiarias.add(labelDiariaIcone);
         blocoVisualizaDiarias.add(labelEsquerdaIcone);
         blocoVisualizaDiarias.add(numeroDiaria);
         blocoVisualizaDiarias.add(labelDireitaIcone);
         blocoVisualizaDiarias.add(labelDataEntrada);
-//        blocoVisualizaDiarias.add(labelDataSaida);
-        blocoVisualizaDiarias.add(valorDiaria);
+        blocoVisualizaDiarias.add(labelDataSaida);
+//        blocoVisualizaDiarias.add(valorDiaria);
 
-        AtomicInteger i = new AtomicInteger(1);  //TODO: pegar a diaria atual
-        if (i.get() == 1) labelEsquerdaIcone.setEnabled(false);
-        if (i.get() == datas.size() - 1) labelDireitaIcone.setEnabled(false);
 
-        labelDireitaIcone.addActionListener(e -> {
-
-            if (i.get() == datas.size() - 1){
-                labelDireitaIcone.setEnabled(false);
-                labelEsquerdaIcone.setEnabled(true);
-
-            } else {
-                labelEsquerdaIcone.setEnabled(true);
-                i.getAndIncrement();
-
-                if (i.get() == datas.size() - 1){
-                    labelDireitaIcone.setEnabled(false);
-                    labelEsquerdaIcone.setEnabled(true);
-                    i.getAndDecrement();
-                }
-            }
-        });
-
-        labelEsquerdaIcone.addActionListener(e -> {
-            if (i.get() == 0){
-                labelDireitaIcone.setEnabled(true);
-                labelEsquerdaIcone.setEnabled(false);
-
-            } else {
-                labelDireitaIcone.setEnabled(true);
-                i.getAndDecrement();
-
-                if (i.get() == 0){
-                    labelDireitaIcone.setEnabled(true);
-                    labelEsquerdaIcone.setEnabled(false);
-                    i.getAndIncrement();
-                }
-            }
-
-        });
         return blocoVisualizaDiarias;
     }
 
@@ -416,42 +484,53 @@ public class BuscaPernoiteIndividual {
     }
 
 
-    public JPanel blocoConsumo(JPanel blocoConsumo, DiariaResponse.Consumo consumo){
+    public JPanel blocoConsumo(JPanel blocoConsumo, DiariaResponse.Consumo consumo) {
         blocoConsumo.setPreferredSize(new Dimension(500, 45));
         blocoConsumo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
         blocoConsumo.setBackground(Cor.AZUL_ESCURO);
         blocoConsumo.setLayout(new BorderLayout());
-        blocoConsumo.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
+        blocoConsumo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        ImageIcon iconeConsumo = resizeIcon(Icones.sacola_branca, 25, 25);
+        // Ícone e título à esquerda
+        ImageIcon iconeConsumo = resizeIcon(Icones.sacola_branca, 20, 20);
         JLabel consumoIcone = new JLabel(iconeConsumo);
 
-        JLabel labelConsumo = new JLabel(" Consumo");
+        JLabel labelConsumo = new JLabel(" Total Consumo");
         labelConsumo.setFont(new Font("Inter", Font.BOLD, 20));
         labelConsumo.setForeground(Color.WHITE);
 
-        JLabel labelTotalConsumo = new JLabel(" R$ "+ consumo.total_consumo());
-        labelTotalConsumo.setFont(new Font("Inter", Font.BOLD, 20));
-        labelTotalConsumo.setForeground(Color.WHITE);
-
-        PanelArredondado panelConsumo = new PanelArredondado();
+        JPanel panelConsumo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelConsumo.add(consumoIcone);
         panelConsumo.setBackground(Cor.AZUL_ESCURO);
-        panelConsumo.add(labelTotalConsumo);
-
-
+        panelConsumo.add(labelConsumo);
 
         blocoConsumo.add(panelConsumo, BorderLayout.WEST);
 
+        // Painel que contém o valor e o botão
+        JPanel valorEBotaoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        valorEBotaoPanel.setBackground(Cor.AZUL_ESCURO);
+
+        // Label para o valor total de consumo
+        JLabel labelTotalConsumo = new JLabel("R$ " + consumo.total_consumo());
+        labelTotalConsumo.setFont(new Font("Inter", Font.BOLD, 20));
+        labelTotalConsumo.setForeground(Color.WHITE);
+
+        // Botão "Adicionar"
         JButton adicionarConsumo = new JButton("Adicionar");
         adicionarConsumo.setFocusPainted(false);
         adicionarConsumo.setPreferredSize(new Dimension(100, 30));
         adicionarConsumo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        blocoConsumo.add(adicionarConsumo, BorderLayout.EAST);
+
+        // Adicionar label e botão ao painel
+        valorEBotaoPanel.add(labelTotalConsumo);
+        valorEBotaoPanel.add(adicionarConsumo);
+
+        // Adicionar o painel ao lado direito
+        blocoConsumo.add(valorEBotaoPanel, BorderLayout.EAST);
 
         return blocoConsumo;
-
     }
+
 
     public JPanel blocoListaDeConsumos(JPanel blocoListaDeConsumos, DiariaResponse.Consumo consumos){
         blocoListaDeConsumos.setLayout(new BoxLayout(blocoListaDeConsumos, BoxLayout.Y_AXIS));
@@ -495,11 +574,18 @@ public class BuscaPernoiteIndividual {
             quantidade.setFont(new Font("Inter", Font.BOLD, 15));
             quantidade.setForeground(Cor.CINZA_ESCURO);
 
+            float subtotalsom = item.quantidade() * item.valor_item();
+
+            JLabel subtotal = new JLabel(String.valueOf(subtotalsom));
+            subtotal.setFont(new Font("Inter", Font.BOLD, 15));
+            subtotal.setForeground(Cor.CINZA_ESCURO);
+
             valorQuantidadePanel.add(quantidade);
             valorQuantidadePanel.add(valor);
+            valorQuantidadePanel.add(subtotal);
 
             itemPanel.add(itemInfoPanel, BorderLayout.WEST);
-            itemPanel.add(valorQuantidadePanel, BorderLayout.EAST); // Adiciona o novo painel alinhado à direita
+            itemPanel.add(valorQuantidadePanel, BorderLayout.EAST);
 
 
 
@@ -525,55 +611,7 @@ public class BuscaPernoiteIndividual {
 
 
 
-    public void buscaPernoiteIndividual(PernoiteResponse response) {
-        JFrame janelaAdicionar = new JFrame("Pernoite");
-        janelaAdicionar.setLayout(new BorderLayout());
-        janelaAdicionar.setSize(580, 800);
-        janelaAdicionar.setMinimumSize(new Dimension(580, 600));
-        janelaAdicionar.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        janelaAdicionar.setBackground(Color.RED);
-        janelaAdicionar.setLocationRelativeTo(null);
-        janelaAdicionar.setVisible(true);
 
-        JPanel background = new JPanel();
-        background.setBackground(Color.WHITE);
-        background.setLayout(new BoxLayout(background, BoxLayout.Y_AXIS));
-
-        JPanel blocoBranco = blocoBranco(new JPanel(), response);
-        JPanel linhaCinza = linhaCinza(new JPanel());
-        JPanel linhaCinza2 = linhaCinza(new JPanel());
-
-        background.add(blocoBranco);
-        background.add(linhaCinza);
-
-        var diaria = response.diarias().get(0);
-
-        JPanel blocoVisualizaDiarias = blocoVisualizarDiarias(new JPanel(), response, diaria);
-        JPanel espacoBranco = espacoBranco(new JPanel());
-        JPanel blocoPessoas = blocoPessoas(new JPanel());
-        JPanel blocoListaDePessoas = blocoListaDePessoas(new JPanel(), diaria);
-        JPanel blocoPagamentos = blocoPagamentos(new JPanel());
-        JPanel blocoListaDePagamentos = blocoListaDePagamentos(new JPanel(), diaria);
-        JPanel blocoConsumo = blocoConsumo(new JPanel(), diaria.consumo());
-        JPanel blocoListaConsumo = blocoListaDeConsumos(new JPanel(), diaria.consumo());
-        JPanel blocoOpcoes = blocoBotoesOpcoes(new JPanel());
-
-        background.add(blocoVisualizaDiarias);
-        background.add(linhaCinza2);
-        background.add(espacoBranco);
-        background.add(blocoPessoas);
-        background.add(blocoListaDePessoas);
-        background.add(blocoPagamentos);
-        background.add(blocoListaDePagamentos);
-        background.add(blocoConsumo);
-        background.add(blocoListaConsumo);
-        background.add(blocoOpcoes);
-
-        janelaAdicionar.add(background, BorderLayout.CENTER);
-
-        janelaAdicionar.revalidate();
-        janelaAdicionar.repaint();
-    }
 
 
 }
