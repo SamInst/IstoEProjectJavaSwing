@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static principals.tools.Tool.resizeIcon;
 
 public class BuscaPernoiteIndividual {
+    JFrame janelaAdicionar = new JFrame("Pernoite");
     JButton labelEsquerdaIcone;
     JButton labelDireitaIcone;
 
@@ -37,7 +38,7 @@ public class BuscaPernoiteIndividual {
         labelDireitaIcone.setPreferredSize(new Dimension(30, 30));
         labelDireitaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        JFrame janelaAdicionar = new JFrame("Pernoite");
+
         janelaAdicionar.setLayout(new BorderLayout());
         janelaAdicionar.setMinimumSize(new Dimension(580, 400));
         janelaAdicionar.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -67,13 +68,11 @@ public class BuscaPernoiteIndividual {
         System.out.println(diaria.get().numero());
 
         labelDireitaIcone.addActionListener(e -> {
-
             labelEsquerdaIcone.setEnabled(true);
 
             if (diaria.get().data_saida().isEqual(response.data_saida())){
                 labelDireitaIcone.setEnabled(false);
-            }
-            else {
+            } else {
                 i.getAndIncrement();
                 diaria.set(response.diarias().get(i.get()));
                 System.out.println(diaria.get().numero());
@@ -83,15 +82,16 @@ public class BuscaPernoiteIndividual {
                     i.getAndDecrement();
                     labelDireitaIcone.setEnabled(false);
                 }
+
+                // Atualizar os painéis
+                atualizarPanels(background, response, diaria.get());
             }
         });
 
         labelEsquerdaIcone.addActionListener(e -> {
             if (diaria.get().data_entrada().equals(response.data_entrada())) {
                 labelEsquerdaIcone.setEnabled(false);
-            }
-
-            else {
+            } else {
                 labelDireitaIcone.setEnabled(true);
                 diaria.set(response.diarias().get(i.get()));
                 i.getAndDecrement();
@@ -103,8 +103,12 @@ public class BuscaPernoiteIndividual {
                     labelEsquerdaIcone.setEnabled(false);
                     labelDireitaIcone.setEnabled(true);
                 }
+
+                // Atualizar os painéis
+                atualizarPanels(background, response, diaria.get());
             }
         });
+
 
         JPanel blocoVisualizaDiarias = blocoVisualizarDiarias(new JPanel(), response, diaria.get());
         JPanel espacoBranco = espacoBranco(new JPanel());
@@ -133,6 +137,45 @@ public class BuscaPernoiteIndividual {
         janelaAdicionar.revalidate();
         janelaAdicionar.repaint();
     }
+
+    private void atualizarPanels(JPanel background, PernoiteResponse response, DiariaResponse diaria) {
+        // Remove todos os componentes do background
+        background.removeAll();
+
+        // Recria e adiciona os painéis com base na nova diária
+        JPanel blocoBranco = blocoBranco(new JPanel(), response);
+        JPanel linhaCinza = linhaCinza(new JPanel());
+        JPanel linhaCinza2 = linhaCinza(new JPanel());
+        JPanel blocoVisualizaDiarias = blocoVisualizarDiarias(new JPanel(), response, diaria);
+        JPanel espacoBranco = espacoBranco(new JPanel());
+        JPanel blocoPessoas = blocoPessoas(new JPanel());
+        JPanel blocoListaDePessoas = blocoListaDePessoas(new JPanel(), diaria);
+        JPanel blocoPagamentos = blocoPagamentos(new JPanel());
+        JPanel blocoListaDePagamentos = blocoListaDePagamentos(new JPanel(), diaria);
+        JPanel blocoConsumo = blocoConsumo(new JPanel(), diaria.consumo());
+        JPanel blocoListaConsumo = blocoListaDeConsumos(new JPanel(), diaria.consumo());
+        JPanel blocoOpcoes = blocoBotoesOpcoes(new JPanel());
+
+        // Adiciona os painéis atualizados no background
+        background.add(blocoBranco);
+        background.add(linhaCinza);
+        background.add(blocoVisualizaDiarias);
+        background.add(linhaCinza2);
+        background.add(espacoBranco);
+        background.add(blocoPessoas);
+        background.add(blocoListaDePessoas);
+        background.add(blocoPagamentos);
+        background.add(blocoListaDePagamentos);
+        background.add(blocoConsumo);
+        background.add(blocoListaConsumo);
+        background.add(blocoOpcoes);
+
+        // Atualiza a interface
+        background.revalidate();
+        background.repaint();
+        janelaAdicionar.pack();
+    }
+
 
 
 
@@ -480,7 +523,6 @@ public class BuscaPernoiteIndividual {
         blocoPagamento.add(adicionarPagamento, BorderLayout.EAST);
 
         return blocoPagamento;
-
     }
 
 

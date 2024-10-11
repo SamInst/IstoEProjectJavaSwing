@@ -4,6 +4,7 @@ import enums.StatusPernoiteEnum;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.Icones;
+import principals.tools.PanelArredondado;
 import repository.PernoitesRepository;
 
 import javax.swing.*;
@@ -84,16 +85,16 @@ public class BlocosPernoitesAtivos {
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
 
-            JLabel idPernoiteLabel = new JLabel("#" + pernoite.pernoite_id());
-            idPernoiteLabel.setFont(new Font("Inter", Font.BOLD, 17));
-            idPernoiteLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
-            idPernoiteLabel.setForeground(Color.RED);
+//            JLabel idPernoiteLabel = new JLabel("#" + pernoite.pernoite_id());
+//            idPernoiteLabel.setFont(new Font("Inter", Font.BOLD, 17));
+//            idPernoiteLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
+//            idPernoiteLabel.setForeground(Color.RED);
 
-            leftPanel.add(idPernoiteLabel);
+//            leftPanel.add(idPernoiteLabel);
 
             ImageIcon iconeCalendario = resizeIcon(Icones.calendario, 20, 20);
             JLabel labelCalendario = new JLabel(iconeCalendario);
-            labelCalendario.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+            labelCalendario.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
             JLabel labelDataEntrada = new JLabel(pernoite.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
@@ -153,18 +154,18 @@ public class BlocosPernoitesAtivos {
             ImageIcon iconePessoa = resizeIcon(Icones.usuarios, 20, 20);
             JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
-            JLabel labelNumero = new JLabel("#"+pernoite.representante().id().toString());
-            labelNumero.setForeground(Color.RED);
-            labelNumero.setBorder(BorderFactory.createEmptyBorder(0, 33, 0, 10));
-            labelNumero.setFont(new Font("Inter", Font.BOLD, 17));
-            labelNumero.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//            JLabel labelNumero = new JLabel("#"+pernoite.representante().id().toString());
+//            labelNumero.setForeground(Color.RED);
+//            labelNumero.setBorder(BorderFactory.createEmptyBorder(0, 33, 0, 10));
+//            labelNumero.setFont(new Font("Inter", Font.BOLD, 17));
+//            labelNumero.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-            JLabel labelNome = new JLabel(pernoite.representante().nome() + "   "+ pernoite.representante().telefone());
+            JLabel labelNome = new JLabel("  "+pernoite.representante().nome() + "   "+ pernoite.representante().telefone());
             labelNome.setForeground(Cor.CINZA_ESCURO);
             labelNome.setFont(new Font("Inter", Font.BOLD, 17));
 
             painelEsquerdo.add(iconePessoaLabel);
-            painelEsquerdo.add(labelNumero);
+//            painelEsquerdo.add(labelNumero);
             painelEsquerdo.add(labelNome);
 
 
