@@ -3,6 +3,8 @@ package principals;
 
 
 import principals.panels.*;
+import principals.panels.pernoitePanels.PernoitePanel;
+import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.Icones;
 import principals.tools.LabelArredondado;
 
@@ -23,19 +25,15 @@ public class Menu extends JFrame {
         setLayout(new BorderLayout());
         setVisible(true);
 
-        // Menu lateral (painel esquerdo)
         JPanel sideMenu = new JPanel();
         sideMenu.setLayout(new BoxLayout(sideMenu, BoxLayout.Y_AXIS));
         sideMenu.setBackground(defaultColor);
-        sideMenu.setPreferredSize(new Dimension(230, getHeight()));  // Ajustar largura do painel lateral
+        sideMenu.setPreferredSize(new Dimension(230, getHeight()));
 
-        // Caixa de informações do funcionário
         JPanel employeeInfoPanel = createEmployeeInfoPanel();
         sideMenu.add(employeeInfoPanel);
-        sideMenu.add(Box.createRigidArea(new Dimension(0, 15)));  // Espaço entre o painel do funcionário e os botões
+        sideMenu.add(Box.createRigidArea(new Dimension(0, 15)));
 
-
-        // Botões do menu com ícones e fonte ajustada
         JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(Icones.dashboard, 24, 24));
         JButton btnQuartos = createMenuButton("Quartos", resizeIcon(Icones.quartos, 24, 24));
         JButton btnEntradas = createMenuButton("Entradas", resizeIcon(Icones.entradas, 24, 24));
@@ -46,7 +44,6 @@ public class Menu extends JFrame {
         JButton btnReservas = createMenuButton("Reservas", resizeIcon(Icones.reservas, 24, 24));
         JButton btnPrice = createMenuButton("Precos",  resizeIcon(Icones.preco, 24, 24));
 
-        // Adiciona botões ao menu
         sideMenu.add(btnDashboard);
         sideMenu.add(btnQuartos);
         sideMenu.add(btnEntradas);
@@ -56,31 +53,26 @@ public class Menu extends JFrame {
         sideMenu.add(btnItens);
         sideMenu.add(btnReservas);
         sideMenu.add(btnPrice);
-
-        // Adiciona espaço flexível para ajustar o layout
         sideMenu.add(Box.createVerticalGlue());
 
-        // Painel principal para trocar as telas
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.LIGHT_GRAY);
-        mainPanel.setLayout(new CardLayout());  // Usando CardLayout para trocar as telas
+        mainPanel.setLayout(new CardLayout());
 
-        // Adicionando os componentes à janela principal
         add(sideMenu, BorderLayout.WEST);
         add(mainPanel, BorderLayout.CENTER);
 
-        // Efeito de hover e seleção para os botões
         addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
         addHoverAndSelectionEffect(btnQuartos, new RoomsPanel());
         addHoverAndSelectionEffect(btnEntradas, new EntryPanel());
-        addHoverAndSelectionEffect(btnPernoites, new OvernightPanel());
+        addHoverAndSelectionEffect(btnPernoites, new PernoitePanel());
         addHoverAndSelectionEffect(btnRelatorio, new RelatoriosPanel());
         addHoverAndSelectionEffect(btnClientes, new CustomersPanel());
         addHoverAndSelectionEffect(btnItens, new ItensPanel());
         addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
         addHoverAndSelectionEffect(btnPrice, new PricePanel());
 
-        showPanel(new OvernightPanel());
+        showPanel(new PernoitePanel());
         setVisible(true);
     }
 
@@ -88,38 +80,30 @@ public class Menu extends JFrame {
 
     private JPanel createEmployeeInfoPanel() {
         JPanel employeePanel = new JPanel();
-        employeePanel.setLayout(new BoxLayout(employeePanel, BoxLayout.Y_AXIS));  // Centralizando o conteúdo verticalmente
+        employeePanel.setLayout(new BoxLayout(employeePanel, BoxLayout.Y_AXIS));
         employeePanel.setBackground(new Color(66, 75, 152));
+        employeePanel.setMaximumSize(new Dimension(500, 150));
+        employeePanel.setPreferredSize(new Dimension(250, 150));
+        employeePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
-        // Ajustar o tamanho do painel para coincidir com o menu lateral
-        employeePanel.setMaximumSize(new Dimension(500, 150));  // Definir a largura para 250 pixels (igual ao menu lateral)
-        employeePanel.setPreferredSize(new Dimension(250, 150));  // Definir a largura preferida para 250 pixels
-
-        // Adicionar um espaçamento no topo
-        employeePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));  // Adiciona 20px de espaço no topo
-
-        // Ícone do funcionário
         ImageIcon icon = new ImageIcon(new ImageIcon("src/main/resources/icons/menu/user.png").getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
         JLabel labelIcon = new JLabel(icon);
         labelIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Nome do funcionário
         JLabel labelName = new JLabel("Sam Helson");
         labelName.setForeground(Color.WHITE);
         labelName.setFont(new Font("Inter", Font.BOLD, 16));
-        labelName.setAlignmentX(Component.CENTER_ALIGNMENT);  // Centralizar nome
+        labelName.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Cargo do funcionário
         JLabel labelRole = new JLabel("Funcionário");
         labelRole.setForeground(Color.WHITE);
         labelRole.setFont(new Font("Inter", Font.PLAIN, 12));
-        labelRole.setAlignmentX(Component.CENTER_ALIGNMENT);  // Centralizar cargo
+        labelRole.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Adicionando os componentes ao painel
         employeePanel.add(labelIcon);
-        employeePanel.add(Box.createRigidArea(new Dimension(0, 10)));  // Espaço entre ícone e nome
+        employeePanel.add(Box.createRigidArea(new Dimension(0, 10)));
         employeePanel.add(labelName);
-        employeePanel.add(Box.createRigidArea(new Dimension(0, 5)));   // Espaço entre nome e cargo
+        employeePanel.add(Box.createRigidArea(new Dimension(0, 5)));
         employeePanel.add(labelRole);
 
         return employeePanel;
@@ -135,9 +119,9 @@ public class Menu extends JFrame {
         button.setBackground(defaultColor);
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Inter", Font.BOLD, 20));
-        button.setHorizontalAlignment(SwingConstants.LEFT);  // Alinha o conteúdo à esquerda
-        button.setHorizontalTextPosition(SwingConstants.RIGHT);  // Texto à direita do ícone
-        button.setIconTextGap(15);  // Espaçamento entre o ícone e o texto
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setHorizontalTextPosition(SwingConstants.RIGHT);
+        button.setIconTextGap(15);
         button.setMinimumSize(new Dimension(800, 75));
         button.setMaximumSize(new Dimension(500, 70));
         button.setAlignmentX(10);
@@ -145,11 +129,10 @@ public class Menu extends JFrame {
         return button;
     }
 
-    // Método para redimensionar o ícone
     private static ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
         Image img = icon.getImage();
         Image resizedImage = img.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
-        return new ImageIcon(resizedImage);  // Retorna o ícone redimensionado
+        return new ImageIcon(resizedImage);
     }
 
     private void addHoverAndSelectionEffect(JButton button, JPanel panel) {
@@ -158,20 +141,20 @@ public class Menu extends JFrame {
             @Override
             public void mouseEntered(MouseEvent e) {
                 button.setFont(new Font("Inter", Font.BOLD, 25));
-                button.setBackground(new Color(70, 130, 180));  // Cor de hover
+                button.setBackground(new Color(70, 130, 180));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 button.setFont(new Font("Inter", Font.BOLD, 20));
-                button.setBackground(defaultColor);  // Retorna à cor padrão
+                button.setBackground(defaultColor);
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                showPanel(panel);  // Mostra o painel correspondente
+                showPanel(panel);
                 resetButtonColors();
-                button.setBackground(new Color(100, 75, 237));  // Cor de seleção
+                button.setBackground(new Color(100, 75, 237));
             }
         });
     }
@@ -181,7 +164,7 @@ public class Menu extends JFrame {
             if (comp instanceof JPanel) {
                 for (Component button : ((JPanel) comp).getComponents()) {
                     if (button instanceof JButton) {
-                        button.setBackground(defaultColor);  // Reseta a cor dos botões
+                        button.setBackground(defaultColor);
                     }
                 }
             }
@@ -204,15 +187,14 @@ public class Menu extends JFrame {
         identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         identificadorPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 20));
 
-        // Usando a classe LabelArredondado ao invés de JLabel
         LabelArredondado labelTitulo = new LabelArredondado(titulo);
-        labelTitulo.setIcon(resizeIcon(icon, 40, 40));  // Definir o ícone com o tamanho ajustado
+        labelTitulo.setIcon(resizeIcon(icon, 40, 40));
         labelTitulo.setFont(new Font("Inter", Font.BOLD, 25));
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setOpaque(true);
-        labelTitulo.setBackground(new Color(66, 75, 152));  // Cor de fundo da label
+        labelTitulo.setBackground(new Color(66, 75, 152));
         labelTitulo.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        labelTitulo.setIconTextGap(10);  // Espaço entre o ícone e o texto
+        labelTitulo.setIconTextGap(10);
 
         identificadorPanel.add(labelTitulo);
 

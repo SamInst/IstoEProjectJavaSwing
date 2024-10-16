@@ -161,17 +161,6 @@ public class RelatoriosRepository {
         return relatoriosDoDia;
     }
 
-
-    public RowMapper<RelatorioRowmapper> relatorioRowMapper = (rs, rowNum) -> new RelatorioRowmapper(
-            rs.getLong("id"),
-            rs.getTimestamp("data_hora").toLocalDateTime(),
-            rs.getString("tipo_pagamento_enum"),
-            rs.getString("relatorio"),
-            rs.getObject("pernoite_id") != null ? rs.getLong("pernoite_id") : null,
-            rs.getObject("entrada_id") != null ? rs.getLong("entrada_id") : null,
-            rs.getFloat("valor")
-    );
-
     public void adicionarRelatorio(RelatorioRequest request){
         Long pernoite_id;
         Long entrada_id;

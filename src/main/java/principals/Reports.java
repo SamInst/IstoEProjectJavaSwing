@@ -92,7 +92,6 @@ public class Reports {
             Label lblApartamento = new Label(String.valueOf(entrada.getApartamento()));
             Label lblValor = new Label("R$ " + String.format("%.2f", entrada.getValor()));
 
-            // Ajustar a cor do valor baseado se é positivo ou negativo
             if (entrada.getValor() > 0) {
                 lblValor.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
             } else if (entrada.getValor() < 0) {
@@ -106,8 +105,6 @@ public class Reports {
 
             entradaBox.getChildren().addAll(lblId, lblHora, lblRelatorio, spacer, lblApartamento, lblValor);
             entradasBox.getChildren().add(entradaBox);
-
-            // Adicionar eventos de mouse para mudança de cor
             entradaBox.setOnMouseEntered(e -> entradaBox.setStyle("-fx-background-color: #E0F7FA; -fx-border-color: #CCCCCC; -fx-border-radius: 5;"));
             entradaBox.setOnMouseExited(e -> entradaBox.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #CCCCCC; -fx-border-radius: 5;"));
         }
@@ -121,7 +118,7 @@ public class Reports {
         List<RelatorioDiario> relatorios = new ArrayList<>();
 
         List<RelatorioEntrada> entradas1 = new ArrayList<>();
-        entradas1.add(new RelatorioEntrada(3244678, "01:00", "PAGO LANCHE", 2, -20.00)); // Valor negativo
+        entradas1.add(new RelatorioEntrada(3244678, "01:00", "PAGO LANCHE", 2, -20.00));
         entradas1.add(new RelatorioEntrada(3244677, "00:24", "ENTRADA NOITE (CARTÃO DE CRÉDITO)", 2, 30.00));
         entradas1.add(new RelatorioEntrada(3244676, "00:24", "ENTRADA NOITE (PIX)", 2, 30.00));
         entradas1.add(new RelatorioEntrada(3244677, "00:24", "ENTRADA NOITE (CARTÃO DE CRÉDITO)", 2, 30.00));
@@ -156,10 +153,7 @@ public class Reports {
         entradas2.add(new RelatorioEntrada(3244676, "00:24", "ENTRADA NOITE (PIX)", 2, 30.00));entradas2.add(new RelatorioEntrada(3244677, "00:24", "ENTRADA NOITE (CARTÃO DE CRÉDITO)", 2, 30.00));
         entradas2.add(new RelatorioEntrada(3244676, "00:24", "ENTRADA NOITE (PIX)", 2, 30.00));
 
-
-
         relatorios.add(new RelatorioDiario("25/08/2024", entradas2));
-
         return relatorios;
     }
 

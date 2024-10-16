@@ -2,8 +2,8 @@ package repository;
 
 import config.PostgresDatabaseConnect;
 import enums.StatusPernoiteEnum;
+import enums.StatusQuartoEnum;
 import org.springframework.transaction.annotation.Transactional;
-import principals.tools.Converter;
 import request.PernoiteRequest;
 import response.BuscaPernoiteResponse;
 import response.DiariaResponse;
@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static principals.tools.Converter.*;
+import static principals.tools.Converter.converterStatusPagamento;
+import static principals.tools.Converter.converterTipoPagamento;
 
 public class PernoitesRepository extends PostgresDatabaseConnect {
     PrecosRepository precosRepository = new PrecosRepository();
+    QuartosRepository quartosRepository = new QuartosRepository();
     Connection connection = connect();
 
     @Transactional
@@ -112,6 +114,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+            quartosRepository.alterarStatusQuarto(request.quarto_id(), StatusQuartoEnum.OCUPADO);
         return adicionado;
     }
 
@@ -381,12 +384,4 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         }
         return diarias;
     }
-
-
-
-
-
-
-
-
-    }
+}

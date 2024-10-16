@@ -1,4 +1,4 @@
-package principals.panels.pernoitesSubPanels;
+package principals.panels.pernoitePanels;
 
 import principals.tools.Cor;
 import repository.PessoaRepository;

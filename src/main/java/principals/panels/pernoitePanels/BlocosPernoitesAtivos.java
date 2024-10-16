@@ -1,10 +1,10 @@
-package principals.panels.pernoitesSubPanels;
+package principals.panels.pernoitePanels;
 
 import enums.StatusPernoiteEnum;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
+import principals.tools.FormatarFloat;
 import principals.tools.Icones;
-import principals.tools.PanelArredondado;
 import repository.PernoitesRepository;
 
 import javax.swing.*;
@@ -27,9 +27,9 @@ public class BlocosPernoitesAtivos {
         statusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         String statusTitulo = "";
-        Color cor = Cor.VERDE_ESCURO;
+        Color cor = Cor.AZUL_ESCURO;
         switch (statusPernoiteEnum) {
-        case ATIVO -> statusTitulo = "Ativo";
+        case ATIVO -> statusTitulo = "Ativos";
             case DIARIA_ENCERRADA -> {
                 statusTitulo = "Diária Encerrada";
                 cor = new Color(0xA83131);
@@ -67,7 +67,7 @@ public class BlocosPernoitesAtivos {
                     new BuscaPernoiteIndividual().buscaPernoiteIndividual(pernoitesRepository.buscaPernoite(pernoite.pernoite_id()))
             );
 
-            BotaoArredondado botaoQuarto = new BotaoArredondado(pernoite.quarto().toString());
+            BotaoArredondado botaoQuarto = new BotaoArredondado(pernoite.quarto() < 10L ? "0" + pernoite.quarto() : pernoite.quarto().toString());
             botaoQuarto.setLayout(null);
             botaoQuarto.setPreferredSize(new Dimension(60, 40));
             botaoQuarto.setBackground(finalCor);
@@ -85,13 +85,6 @@ public class BlocosPernoitesAtivos {
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
 
-//            JLabel idPernoiteLabel = new JLabel("#" + pernoite.pernoite_id());
-//            idPernoiteLabel.setFont(new Font("Inter", Font.BOLD, 17));
-//            idPernoiteLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
-//            idPernoiteLabel.setForeground(Color.RED);
-
-//            leftPanel.add(idPernoiteLabel);
-
             ImageIcon iconeCalendario = resizeIcon(Icones.calendario, 20, 20);
             JLabel labelCalendario = new JLabel(iconeCalendario);
             labelCalendario.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -99,12 +92,12 @@ public class BlocosPernoitesAtivos {
             JLabel labelDataEntrada = new JLabel(pernoite.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
             labelDataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
-            labelDataEntrada.setForeground(new Color(0xF5841B));
+            labelDataEntrada.setForeground(Cor.CINZA_ESCURO);
             labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
 
             JLabel labelDataSaida = new JLabel(pernoite.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataSaida.setToolTipText("Data de saida");
-            labelDataSaida.setForeground(new Color(0xF5841B));
+            labelDataSaida.setForeground(Cor.CINZA_ESCURO);
             labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
 
             leftPanel.add(labelCalendario);
@@ -115,20 +108,18 @@ public class BlocosPernoitesAtivos {
 
             rightPanel.setOpaque(false);
 
-            var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays();
+            var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays() + 1;
 
             JLabel diariaAtualIcon = new JLabel(resizeIcon(Icones.diaria_atual_laranja, 20, 18));
             diariaAtualIcon.setToolTipText("Diaria atual");
+
             JLabel totalTextoLabel = new JLabel(diariaAtual + "  ");
             totalTextoLabel.setToolTipText("Diaria atual");
             totalTextoLabel.setFont(new Font("Inter", Font.BOLD, 23));
             totalTextoLabel.setForeground(new Color(0xF5841B));
 
-            NumberFormat nf = NumberFormat.getInstance(new Locale("pt", "BR"));
-            nf.setMinimumFractionDigits(2);
-            nf.setMaximumFractionDigits(2);
 
-            JLabel totalLabel = new JLabel("R$ " + nf.format(pernoite.valor_total()));
+            JLabel totalLabel = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
             totalLabel.setFont(new Font("Inter", Font.BOLD, 23));
             totalLabel.setForeground(Cor.VERDE_ESCURO);
 
@@ -154,22 +145,12 @@ public class BlocosPernoitesAtivos {
             ImageIcon iconePessoa = resizeIcon(Icones.usuarios, 20, 20);
             JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
-//            JLabel labelNumero = new JLabel("#"+pernoite.representante().id().toString());
-//            labelNumero.setForeground(Color.RED);
-//            labelNumero.setBorder(BorderFactory.createEmptyBorder(0, 33, 0, 10));
-//            labelNumero.setFont(new Font("Inter", Font.BOLD, 17));
-//            labelNumero.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-            JLabel labelNome = new JLabel("  "+pernoite.representante().nome() + "   "+ pernoite.representante().telefone());
+            JLabel labelNome = new JLabel(pernoite.representante() == null ? null : pernoite.representante().nome());
             labelNome.setForeground(Cor.CINZA_ESCURO);
-            labelNome.setFont(new Font("Inter", Font.BOLD, 17));
+            labelNome.setFont(new Font("Inter", Font.BOLD, 20));
 
             painelEsquerdo.add(iconePessoaLabel);
-//            painelEsquerdo.add(labelNumero);
             painelEsquerdo.add(labelNome);
-
-
-
 
             JPanel painelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             painelDireito.setOpaque(false);

@@ -1,11 +1,9 @@
-package principals.panels;
+package principals.panels.pernoitePanels;
 
 import com.toedter.calendar.JCalendar;
 import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
 import lombok.Getter;
-import principals.panels.pernoitesSubPanels.BlocosPernoitesAtivos;
-import principals.panels.pernoitesSubPanels.BuscaPessoasPanel;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
@@ -32,7 +30,7 @@ import java.util.Objects;
 
 import static principals.tools.Cor.VERDE_ESCURO;
 
-public class OvernightPanel extends JPanel {
+public class PernoitePanel extends JPanel {
     Long quarto_id = null;
     LocalDate dataEntrada = LocalDate.now();
     LocalDate dataSaida = LocalDate.now();
@@ -41,13 +39,14 @@ public class OvernightPanel extends JPanel {
     private final ObservableValue<Float> valorTotalGlobal = new ObservableValue<>(0F);
     List<Long> pessoas = new ArrayList<>();
 
+    JPanel pernoitesPanel = new JPanel();
+
     PernoitesRepository pernoitesRepository = new PernoitesRepository();
     PrecosRepository precosRepository = new PrecosRepository();
     QuartosRepository quartosRepository = new QuartosRepository();
 
-    public OvernightPanel() {
+    public PernoitePanel() {
         setLayout(new BorderLayout());
-        System.out.println(pernoitesRepository.buscaPernoite(35L));
 
         JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -75,16 +74,13 @@ public class OvernightPanel extends JPanel {
         identificadorPanel.add(buttonPanel, BorderLayout.WEST);
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
 
-        JPanel pernoitesPanel = new JPanel();
-        pernoitesPanel.setBackground(Color.RED);
+
         pernoitesPanel.setLayout(new BoxLayout(pernoitesPanel, BoxLayout.Y_AXIS));
 
         add(topPanel, BorderLayout.NORTH);
 
         for (int i = 0; i < StatusPernoiteEnum.values().length; i++){
-            StatusPernoiteEnum statusPernoite = StatusPernoiteEnum.values()[i];
-            JPanel statusPanel = new JPanel();
-            pernoitesPanel.add(new BlocosPernoitesAtivos().blocoPernoitesAtivos(statusPanel, pernoitesRepository, statusPernoite));
+            pernoitesPanel.add(new BlocosPernoitesAtivos().blocoPernoitesAtivos(new JPanel(), pernoitesRepository, StatusPernoiteEnum.values()[i]));
         }
 
         JScrollPane scrollPane = new JScrollPane(pernoitesPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -175,6 +171,12 @@ public class OvernightPanel extends JPanel {
 
                     if (result == JOptionPane.OK_OPTION) {
                        janelaAdicionar.dispose();
+                       pernoitesPanel.removeAll();
+                        for (int i = 0; i < StatusPernoiteEnum.values().length; i++){
+                            pernoitesPanel.add(new BlocosPernoitesAtivos().blocoPernoitesAtivos(new JPanel(), new PernoitesRepository(), StatusPernoiteEnum.values()[i]));
+                        }
+                        pernoitesPanel.revalidate();
+                        pernoitesPanel.repaint();
                     }
 
                 }
