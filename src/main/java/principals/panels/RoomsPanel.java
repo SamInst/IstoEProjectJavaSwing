@@ -22,7 +22,8 @@ public class RoomsPanel extends JPanel {
                 "src/main/resources/icons/plus_icon.png",
                 40,
                 40,
-                new Color(76, 175, 80)
+                new Color(76, 175, 80),
+                130,30
         );
 
         JButton btnAdicionar2 = Botoes.botaoEstilizado(
@@ -31,7 +32,8 @@ public class RoomsPanel extends JPanel {
                 "src/main/resources/icons/lupa.png",
                 40,
                 40,
-                new Color(66, 75, 152)
+                new Color(66, 75, 152),
+                130,30
         );
 
         // Painel para o botão no topo à direita

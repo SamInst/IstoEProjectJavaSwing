@@ -11,11 +11,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 
 import static principals.tools.Tool.resizeIcon;
 
@@ -55,11 +53,18 @@ public class BlocosPernoitesAtivos {
         pernoitesPanel.setLayout(new GridLayout(0, 2, 10, 10));
         pernoitesPanel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
 
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(pernoitesPanel, BorderLayout.CENTER);
+
+        statusPanel.add(mainPanel, BorderLayout.CENTER);
+
         Color finalCor = cor;
         pernoitesRepository.buscaPernoitesPorStatus(statusPernoiteEnum).forEach(pernoite -> {
             BotaoArredondado pernoiteButton = new BotaoArredondado("");
-            pernoiteButton.setLayout(null);
-            pernoiteButton.setPreferredSize(new Dimension(810, 95));
+            pernoiteButton.setLayout(new BorderLayout());
+            pernoiteButton.setPreferredSize(new Dimension(0, 95));
+            pernoiteButton.setMinimumSize(new Dimension(0, 95));
+            pernoiteButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 95));
             pernoiteButton.setBackground(Color.WHITE);
             pernoiteButton.setBorderPainted(false);
             pernoiteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -67,7 +72,7 @@ public class BlocosPernoitesAtivos {
                     new BuscaPernoiteIndividual().buscaPernoiteIndividual(pernoitesRepository.buscaPernoite(pernoite.pernoite_id()))
             );
 
-            BotaoArredondado botaoQuarto = new BotaoArredondado(pernoite.quarto() < 10L ? "0" + pernoite.quarto() : pernoite.quarto().toString());
+            JButton botaoQuarto = new BotaoArredondado(pernoite.quarto() < 10L ? "0" + pernoite.quarto() : pernoite.quarto().toString());
             botaoQuarto.setLayout(null);
             botaoQuarto.setPreferredSize(new Dimension(60, 40));
             botaoQuarto.setBackground(finalCor);
@@ -78,7 +83,7 @@ public class BlocosPernoitesAtivos {
 
             JPanel blocoInfoPanelSuperior = new JPanel(new BorderLayout());
             blocoInfoPanelSuperior.setBackground(Color.WHITE);
-            blocoInfoPanelSuperior.setBounds(100, 5, 695, 37);
+            blocoInfoPanelSuperior.setPreferredSize(new Dimension(0, 37));
             blocoInfoPanelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 5));
             pernoiteButton.add(blocoInfoPanelSuperior);
 
@@ -104,9 +109,10 @@ public class BlocosPernoitesAtivos {
             leftPanel.add(labelDataEntrada);
             leftPanel.add(labelDataSaida);
 
-            JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
+            JPanel rightPanel = new JPanel(new BorderLayout());
             rightPanel.setOpaque(false);
+            rightPanel.setBackground(Color.BLUE);
+            rightPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
             var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays() + 1;
 
@@ -124,8 +130,8 @@ public class BlocosPernoitesAtivos {
             totalLabel.setForeground(Cor.VERDE_ESCURO);
 
             if (pernoite.status_pernoite().equals("0")) {
-                rightPanel.add(diariaAtualIcon);
-                rightPanel.add(totalTextoLabel);
+                rightPanel.add(diariaAtualIcon, BorderLayout.WEST);
+                rightPanel.add(totalTextoLabel, BorderLayout.CENTER);
             }
 
             rightPanel.add(totalLabel, BorderLayout.EAST);
@@ -135,7 +141,10 @@ public class BlocosPernoitesAtivos {
 
             JPanel blocoInfoPanelInferior = new JPanel(new BorderLayout());
             blocoInfoPanelInferior.setBackground(Color.WHITE);
-            blocoInfoPanelInferior.setBounds(100, 47, 695, 38);
+//            blocoInfoPanelInferior.setBounds(100, 47, 500, 38);
+            blocoInfoPanelInferior.setBorder(BorderFactory.createEmptyBorder(0,80,0,0));
+            blocoInfoPanelInferior.setPreferredSize(new Dimension(0, 38));
+
             pernoiteButton.add(blocoInfoPanelInferior);
 
             JPanel painelEsquerdo = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -145,7 +154,7 @@ public class BlocosPernoitesAtivos {
             ImageIcon iconePessoa = resizeIcon(Icones.usuarios, 20, 20);
             JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
-            JLabel labelNome = new JLabel(pernoite.representante() == null ? null : pernoite.representante().nome());
+            JLabel labelNome = new JLabel(" " + (pernoite.representante() == null ? null : pernoite.representante().nome()));
             labelNome.setForeground(Cor.CINZA_ESCURO);
             labelNome.setFont(new Font("Inter", Font.BOLD, 20));
 

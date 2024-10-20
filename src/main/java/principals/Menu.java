@@ -22,6 +22,7 @@ public class Menu extends JFrame {
         setTitle("ISTO E POUSADA");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setMinimumSize(new Dimension(600, 600));
         setLayout(new BorderLayout());
         setVisible(true);
 
@@ -65,12 +66,14 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
         addHoverAndSelectionEffect(btnQuartos, new RoomsPanel());
         addHoverAndSelectionEffect(btnEntradas, new EntryPanel());
-        addHoverAndSelectionEffect(btnPernoites, new PernoitePanel());
+//
         addHoverAndSelectionEffect(btnRelatorio, new RelatoriosPanel());
         addHoverAndSelectionEffect(btnClientes, new CustomersPanel());
         addHoverAndSelectionEffect(btnItens, new ItensPanel());
         addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
         addHoverAndSelectionEffect(btnPrice, new PricePanel());
+
+        btnPernoites.addActionListener(a-> addHoverAndSelectionEffect(btnPernoites, new PernoitePanel()));
 
         showPanel(new PernoitePanel());
         setVisible(true);

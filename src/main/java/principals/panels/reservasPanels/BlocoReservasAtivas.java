@@ -59,6 +59,27 @@ public class BlocoReservasAtivas {
             blocoInfoPanelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 5));
             reservaButton.add(blocoInfoPanelSuperior);
 
+
+            JPanel blocoInfoPanelInferior = new JPanel(new BorderLayout());
+            blocoInfoPanelInferior.setBackground(Color.WHITE);
+            blocoInfoPanelInferior.setBounds(100, 47, 695, 38);
+            reservaButton.add(blocoInfoPanelInferior);
+
+            JPanel painelEsquerdo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            painelEsquerdo.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+            painelEsquerdo.setOpaque(false);
+
+            ImageIcon iconePessoa = resizeIcon(Icones.usuarios, 20, 20);
+            JLabel iconePessoaLabel = new JLabel(iconePessoa);
+
+            JLabel labelNome = new JLabel(reserva.pessoas().isEmpty() ? null : reserva.pessoas().get(0).nome());
+            labelNome.setForeground(Cor.CINZA_ESCURO);
+            labelNome.setFont(new Font("Inter", Font.BOLD, 20));
+            labelNome.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+            painelEsquerdo.add(iconePessoaLabel);
+            painelEsquerdo.add(labelNome);
+
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
 
@@ -66,13 +87,13 @@ public class BlocoReservasAtivas {
             JLabel labelCalendario = new JLabel(iconeCalendario);
             labelCalendario.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-            JLabel labelDataEntrada = new JLabel(reserva.data_entrada());
+            JLabel labelDataEntrada = new JLabel(reserva.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
             labelDataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
             labelDataEntrada.setForeground(Cor.CINZA_ESCURO);
             labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
 
-            JLabel labelDataSaida = new JLabel(reserva.data_saida());
+            JLabel labelDataSaida = new JLabel(reserva.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataSaida.setToolTipText("Data de saida");
             labelDataSaida.setForeground(Cor.CINZA_ESCURO);
             labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
@@ -83,6 +104,8 @@ public class BlocoReservasAtivas {
 
             blocoInfoPanelSuperior.add(leftPanel, BorderLayout.WEST);
 
+            blocoInfoPanelInferior.add(painelEsquerdo, BorderLayout.WEST);
+
             reservasPanel.add(reservaButton);
 
             reservaButton.addMouseListener(new MouseAdapter() {
@@ -90,12 +113,14 @@ public class BlocoReservasAtivas {
                 public void mouseEntered(MouseEvent e) {
                     reservaButton.setBackground(Cor.CINZA_CLARO);
                     blocoInfoPanelSuperior.setBackground(Cor.CINZA_CLARO);
+                    blocoInfoPanelInferior.setBackground(Cor.CINZA_CLARO);
                     tituloStatus.setBackground(Cor.CINZA_CLARO);
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     reservaButton.setBackground(Cor.BRANCO);
+                    blocoInfoPanelInferior.setBackground(Cor.BRANCO);
                     blocoInfoPanelSuperior.setBackground(Cor.BRANCO);
                     tituloStatus.setForeground(Cor.BRANCO);
                 }

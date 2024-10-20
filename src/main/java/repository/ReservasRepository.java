@@ -167,8 +167,8 @@ public class ReservasRepository {
                 listaReservas.add(new BuscaReservasResponse.Reservas(
                         reservaId,
                         rsReserva.getLong("quarto_id"),
-                        rsReserva.getString("data_entrada"),
-                        rsReserva.getString("data_saida"),
+                        rsReserva.getDate("data_entrada").toLocalDate(),
+                        rsReserva.getDate("data_saida").toLocalDate(),
                         listaPessoas,
                         pagamentos
                 ));

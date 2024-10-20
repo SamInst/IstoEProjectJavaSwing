@@ -4,6 +4,7 @@ import com.toedter.calendar.JCalendar;
 import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
 import lombok.Getter;
+import org.springframework.scheduling.annotation.Scheduled;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
@@ -21,6 +22,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,7 +49,11 @@ public class PernoitePanel extends JPanel {
     QuartosRepository quartosRepository = new QuartosRepository();
 
     public PernoitePanel() {
+
+        verificaDiariasEncerradas();
         setLayout(new BorderLayout());
+
+
 
         JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -607,5 +614,15 @@ public class PernoitePanel extends JPanel {
         public interface Observer {
             void update();
         }
+    }
+
+    public void verificaDiariasEncerradas(){
+        pernoitesRepository.buscaPernoitesPorStatus(StatusPernoiteEnum.ATIVO)
+                .forEach(pernoite -> {
+            LocalDateTime dataHoraSaida = LocalDateTime.of(pernoite.data_saida(), LocalTime.of(12,0));
+            if (dataHoraSaida.isBefore(LocalDateTime.now())) {
+               pernoitesRepository.alterarStatusPernoite(StatusPernoiteEnum.DIARIA_ENCERRADA, pernoite.pernoite_id());
+            }
+        });
     }
 }

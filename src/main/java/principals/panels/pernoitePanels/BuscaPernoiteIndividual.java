@@ -3,14 +3,11 @@ package principals.panels.pernoitePanels;
 import principals.tools.*;
 import response.DiariaResponse;
 import response.PernoiteResponse;
-
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Period;
-import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -198,7 +195,6 @@ public class BuscaPernoiteIndividual {
         botaoQuarto.setFont(new Font("Inter", Font.BOLD, 40));
         subBlocoEsquerdo.add(botaoQuarto);
 
-
         JPanel subBlocoDireito = new JPanel();
         subBlocoDireito.setLayout(new GridLayout(2, 1));
         blocoBranco.add(subBlocoDireito, BorderLayout.CENTER);
@@ -315,12 +311,13 @@ public class BuscaPernoiteIndividual {
         blocoVisualizaDiarias.add(labelDataEntrada);
         blocoVisualizaDiarias.add(labelDataSaida);
 
-        if (diaria.data_entrada().equals(LocalDate.now().minusDays(1))
-                && diaria.data_saida().isBefore(ChronoLocalDate.from(
-                        LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(12,0))))) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime entrada = diaria.data_entrada().atTime(12, 0);
+        LocalDateTime saida = diaria.data_saida().atTime(12, 0);
+
+        if (now.isAfter(entrada) && now.isBefore(saida)) {
             blocoVisualizaDiarias.add(isDiariaAtualLabel);
         }
-
 
         return blocoVisualizaDiarias;
     }

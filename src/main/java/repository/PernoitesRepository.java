@@ -266,11 +266,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
 
     public Integer hospedados() {
         String sql = """
-        SELECT COUNT(DISTINCT dh.hospedes_id) AS quantidade_pessoas
-        FROM diaria_hospedes dh
-        JOIN diaria d ON dh.diaria_id = d.id
-        JOIN pernoite p ON p.id = d.pernoite_id
-        WHERE p.ativo = true;
+        select sum(d.quantidade_pessoa) quantidade_pessoas from pernoite d where d.ativo = true;
     """;
 
         try (
@@ -383,5 +379,17 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
             throw new RuntimeException(e);
         }
         return diarias;
+    }
+
+    public void alterarStatusPernoite(StatusPernoiteEnum statusPernoite, Long pernoiteId){
+        String sql = "update pernoite set status_pernoite_enum = ? where id = ?";
+
+        try (
+            PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, statusPernoite.getValue());
+            stmt.setLong(2, pernoiteId);
+            stmt.executeQuery();
+
+        } catch (Exception e){ e.printStackTrace(); }
     }
 }

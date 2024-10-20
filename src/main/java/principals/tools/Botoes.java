@@ -7,85 +7,73 @@ import java.util.concurrent.Executors;
 
 public class Botoes {
 
-    public static JButton botaoEstilizado(String titulo, int tamanhoTitulo, String pathIcon, int larguraIcone, int alturaIcone, Color color) {
-        // Carregar o ícone do botão a partir do caminho
+    public static JButton botaoEstilizado(String titulo, int tamanhoTitulo, String pathIcon, int larguraIcone, int alturaIcone, Color color,  int larguraBotao, int alturaBotao) {
         ImageIcon icone = new ImageIcon(pathIcon);
 
-        // Criar o botão e definir o ícone redimensionado
         JButton btnAdicionar = new JButton(titulo, Tool.resizeIcon(icone, larguraIcone, alturaIcone));
-        btnAdicionar.setFont(new Font("Inter", Font.BOLD, tamanhoTitulo)); // Fonte do texto
-        btnAdicionar.setForeground(Color.WHITE); // Cor do texto
-        btnAdicionar.setBackground(color); // Cor de fundo personalizada
-        btnAdicionar.setFocusPainted(false); // Remove o foco visual
-        btnAdicionar.setBorderPainted(false); // Remove a borda padrão
-        btnAdicionar.setContentAreaFilled(false); // Remove o preenchimento padrão
-        btnAdicionar.setOpaque(false); // Tornar o botão transparente para controle personalizado de fundo
-        btnAdicionar.setHorizontalTextPosition(SwingConstants.RIGHT); // Texto à direita do ícone
-        btnAdicionar.setIconTextGap(7); // Espaço entre ícone e texto
-        btnAdicionar.setMargin(new Insets(4, 10, 5, 10)); // Definir margens internas
+        btnAdicionar.setFont(new Font("Inter", Font.BOLD, tamanhoTitulo));
+        btnAdicionar.setForeground(Color.WHITE);
+        btnAdicionar.setBackground(color);
+        btnAdicionar.setFocusPainted(false);
+        btnAdicionar.setBorderPainted(false);
+        btnAdicionar.setContentAreaFilled(false);
+        btnAdicionar.setOpaque(false);
+        btnAdicionar.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnAdicionar.setIconTextGap(7);
+        btnAdicionar.setMargin(new Insets(4, 10, 5, 10));
+        btnAdicionar.setPreferredSize(new Dimension(larguraBotao, alturaBotao));
+        btnAdicionar.setMinimumSize(new Dimension(larguraBotao, alturaBotao));
 
-        // Estilizando o botão com bordas arredondadas
         btnAdicionar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.WHITE, 2), // Borda branca ao redor
-                BorderFactory.createEmptyBorder(5, 5, 5, 15) // Espaçamento interno
+                BorderFactory.createLineBorder(Color.WHITE, 2),
+                BorderFactory.createEmptyBorder(5, 5, 5, 15)
         ));
 
-        // Customizando a UI do botão para bordas arredondadas
         btnAdicionar.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
             @Override
             public void paint(Graphics g, JComponent c) {
                 Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // Suavização
-
-                // Cor de fundo personalizada
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(btnAdicionar.getBackground());
-                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 40, 40); // Desenha o fundo arredondado
-
-                // Desenhar a borda branca arredondada
+                g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 40, 40);
                 g2.setColor(Color.WHITE);
                 g2.setStroke(new BasicStroke(2));
-                g2.drawRoundRect(0, 0, c.getWidth() - 1, c.getHeight() - 1, 40, 40); // Borda arredondada com raio 40
+                g2.drawRoundRect(0, 0, c.getWidth() - 1, c.getHeight() - 1, 40, 40);
 
-                // Desenhar o texto e o ícone como parte do botão padrão
                 super.paint(g, c);
             }
         });
 
-        Color hoverColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 178); // 70% opaco (30% transparente)
+        Color hoverColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 178);
         btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdicionar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(hoverColor); // Cor ao passar o mouse
+                btnAdicionar.setBackground(hoverColor);
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(color); // Cor normal quando o mouse sai
+                btnAdicionar.setBackground(color);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // Salvar ícone original e texto do botão
                 String originalText = btnAdicionar.getText();
                 Icon originalIcon = btnAdicionar.getIcon();
 
-                // Definir o GIF animado como ícone do botão (exemplo: "loading.gif")
-                Icon loadingIcon = resizeGif("src/main/resources/icons/loading2.gif", larguraIcone, alturaIcone); // Ajuste o caminho e tamanho
-//                btnAdicionar.setText("Carregando...");
+                Icon loadingIcon = resizeGif(larguraIcone, alturaIcone);
                 btnAdicionar.setIcon(loadingIcon);
-                btnAdicionar.setEnabled(false); // Desativar o botão temporariamente
+                btnAdicionar.setEnabled(false);
 
-                // Simular uma tarefa de carregamento (ou executar uma tarefa real)
                 Executors.newSingleThreadExecutor().submit(() -> {
                     try {
-                        Thread.sleep(3000); // Simular um carregamento de 3 segundos
+                        Thread.sleep(3000);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     } finally {
-                        // Voltar ao estado original após o carregamento
                         SwingUtilities.invokeLater(() -> {
                             btnAdicionar.setText(originalText);
                             btnAdicionar.setIcon(originalIcon);
-                            btnAdicionar.setEnabled(true); // Reativar o botão
+                            btnAdicionar.setEnabled(true);
                         });
                     }
                 });
@@ -93,17 +81,12 @@ public class Botoes {
 
         });
 
-        return btnAdicionar; // Retornar o botão estilizado
+        return btnAdicionar;
     }
 
-    private static ImageIcon resizeGif(String gifPath, int width, int height) {
-        // Carregar a imagem GIF
-        ImageIcon gifIcon = new ImageIcon(gifPath);
-
-        // Redimensionar a imagem
+    private static ImageIcon resizeGif(int width, int height) {
+        ImageIcon gifIcon = new ImageIcon("src/main/resources/icons/loading2.gif");
         Image gifImage = gifIcon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
-
-        // Retornar o novo ícone com o tamanho redefinido
         return new ImageIcon(gifImage);
     }
 }

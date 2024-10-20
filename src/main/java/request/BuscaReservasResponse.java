@@ -10,8 +10,8 @@ public record BuscaReservasResponse(
     public record Reservas(
             Long reserva_id,
             Long quarto,
-            String data_entrada,
-            String data_saida,
+            LocalDate data_entrada,
+            LocalDate data_saida,
             List<Pessoas> pessoas,
             List<Pagamentos> pagamentos
     ){
