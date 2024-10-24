@@ -1,46 +1,40 @@
 package principals;
 
+import principals.tools.Icones;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// Record para armazenar usuário e senha
 record LoginInfo(String user, String senha) {}
 
-// Classe principal da tela de login
 public class TelaLogin extends JFrame {
 
-    // Variáveis da pousada
     private final String nomePousada;
     private final String subtituloPousada;
-
-    // Componentes da interface
     private JTextField campoUsuario;
     private JPasswordField campoSenha;
 
     public TelaLogin(String nomePousada, String subtituloPousada) {
         this.nomePousada = nomePousada;
         this.subtituloPousada = subtituloPousada;
-
-        // Configurações da tela principal
+        setIconImage(Icones.logo.getImage());
         setTitle("Login");
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Painel de fundo com imagem
         JPanel painelFundo = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // Carrega e desenha a imagem de fundo
-                ImageIcon fundoIcon = new ImageIcon("src/main/resources/paisagens/paisagem1.jpg");  // Caminho da imagem de fundo
+                ImageIcon fundoIcon = new ImageIcon("src/main/resources/paisagens/paisagem1.jpg");
                 Image fundo = fundoIcon.getImage();
                 g.drawImage(fundo, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        painelFundo.setLayout(null); // Usar layout null para posicionamento manual
+        painelFundo.setLayout(null);
 
         JLabel labelNomePousada = new JLabel(nomePousada);
         labelNomePousada.setFont(new Font("Inter", Font.BOLD, 48));
@@ -56,10 +50,9 @@ public class TelaLogin extends JFrame {
 
         JPanel painelLogin = new JPanel();
         painelLogin.setLayout(null);
-        painelLogin.setBackground(new Color(128, 128, 192, 200)); // Cor com transparência
-        painelLogin.setSize(350, 250); // Define o tamanho do painel de login
+        painelLogin.setBackground(new Color(128, 128, 192, 200));
+        painelLogin.setSize(350, 250);
 
-        // Centralizando o painel de login
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - painelLogin.getWidth()) / 2;
         int y = (screenSize.height - painelLogin.getHeight()) / 2;

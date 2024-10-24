@@ -4,7 +4,6 @@ import com.toedter.calendar.JCalendar;
 import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
 import lombok.Getter;
-import org.springframework.scheduling.annotation.Scheduled;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
 import principals.tools.CustomJCalendar;
@@ -49,11 +48,8 @@ public class PernoitePanel extends JPanel {
     QuartosRepository quartosRepository = new QuartosRepository();
 
     public PernoitePanel() {
-
         verificaDiariasEncerradas();
         setLayout(new BorderLayout());
-
-
 
         JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -80,7 +76,6 @@ public class PernoitePanel extends JPanel {
         buttonPanel.add(btnAdicionar);
         identificadorPanel.add(buttonPanel, BorderLayout.WEST);
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
-
 
         pernoitesPanel.setLayout(new BoxLayout(pernoitesPanel, BoxLayout.Y_AXIS));
 
@@ -274,7 +269,7 @@ public class PernoitePanel extends JPanel {
 
         BotaoArredondado dataEntrada = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         dataEntrada.setToolTipText("Selecione uma data de Entrada");
-        dataEntrada.setPreferredSize(new Dimension(180, 40)); // Define o tamanho do botão
+        dataEntrada.setPreferredSize(new Dimension(180, 40));
         dataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
         dataEntrada.setBackground(Color.WHITE);
         dataEntrada.setForeground(Color.ORANGE);
@@ -320,7 +315,7 @@ public class PernoitePanel extends JPanel {
             }
         });
 
-        dataSaida.setBorder(BorderFactory.createLineBorder(Color.RED, 3)); // Borda vermelha mais grossa
+        dataSaida.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
 
         gbc.gridx = 1;
         gbc.gridy = 1;

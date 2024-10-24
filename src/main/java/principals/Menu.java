@@ -22,6 +22,7 @@ public class Menu extends JFrame {
         setTitle("ISTO E POUSADA");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setIconImage(Icones.logo.getImage());
         setMinimumSize(new Dimension(600, 600));
         setLayout(new BorderLayout());
         setVisible(true);
@@ -36,7 +37,7 @@ public class Menu extends JFrame {
         sideMenu.add(Box.createRigidArea(new Dimension(0, 15)));
 
         JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(Icones.dashboard, 24, 24));
-        JButton btnQuartos = createMenuButton("Quartos", resizeIcon(Icones.quartos, 24, 24));
+        JButton btnQuartos = createMenuButton("Apartamentos", resizeIcon(Icones.quartos, 24, 24));
         JButton btnEntradas = createMenuButton("Entradas", resizeIcon(Icones.entradas, 24, 24));
         JButton btnPernoites = createMenuButton("Pernoites", resizeIcon(Icones.pernoites, 24, 24));
         JButton btnRelatorio = createMenuButton("Relatorio", resizeIcon(Icones.relatorios, 24, 24));
@@ -66,14 +67,13 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
         addHoverAndSelectionEffect(btnQuartos, new RoomsPanel());
         addHoverAndSelectionEffect(btnEntradas, new EntryPanel());
-//
+        addHoverAndSelectionEffect(btnPernoites, new PernoitePanel());
         addHoverAndSelectionEffect(btnRelatorio, new RelatoriosPanel());
         addHoverAndSelectionEffect(btnClientes, new CustomersPanel());
+        addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
         addHoverAndSelectionEffect(btnItens, new ItensPanel());
         addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
         addHoverAndSelectionEffect(btnPrice, new PricePanel());
-
-        btnPernoites.addActionListener(a-> addHoverAndSelectionEffect(btnPernoites, new PernoitePanel()));
 
         showPanel(new PernoitePanel());
         setVisible(true);

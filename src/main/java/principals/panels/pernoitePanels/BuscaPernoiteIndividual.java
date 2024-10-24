@@ -192,7 +192,7 @@ public class BuscaPernoiteIndividual {
         botaoQuarto.setPreferredSize(new Dimension(80, 70));
         botaoQuarto.setBackground(new Color(66, 75, 152));
         botaoQuarto.setForeground(Color.WHITE);
-        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 40));
+        botaoQuarto.setFont(new Font("Arial", Font.BOLD, 40));
         subBlocoEsquerdo.add(botaoQuarto);
 
         JPanel subBlocoDireito = new JPanel();
@@ -211,14 +211,14 @@ public class BuscaPernoiteIndividual {
 
         LabelArredondado labelDataEntradaArredondado = new LabelArredondado(pernoite.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         labelDataEntradaArredondado.setToolTipText("Data de entrada");
-        labelDataEntradaArredondado.setFont(new Font("Inter", Font.BOLD, 20));
+        labelDataEntradaArredondado.setFont(new Font("Arial", Font.BOLD, 20));
         labelDataEntradaArredondado.setForeground(new Color(0xF5841B));
         labelDataEntradaArredondado.setOpaque(false);
         labelDataEntradaArredondado.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
 
         LabelArredondado labelDataSaidaArredondado = new LabelArredondado(pernoite.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         labelDataSaidaArredondado.setToolTipText("Data de entrada");
-        labelDataSaidaArredondado.setFont(new Font("Inter", Font.BOLD, 20));
+        labelDataSaidaArredondado.setFont(new Font("Arial", Font.BOLD, 20));
         labelDataSaidaArredondado.setForeground(new Color(0xF5841B));
         labelDataSaidaArredondado.setOpaque(false);
         labelDataSaidaArredondado.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
@@ -242,19 +242,19 @@ public class BuscaPernoiteIndividual {
 
         //TODO: adicionar o valor pago
         JLabel valorPago = new JLabel("R$" + FormatarFloat.format(100F));
-        valorPago.setFont(new Font("Inter", Font.BOLD, 15));
+        valorPago.setFont(new Font("Arial", Font.BOLD, 15));
         valorPago.setForeground(new Color(0xF5841B));
 
         JLabel pago = new JLabel("Pago: " + valorPago.getText());
-        pago.setFont(new Font("Inter", Font.BOLD, 15));
+        pago.setFont(new Font("Arial", Font.BOLD, 15));
 
 
         JLabel totalPago = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
-        totalPago.setFont(new Font("Inter", Font.BOLD, 15));
+        totalPago.setFont(new Font("Arial", Font.BOLD, 15));
         totalPago.setForeground(Cor.VERDE_ESCURO);
 
         JLabel total = new JLabel("Total: " + totalPago.getText());
-        total.setFont(new Font("Inter", Font.BOLD, 15));
+        total.setFont(new Font("Arial", Font.BOLD, 15));
 
         subBlocoDireitoInferior.add(pago, BorderLayout.WEST);
         subBlocoDireitoInferior.add(total, BorderLayout.EAST);
@@ -278,7 +278,7 @@ public class BuscaPernoiteIndividual {
         labelDiariaIcone.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
         JLabel numeroDiaria = new JLabel(diaria.numero().toString());
-        numeroDiaria.setFont(new Font("Inter", Font.BOLD, 20));
+        numeroDiaria.setFont(new Font("Arial", Font.BOLD, 20));
         numeroDiaria.setForeground(Cor.CINZA_ESCURO);
 
 

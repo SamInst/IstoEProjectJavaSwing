@@ -172,7 +172,6 @@ public class Rooms {
         btnStatus.setStyle(String.format("-fx-background-color: %s; -fx-text-fill: white; -fx-font-weight: bold;", backgroundColor));
     }
 
-    // Método para criar uma lista de quartos
     private static List<Quarto> criarQuartos() {
         List<Quarto> quartos = new ArrayList<>();
         quartos.add(new Quarto(1, StatusQuartoEnum.DISPONIVEL, 2));

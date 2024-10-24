@@ -3,6 +3,7 @@ package principals.tools;
 import javax.swing.*;
 
 public class Icones {
+    public static ImageIcon logo = new ImageIcon("src/main/resources/icons/pousada_logo.png");
     public static ImageIcon dashboard = new ImageIcon("src/main/resources/icons/menu/dashboard.png");
     public static ImageIcon quartos = new ImageIcon("src/main/resources/icons/menu/rooms.png");
     public static ImageIcon entradas = new ImageIcon("src/main/resources/icons/menu/entry.png");
