@@ -18,7 +18,7 @@ import static principals.tools.Tool.resizeIcon;
 public class BlocosPernoitesAtivos {
 
     public JPanel blocoPernoitesAtivos(JPanel statusPanel, PernoitesRepository pernoitesRepository, StatusPernoiteEnum statusPernoiteEnum) {
-        statusPanel.setBackground(Color.white);
+        statusPanel.setBackground(Color.WHITE);
         statusPanel.setLayout(new BorderLayout());
         statusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -26,7 +26,7 @@ public class BlocosPernoitesAtivos {
         Color cor = Cor.AZUL_ESCURO;
         switch (statusPernoiteEnum) {
         case ATIVO -> statusTitulo = "Ativos";
-            case DIARIA_ENCERRADA -> { statusTitulo = "Diária Encerrada"; cor = new Color(0xA83131);
+        case DIARIA_ENCERRADA -> { statusTitulo = "Diária Encerrada"; cor = new Color(0xA83131);
             }
             default -> { statusTitulo = "Finalizados"; cor = Cor.CINZA_ESCURO;
             }
@@ -34,7 +34,7 @@ public class BlocosPernoitesAtivos {
 
         JLabel tituloStatus = new JLabel(statusTitulo);
         tituloStatus.setForeground(Color.white);
-        tituloStatus.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        tituloStatus.setFont(new Font("Inter", Font.BOLD, 20));
 
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(cor);
@@ -45,7 +45,7 @@ public class BlocosPernoitesAtivos {
 
         JPanel pernoitesPanel = new JPanel();
         pernoitesPanel.setLayout(new GridLayout(0, 2, 10, 10));
-        pernoitesPanel.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
+        pernoitesPanel.setBorder(BorderFactory.createEmptyBorder(15, 5, 15, 10));
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(pernoitesPanel, BorderLayout.CENTER);
@@ -56,16 +56,15 @@ public class BlocosPernoitesAtivos {
         pernoitesRepository.buscaPernoitesPorStatus(statusPernoiteEnum).forEach(pernoite -> {
             BotaoArredondado pernoiteButton = new BotaoArredondado("");
             pernoiteButton.setLayout(new BorderLayout());
-            pernoiteButton.setPreferredSize(new Dimension(0, 150));
-            pernoiteButton.setMinimumSize(new Dimension(0, 100));
+            pernoiteButton.setPreferredSize(new Dimension(0, 90));
+            pernoiteButton.setMinimumSize(new Dimension(0, 90));
             pernoiteButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
             pernoiteButton.setBackground(Color.WHITE);
             pernoiteButton.setBorderPainted(false);
             pernoiteButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            pernoiteButton.setBorder(BorderFactory.createEmptyBorder(5,10,20,10));
-            pernoiteButton.addActionListener(e -> {
-                    }
-//                    new BuscaPernoiteIndividual().buscaPernoiteIndividual(pernoitesRepository.buscaPernoite(pernoite.pernoite_id()))
+
+            pernoiteButton.addActionListener(e ->
+                    new BuscaPernoiteIndividual().buscaPernoiteIndividual(pernoitesRepository.buscaPernoite(pernoite.pernoite_id()))
             );
 
             JPanel panelCentral = new JPanel();
@@ -80,20 +79,23 @@ public class BlocosPernoitesAtivos {
             panelCentral.add(painelQuarto(new JPanel(), pernoite, finalCor), BorderLayout.WEST);
 
             JPanel painelSuperiorInferior = new JPanel();
+            painelSuperiorInferior.setBackground(Color.WHITE);
             painelSuperiorInferior.setLayout(new GridLayout(2, 1));
             panelCentral.add(painelSuperiorInferior, BorderLayout.CENTER);
 
             painelSuperiorInferior.add(painelSuperior(new JPanel(), pernoite));
 
-            JPanel quadranteAzul = new JPanel();
-            quadranteAzul.setBackground(Color.WHITE);
+            PanelArredondado quadranteAzul = new PanelArredondado();
+            quadranteAzul.setLayout(new BorderLayout());
+            quadranteAzul.setBackground(Cor.CINZA_CLARO);
+            quadranteAzul.setBorder(BorderFactory.createEmptyBorder(3, 10, 5, 10));
             painelSuperiorInferior.add(quadranteAzul);
 
-            JPanel blocoInfoPanelSuperior = new JPanel(new BorderLayout());
-            blocoInfoPanelSuperior.setBackground(Color.WHITE);
-            blocoInfoPanelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 5));
+//            JPanel blocoInfoPanelSuperior = new JPanel(new BorderLayout());
+//            blocoInfoPanelSuperior.setBackground(Color.WHITE);
+//            blocoInfoPanelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 5));
 
-            pernoiteButton.add(blocoInfoPanelSuperior, BorderLayout.NORTH);
+//            pernoiteButton.add(blocoInfoPanelSuperior, BorderLayout.NORTH);
 
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
@@ -104,21 +106,21 @@ public class BlocosPernoitesAtivos {
 
             JLabel entrada = new JLabel(" Entrada:");
             entrada.setForeground(Cor.CINZA_CLARO.darker());
-            entrada.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            entrada.setFont(new Font("Inter", Font.BOLD, 18));
 
             JLabel saida = new JLabel(" Saida:");
             saida.setForeground(Cor.CINZA_CLARO.darker());
-            saida.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            saida.setFont(new Font("Inter", Font.BOLD, 18));
 
             JLabel labelDataEntrada = new JLabel(pernoite.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
-            labelDataEntrada.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            labelDataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
             labelDataEntrada.setForeground(Cor.CINZA_ESCURO);
             labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 20));
 
             JLabel labelDataSaida = new JLabel(pernoite.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataSaida.setToolTipText("Data de saida");
-            labelDataSaida.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
             labelDataSaida.setForeground(Cor.CINZA_ESCURO);
             labelDataSaida.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 20));
 
@@ -128,38 +130,67 @@ public class BlocosPernoitesAtivos {
             leftPanel.add(saida);
             leftPanel.add(labelDataSaida);
 
-            JPanel rightPanel = new JPanel(new BorderLayout());
+            quadranteAzul.add(leftPanel, BorderLayout.WEST);
+
+
+
+            PanelArredondado rightPanel = new PanelArredondado();
+            rightPanel.setLayout(new BorderLayout());
             rightPanel.setOpaque(false);
-            rightPanel.setBackground(Color.BLUE);
-            rightPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-            var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays() + 1;
+            PanelArredondado valorPanel = new PanelArredondado();
+            valorPanel.setLayout(new GridBagLayout());
+            valorPanel.setBackground(Cor.VERDE_ESCURO);
+            valorPanel.setOpaque(true);
+            valorPanel.setPreferredSize(new Dimension(120, 40));
 
-            JLabel diariaAtualIcon = new JLabel(resizeIcon(Icones.diaria_atual_laranja, 20, 18));
-            diariaAtualIcon.setToolTipText("Diaria atual");
+            JLabel valorTotal = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
+            valorTotal.setFont(new Font("Inter", Font.BOLD, 19));
+            valorTotal.setForeground(Color.WHITE);
+            valorTotal.setOpaque(false);
 
-            JLabel totalTextoLabel = new JLabel(" " + diariaAtual + "  ");
-            totalTextoLabel.setToolTipText("Diaria atual");
-            totalTextoLabel.setFont(new Font("Segoe UI", Font.BOLD, 23));
-            totalTextoLabel.setForeground(new Color(0xF5841B));
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.CENTER;
+            gbc.fill = GridBagConstraints.BOTH;
+            valorPanel.add(valorTotal, gbc);
+
+            rightPanel.add(valorPanel, BorderLayout.EAST);
+
+            quadranteAzul.add(rightPanel, BorderLayout.EAST);
 
 
-            JLabel totalLabel = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
-            totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 23));
-            totalLabel.setForeground(Cor.VERDE_ESCURO);
 
-            if (pernoite.status_pernoite().equals("0")) {
-                rightPanel.add(diariaAtualIcon, BorderLayout.WEST);
-                rightPanel.add(totalTextoLabel, BorderLayout.CENTER);
-            }
 
-            rightPanel.add(totalLabel, BorderLayout.EAST);
 
-            blocoInfoPanelSuperior.add(leftPanel, BorderLayout.WEST);
-            blocoInfoPanelSuperior.add(rightPanel, BorderLayout.EAST);
 
-            JPanel painelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            painelDireito.setOpaque(false);
+
+
+
+//            JPanel rightPanel = new JPanel(new BorderLayout());
+//            rightPanel.setOpaque(false);
+//            rightPanel.setBackground(Cor.CINZA_CLARO);
+//
+//            var diariaAtual = Period.between(pernoite.data_entrada(), LocalDate.now()).getDays() + 1;
+//
+//            JLabel diariaAtualIcon = new JLabel(resizeIcon(Icones.diaria_atual_laranja, 20, 18));
+//            diariaAtualIcon.setToolTipText("Diaria atual");
+//
+//            JLabel totalTextoLabel = new JLabel(" " + diariaAtual + "  ");
+//            totalTextoLabel.setToolTipText("Diaria atual");
+//            totalTextoLabel.setFont(new Font("Inter", Font.BOLD, 23));
+//            totalTextoLabel.setForeground(new Color(0xF5841B));
+//
+//
+//            JLabel totalLabel = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
+//            totalLabel.setFont(new Font("Inter", Font.BOLD, 23));
+//            totalLabel.setForeground(Cor.VERDE_ESCURO);
+//
+//            if (pernoite.status_pernoite().equals("0")) {
+//                rightPanel.add(diariaAtualIcon, BorderLayout.WEST);
+//                rightPanel.add(totalTextoLabel, BorderLayout.CENTER);
+//            }
+//
+//            rightPanel.add(totalLabel, BorderLayout.EAST);
 
             pernoitesPanel.add(pernoiteButton);
 
@@ -186,25 +217,29 @@ public class BlocosPernoitesAtivos {
     public JPanel painelSuperior(JPanel panelSuperior, BuscaPernoiteResponse pernoite) {
         panelSuperior.setLayout(new BorderLayout());
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(3,10,5,10));
+        panelSuperior.setBackground(Color.WHITE);
+        panelSuperior.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
 
         ImageIcon iconePessoa = resizeIcon(Icones.usuarios, 20, 20);
         JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
         JLabel labelNome = new JLabel(" " + (pernoite.representante() == null ? null : pernoite.representante().nome()));
-        labelNome.setForeground(Cor.CINZA_ESCURO);
-        labelNome.setFont(new Font("Segoe UI", Font.BOLD, 19));
+        labelNome.setForeground(Cor.VERMELHO.darker());
+        labelNome.setFont(new Font("Inter", Font.BOLD, 18));
 
         JPanel panelEsquerdo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelEsquerdo.setBackground(Color.WHITE);
         panelEsquerdo.add(iconePessoaLabel);
         panelEsquerdo.add(labelNome);
 
         JPanel panelDireito = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelDireito.setBackground(Color.WHITE);
 
         ImageIcon iconeDiarias = resizeIcon(Icones.diarias_quantidade, 20, 20);
         JLabel labelDiarias = new JLabel(iconeDiarias);
 
         JLabel labelQuantidadeDiarias = new JLabel(pernoite.quantidade_diarias().toString());
-        labelQuantidadeDiarias.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        labelQuantidadeDiarias.setFont(new Font("Inter", Font.BOLD, 20));
         labelQuantidadeDiarias.setForeground(Cor.CINZA_ESCURO);
         labelQuantidadeDiarias.setToolTipText("quantidade de diarias");
 
@@ -213,7 +248,7 @@ public class BlocosPernoitesAtivos {
         labelConsumo.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
         JLabel labelQuantidadeConsumo = new JLabel(pernoite.quantidade_consumo().toString());
-        labelQuantidadeConsumo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        labelQuantidadeConsumo.setFont(new Font("Inter", Font.BOLD, 20));
         labelQuantidadeConsumo.setForeground(Cor.CINZA_ESCURO);
         labelQuantidadeConsumo.setToolTipText("quantidade de itens consumidos");
 
@@ -222,7 +257,7 @@ public class BlocosPernoitesAtivos {
         labelPessoas.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
         JLabel labelQuantidadePessoas = new JLabel(pernoite.quantidade_pessoas().toString());
-        labelQuantidadePessoas.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        labelQuantidadePessoas.setFont(new Font("Inter", Font.BOLD, 20));
         labelQuantidadePessoas.setForeground(Cor.CINZA_ESCURO);
         labelQuantidadePessoas.setToolTipText("quantidade de pessoas");
 
@@ -244,11 +279,11 @@ public class BlocosPernoitesAtivos {
 
         JButton botaoQuarto = new BotaoArredondado(pernoite.quarto() < 10L ? "0" + pernoite.quarto() : pernoite.quarto().toString());
         botaoQuarto.setLayout(null);
-        botaoQuarto.setPreferredSize(new Dimension(90, 80));
+        botaoQuarto.setPreferredSize(new Dimension(80, 70));
         botaoQuarto.setBackground(finalCor);
         botaoQuarto.setForeground(Color.WHITE);
-        botaoQuarto.setFont(new Font("Segoe UI", Font.BOLD, 40));
-        botaoQuarto.setBounds(10, 10, 80, 75);
+        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 40));
+//        botaoQuarto.setBounds(0, 10, 80, 70);
 
         JPanel panelQUarto = new JPanel();
         panelQUarto.setBackground(Color.WHITE);
@@ -256,10 +291,9 @@ public class BlocosPernoitesAtivos {
         panelQUarto.setPreferredSize(new Dimension(90, 80));
         panelQUarto.setMinimumSize(new Dimension(90, 80));
         panelQUarto.setMaximumSize(new Dimension(90, 80));
-        panelQUarto.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panelQUarto.add(botaoQuarto, BorderLayout.CENTER);
 
-        painelQuarto.add(panelQUarto, BorderLayout.CENTER);
+        painelQuarto.add(botaoQuarto, BorderLayout.CENTER);
 
         return painelQuarto;
     }

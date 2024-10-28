@@ -170,11 +170,9 @@ public class RelatoriosRepository {
            data_hora,
            tipo_pagamento_enum,
            relatorio,
-           pernoite_id,
-           entrada_id,
            valor,
            quarto_id)
-        VALUES (?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?)
         """;
 
         if (request.quarto_id() != null){
@@ -183,15 +181,16 @@ public class RelatoriosRepository {
             System.out.println(quarto.descricao());
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        Timestamp timestamp = Timestamp.valueOf(now);
-
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setTimestamp(1, timestamp);
+            statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             statement.setInt(2, request.tipo_pagamento_enum().getCodigo());
             statement.setString(3, request.relatorio());
+            statement.setFloat(4, request.valor());
+            statement.setLong(5, request.quarto_id());
+            statement.executeUpdate();
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

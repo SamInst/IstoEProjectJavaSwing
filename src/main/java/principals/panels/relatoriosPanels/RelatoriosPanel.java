@@ -1,4 +1,4 @@
-package principals.panels;
+package principals.panels.relatoriosPanels;
 
 import com.toedter.calendar.JCalendar;
 import principals.tools.*;
@@ -44,7 +44,7 @@ public class RelatoriosPanel extends JPanel {
         btnAdicionar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("click");
+                new AdicionarRelatorioFrame();
             }
         });
 

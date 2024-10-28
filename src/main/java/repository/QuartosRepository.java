@@ -29,8 +29,8 @@ public class QuartosRepository {
                             resultSet.getLong("id"),
                             resultSet.getString("descricao"),
                             resultSet.getInt("quantidade_pessoas"),
-                            TipoQuartoEnum.valueOf(String.valueOf(resultSet.getInt("tipo_quarto_enum"))),
-                            StatusQuartoEnum.valueOf(String.valueOf(resultSet.getInt("status_quarto_enum")))
+                            TipoQuartoEnum.fromCodigo(resultSet.getInt("tipo_quarto_enum")),
+                            StatusQuartoEnum.fromCodigo(resultSet.getInt("status_quarto_enum"))
                     );
                 }
             }

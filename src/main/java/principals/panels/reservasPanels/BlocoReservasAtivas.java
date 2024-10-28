@@ -1,7 +1,9 @@
 package principals.panels.reservasPanels;
 
+import com.toedter.calendar.JCalendar;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
+import principals.tools.CustomJCalendar;
 import principals.tools.Icones;
 import request.BuscaReservasResponse;
 
@@ -42,7 +44,20 @@ public class BlocoReservasAtivas {
             reservaButton.setBackground(Color.WHITE);
             reservaButton.setBorderPainted(false);
             reservaButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            reservaButton.addActionListener(e -> {});
+            reservaButton.addActionListener(e -> {
+                ReservaCalendarioCustomizado customJCalendar = new ReservaCalendarioCustomizado();
+                JCalendar jCalendar = customJCalendar.createCustomCalendar();
+
+                JPanel painelPesquisa = new JPanel();
+                painelPesquisa.add(jCalendar);
+                JFrame jFrame = new JFrame();
+                jFrame.setSize(900, 600);
+                jFrame.setLocationRelativeTo(null);
+                jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jFrame.setVisible(true);
+                jFrame.add(painelPesquisa);
+
+            });
 
             BotaoArredondado botaoQuarto = new BotaoArredondado(reserva.quarto() < 10L ? "0" + reserva.quarto() : reserva.quarto().toString());
             botaoQuarto.setLayout(null);

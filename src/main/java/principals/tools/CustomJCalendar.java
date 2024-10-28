@@ -62,6 +62,7 @@ public class CustomJCalendar {
                             dayButton.setBackground(new Color(0x424B98));  // Cor ao passar o mouse
                             dayButton.setForeground(Color.WHITE);
                         }
+
                     }
 
                     @Override

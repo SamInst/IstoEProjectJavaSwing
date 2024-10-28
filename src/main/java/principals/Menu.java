@@ -4,6 +4,7 @@ package principals;
 
 import principals.panels.*;
 import principals.panels.pernoitePanels.PernoitePanel;
+import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.Icones;
 import principals.tools.LabelArredondado;

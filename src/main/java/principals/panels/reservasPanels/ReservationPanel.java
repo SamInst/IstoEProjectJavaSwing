@@ -2,12 +2,25 @@ package principals.panels.reservasPanels;
 
 import principals.tools.Icones;
 import repository.ReservasRepository;
+import request.AdicionarReservasRequest;
+
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class ReservationPanel extends javax.swing.JPanel {
     ReservasRepository reservasRepository = new ReservasRepository();
     public ReservationPanel() {
+
+        reservasRepository.adicionarReserva(new AdicionarReservasRequest(
+                1L,
+                LocalDate.now().plusDays(4),
+                LocalDate.now().plusDays(5),
+                2,
+                new ArrayList<>(),
+                new ArrayList<>()
+        ));
 
 
         JPanel reservasPanel = new JPanel();
@@ -25,7 +38,9 @@ public class ReservationPanel extends javax.swing.JPanel {
 
         JButton btnAdicionar = new JButton("Adicionar");
         btnAdicionar.setPreferredSize(new Dimension(125, 40));
-        btnAdicionar.addActionListener(e -> {});
+        btnAdicionar.addActionListener(e -> {
+            new ReservaCalendarioCustomizado();
+        });
 
         buttonPanel.add(btnAdicionar);
         identificadorPanel.add(buttonPanel, BorderLayout.WEST);

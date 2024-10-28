@@ -1,0 +1,230 @@
+package principals.panels.relatoriosPanels;
+
+import enums.TipoPagamentoEnum;
+import principals.tools.Cor;
+import principals.tools.JComboBoxArredondado;
+import principals.tools.JTextFieldComTextoFixoArredondado;
+import repository.RelatoriosRepository;
+import request.RelatorioRequest;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
+import java.util.Locale;
+
+public class AdicionarRelatorioFrame extends JFrame {
+    // Inicializar as variáveis como atributos da classe
+    private JTextFieldComTextoFixoArredondado valorField;
+    private JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
+    private JTextFieldComTextoFixoArredondado campoQuarto;
+    private JTextFieldComTextoFixoArredondado campoValor;
+
+    RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
+
+    public AdicionarRelatorioFrame() {
+        setTitle("Adicionar Relatorio");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(600, 200);
+        setPreferredSize(new Dimension(600, 250));
+        setMinimumSize(new Dimension(600, 250));
+        setMaximumSize(new Dimension(600, 250));
+        setResizable(false);
+        setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
+
+        JPanel azulPanel = new JPanel();
+        azulPanel.setBackground(new Color(0x424B98));
+        azulPanel.setPreferredSize(new Dimension(400, 50));
+        azulPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        azulPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
+        JLabel titulo = new JLabel("Adicionar Relatório");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titulo.setForeground(Color.WHITE);
+        azulPanel.add(titulo);
+        add(azulPanel, BorderLayout.NORTH);
+
+        JPanel laranjaPanel = new JPanel();
+        laranjaPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 5));
+        laranjaPanel.setBackground(Color.WHITE);
+        laranjaPanel.setPreferredSize(new Dimension(500, 200));
+
+        // Usar os atributos da classe para inicializar os campos
+        valorField = new JTextFieldComTextoFixoArredondado("relatório: ", 35);
+        valorField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+
+        tipoPagamentoComboBox = new JComboBoxArredondado<>();
+        tipoPagamentoComboBox.setEditable(true);
+        tipoPagamentoComboBox.setPreferredSize(new Dimension(200, 30));
+        Arrays.stream(TipoPagamentoEnum.values()).forEach(tipoPagamentoComboBox::addItem);
+
+        tipoPagamentoComboBox.setEspessuraBorda(1.0F);
+        tipoPagamentoComboBox.setCorBorda(Cor.CINZA_ESCURO.brighter());
+
+        campoQuarto = new JTextFieldComTextoFixoArredondado("quarto: ", 7);
+        campoQuarto.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+
+        campoValor = new JTextFieldComTextoFixoArredondado("valor: ", 12);
+        campoValor.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+
+        laranjaPanel.add(tipoPagamentoComboBox);
+        laranjaPanel.add(campoQuarto);
+        laranjaPanel.add(campoValor);
+        laranjaPanel.add(valorField);
+        add(laranjaPanel, BorderLayout.CENTER);
+
+        JPanel pretoPanel = new JPanel();
+        pretoPanel.setPreferredSize(new Dimension(400, 50));
+        pretoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        JButton btnAdicionar = new JButton("Adicionar");
+        btnAdicionar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnAdicionar.setBackground(new Color(0, 153, 0));
+        btnAdicionar.setForeground(Color.WHITE);
+        pretoPanel.add(btnAdicionar);
+
+        // Adicionar ação ao botão
+        btnAdicionar.addActionListener(e -> adicionarRelatorio());
+
+        add(pretoPanel, BorderLayout.SOUTH);
+
+        setupComboBoxFiltering(tipoPagamentoComboBox);
+        configurarValidacaoCampos(campoQuarto, campoValor, valorField);
+        setVisible(true);
+    }
+
+    private void setupComboBoxFiltering(JComboBox<TipoPagamentoEnum> comboBox) {
+        JTextField textField = (JTextField) comboBox.getEditor().getEditorComponent();
+        textField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String filter = textField.getText();
+                comboBox.removeAllItems();
+                for (TipoPagamentoEnum item : TipoPagamentoEnum.values()) {
+                    if (item.name().toLowerCase().contains(filter.toLowerCase())) {
+                        comboBox.addItem(item);
+                    }
+                }
+                textField.setText(filter);
+                comboBox.showPopup();
+            }
+        });
+    }
+
+    private void configurarValidacaoCampos(JTextFieldComTextoFixoArredondado campoQuarto, JTextFieldComTextoFixoArredondado campoValor, JTextFieldComTextoFixoArredondado valorField) {
+        // Validação para os campos
+        campoQuarto.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campoQuarto.getText().replaceAll("[^0-9]", "");
+                if (!texto.isEmpty()) {
+                    int numero = Integer.parseInt(texto);
+                    String formattedText = (numero < 10) ? "0" + numero : String.valueOf(numero);
+                    campoQuarto.setText("quarto: " + formattedText.substring(0, Math.min(2, formattedText.length())));
+                    campoQuarto.setCaretPosition(campoQuarto.getText().length());
+                    campoQuarto.setForeground(Color.BLACK);
+                } else {
+                    campoQuarto.setText("quarto: ");
+                    campoQuarto.setForeground(Cor.CINZA_ESCURO.brighter());
+                    campoQuarto.setCaretPosition(campoQuarto.getText().length());
+                }
+            }
+        });
+
+        campoValor.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campoValor.getText().replaceAll("[^-0-9]", "");
+                boolean isNegative = texto.startsWith("-");
+
+                if (!texto.isEmpty() && !(texto.equals("-"))) { // Permite o sinal de "-" como entrada válida
+                    double valor = Double.parseDouble(texto.replace("-", "")) / 100;
+
+                    if (valor == 0) {
+                        campoValor.setText("valor: ");
+                        campoValor.setForeground(Cor.CINZA_ESCURO.brighter());
+                        campoValor.setCaretPosition(campoValor.getText().length());
+                    } else {
+                        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+                        symbols.setDecimalSeparator(',');
+                        symbols.setGroupingSeparator('.');
+                        DecimalFormat formato = new DecimalFormat("#,##0.00", symbols);
+                        String formattedValue = (isNegative ? "-" : "") + "R$ " + formato.format(valor);
+
+                        campoValor.setText("valor: " + formattedValue);
+                        campoValor.setCaretPosition(campoValor.getText().length());
+
+                        if (isNegative) {
+                            campoValor.setForeground(Color.RED);
+                        } else {
+                            campoValor.setForeground(Cor.VERDE_ESCURO);
+                        }
+                    }
+                } else if (texto.equals("-")) { // Caso seja apenas o "-"
+                    campoValor.setText("valor: -");
+                    campoValor.setForeground(Color.RED);
+                    campoValor.setCaretPosition(campoValor.getText().length());
+                } else {
+                    // Caso o campo esteja vazio, restaurar o estado inicial
+                    campoValor.setText("valor: ");
+                    campoValor.setForeground(Cor.CINZA_ESCURO.brighter());
+                    campoValor.setCaretPosition(campoValor.getText().length());
+                }
+            }
+        });
+
+
+        valorField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = valorField.getText().replaceFirst("relatório: ", "");
+                valorField.setText("relatório: " + texto);
+                valorField.setCaretPosition(valorField.getText().length());
+
+                if (texto.isEmpty()) {
+                    valorField.setForeground(Cor.CINZA_ESCURO.brighter());
+                } else {
+                    valorField.setForeground(Color.BLACK);
+                }
+            }
+        });
+    }
+
+    private void adicionarRelatorio() {
+        try {
+            String relatorio = valorField.getText().replace("relatório: ", "").trim().toUpperCase();
+            TipoPagamentoEnum tipoPagamento = (TipoPagamentoEnum) tipoPagamentoComboBox.getSelectedItem();
+
+            Long quartoId = null;
+
+            String quartoTexto = campoQuarto.getText().replace("quarto: ", "").trim();
+            if (!quartoTexto.isEmpty()) {
+                quartoId = Long.parseLong(quartoTexto);
+                if (quartoId == 0) quartoId = null;
+            }
+
+            String valorTexto = campoValor.getText().replace("valor: ", "").replace("R$ ", "").replace(".", "").replace(",", ".").trim();
+            Float valor = Float.parseFloat(valorTexto);
+
+            RelatorioRequest relatorioRequest = new RelatorioRequest(relatorio, tipoPagamento, quartoId, valor);
+
+             relatoriosRepository.adicionarRelatorio(relatorioRequest);
+
+            System.out.println(relatorioRequest);
+            JOptionPane.showMessageDialog(this, "Relatório adicionado com sucesso!");
+            dispose();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar o relatório: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(AdicionarRelatorioFrame::new);
+    }
+}

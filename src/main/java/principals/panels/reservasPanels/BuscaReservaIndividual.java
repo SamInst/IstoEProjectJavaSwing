@@ -14,7 +14,7 @@ public class BuscaReservaIndividual {
     JFrame janelaAdicionar = new JFrame("Reserva");
 
     public void buscaReservaIndividual(BuscaReservasResponse response) {
-
+        new ReservaCalendarioCustomizado();
     }
 
 
