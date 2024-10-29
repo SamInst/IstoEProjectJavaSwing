@@ -1,9 +1,12 @@
 package principals.panels.pessoaPanel;
 
 import principals.tools.JTextFieldComTextoFixoArredondado;
+import principals.tools.JTextFieldComTextoFixoArredondadoRelatorios;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class IdentificacaoPessoaFrame extends JFrame {
 
@@ -54,17 +57,24 @@ public class IdentificacaoPessoaFrame extends JFrame {
         campoCPF = new JTextFieldComTextoFixoArredondado("CPF: ", 10);
         campoCPF.setPreferredSize(fieldDimension);
 
+        adicionarMascaraCPF(campoCPF);
+
         campoRG = new JTextFieldComTextoFixoArredondado("RG: ", 10);
         campoRG.setPreferredSize(fieldDimension);
 
+        adicionarMascaraRG(campoRG);
+
         campoTelefone = new JTextFieldComTextoFixoArredondado("Fone: ", 15);
         campoTelefone.setPreferredSize(fieldDimension);
+
+        adicionarMascaraTelefone(campoTelefone);
 
         campoEmail = new JTextFieldComTextoFixoArredondado("Email: ", 20);
         campoEmail.setPreferredSize(fieldDimension);
 
         campoDataNascimento = new JTextFieldComTextoFixoArredondado("Nascimento: ", 10);
         campoDataNascimento.setPreferredSize(fieldDimension);
+        adicionarMascaraDataNascimento(campoDataNascimento);
 
         campoEndereco = new JTextFieldComTextoFixoArredondado("Endereco: ", 20);
         campoEndereco.setPreferredSize(fieldDimension);
@@ -193,6 +203,138 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         JOptionPane.showMessageDialog(this, "Identificação salva com sucesso!");
     }
+
+    private void adicionarMascaraDataNascimento(JTextFieldComTextoFixoArredondado campo) {
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campo.getText().replaceAll("[^0-9]", "");
+                if (texto.length() > 8) {
+                    texto = texto.substring(0, 8); // Limita a 8 caracteres
+                }
+
+                StringBuilder formatado = new StringBuilder("Nascimento: ");
+                if (texto.length() >= 2) {
+                    formatado.append(texto.substring(0, 2)).append("/");
+                } else {
+                    formatado.append(texto);
+                }
+                if (texto.length() > 4) {
+                    formatado.append(texto.substring(2, 4)).append("/").append(texto.substring(4));
+                } else if (texto.length() > 2) {
+                    formatado.append(texto.substring(2));
+                }
+
+                campo.setText(formatado.toString());
+            }
+        });
+    }
+
+
+    private void adicionarMascaraTelefone(JTextFieldComTextoFixoArredondado campo) {
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campo.getText().replaceAll("[^0-9]", "");
+                if (texto.length() > 11) {
+                    texto = texto.substring(0, 11); // Limita a 11 caracteres
+                }
+
+                StringBuilder formatado = new StringBuilder("Fone: ");
+                if (texto.length() >= 2) {
+                    formatado.append("(").append(texto.substring(0, 2)).append(") ");
+                } else {
+                    formatado.append(texto);
+                }
+                if (texto.length() > 7) {
+                    formatado.append(texto.substring(2, 7)).append("-").append(texto.substring(7));
+                } else if (texto.length() > 2) {
+                    formatado.append(texto.substring(2));
+                }
+
+                campo.setText(formatado.toString());
+            }
+        });
+    }
+
+
+    private void adicionarMascaraCPF(JTextFieldComTextoFixoArredondado campo) {
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campo.getText().replaceAll("[^0-9]", "");
+                if (texto.length() > 11) {
+                    texto = texto.substring(0, 11);
+                }
+
+                StringBuilder formatado = new StringBuilder("CPF: ");
+                if (texto.length() > 3) {
+                    formatado.append(texto, 0, 3).append(".");
+                } else {
+                    formatado.append(texto);
+                }
+                if (texto.length() > 6) {
+                    formatado.append(texto, 3, 6).append(".");
+                } else if (texto.length() > 3) {
+                    formatado.append(texto.substring(3));
+                }
+                if (texto.length() > 9) {
+                    formatado.append(texto, 6, 9).append("-");
+                } else if (texto.length() > 6) {
+                    formatado.append(texto.substring(6));
+                }
+                if (texto.length() > 9) {
+                    formatado.append(texto.substring(9));
+                }
+
+                campo.setText(formatado.toString());
+            }
+        });
+    }
+
+    private void adicionarMascaraRG(JTextFieldComTextoFixoArredondado campo) {
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campo.getText().replaceAll("[^0-9]", ""); // Apenas dígitos
+
+                // Limita a 13 caracteres
+                if (texto.length() > 13) {
+                    texto = texto.substring(0, 13);
+                }
+
+                // Aplica a formatação incremental
+                StringBuilder formatado = new StringBuilder("RG: ");
+                if (texto.length() > 2) {
+                    formatado.append(texto.substring(0, 2)).append(".");
+                    if (texto.length() > 5) {
+                        formatado.append(texto.substring(2, 5)).append(".");
+                        if (texto.length() > 8) {
+                            formatado.append(texto.substring(5, 8)).append(".");
+                            if (texto.length() > 12) {
+                                formatado.append(texto.substring(8, 12)).append("-");
+                            } else if (texto.length() > 8) {
+                                formatado.append(texto.substring(8));
+                            }
+                        } else {
+                            formatado.append(texto.substring(5));
+                        }
+                    } else {
+                        formatado.append(texto.substring(2));
+                    }
+                } else {
+                    formatado.append(texto);
+                }
+
+                // Atualiza o texto do campo, posicionando o cursor ao final
+                campo.setText(formatado.toString());
+                campo.setCaretPosition(campo.getText().length());
+            }
+        });
+    }
+
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(IdentificacaoPessoaFrame::new);
