@@ -6,8 +6,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static principals.tools.Cor.CINZA_CLARO;
-
 public class JComboBoxArredondado<E> extends JComboBox<E> {
 
     private float espessuraBorda = 0.5f;
@@ -19,7 +17,6 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
         setBackground(Color.WHITE);
         setForeground(Cor.CINZA_ESCURO.brighter());
         setPreferredSize(new Dimension(200, 40));
-        // Remover ou ajustar o setBorder para evitar deslocamento do texto
         setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 5));
 
         setRenderer(new DefaultListCellRenderer() {
@@ -29,12 +26,13 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
                 label.setOpaque(true);
                 if (isSelected) {
                     label.setBackground(new Color(184, 207, 229));
-                    label.setForeground(Color.BLACK);
+                    label.setForeground(Cor.CINZA_ESCURO);
+                    label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 } else {
                     label.setBackground(Color.WHITE);
                     label.setForeground(Color.GRAY);
                 }
-                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5)); // Ajustar as margens para alinhar o texto corretamente
+                label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
                 return label;
             }
         });
@@ -49,11 +47,9 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
         int arcHeight = 20;
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), arcWidth, arcHeight);
-
         g2.setColor(corBorda);
         g2.setStroke(new BasicStroke(espessuraBorda));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, arcWidth, arcHeight);
-
         g2.dispose();
         super.paintComponent(g);
     }

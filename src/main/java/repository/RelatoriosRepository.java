@@ -177,8 +177,7 @@ public class RelatoriosRepository {
 
         if (request.quarto_id() != null){
             QuartosRepository quartosRepository = new QuartosRepository();
-            var quarto = quartosRepository.buscaQuartoById(request.quarto_id());
-            System.out.println(quarto.descricao());
+             quartosRepository.buscaQuartoById(request.quarto_id());
         }
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -186,13 +185,21 @@ public class RelatoriosRepository {
             statement.setInt(2, request.tipo_pagamento_enum().getCodigo());
             statement.setString(3, request.relatorio());
             statement.setFloat(4, request.valor());
-            statement.setLong(5, request.quarto_id());
+
+            // Verifica se quarto_id é null e configura o parâmetro adequadamente
+            if (request.quarto_id() == null) {
+                statement.setNull(5, java.sql.Types.BIGINT); // Define null para o tipo BIGINT
+            } else {
+                statement.setLong(5, request.quarto_id()); // Define o valor de quarto_id
+            }
+
             statement.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
 
     }
 

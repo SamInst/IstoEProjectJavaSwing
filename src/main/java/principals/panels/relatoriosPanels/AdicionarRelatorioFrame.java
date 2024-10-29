@@ -3,7 +3,7 @@ package principals.panels.relatoriosPanels;
 import enums.TipoPagamentoEnum;
 import principals.tools.Cor;
 import principals.tools.JComboBoxArredondado;
-import principals.tools.JTextFieldComTextoFixoArredondado;
+import principals.tools.JTextFieldComTextoFixoArredondadoRelatorios;
 import repository.RelatoriosRepository;
 import request.RelatorioRequest;
 
@@ -17,11 +17,10 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class AdicionarRelatorioFrame extends JFrame {
-    // Inicializar as variáveis como atributos da classe
-    private JTextFieldComTextoFixoArredondado valorField;
+    private JTextFieldComTextoFixoArredondadoRelatorios valorField;
     private JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
-    private JTextFieldComTextoFixoArredondado campoQuarto;
-    private JTextFieldComTextoFixoArredondado campoValor;
+    private JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
+    private JTextFieldComTextoFixoArredondadoRelatorios campoValor;
 
     RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
 
@@ -52,9 +51,8 @@ public class AdicionarRelatorioFrame extends JFrame {
         laranjaPanel.setBackground(Color.WHITE);
         laranjaPanel.setPreferredSize(new Dimension(500, 200));
 
-        // Usar os atributos da classe para inicializar os campos
-        valorField = new JTextFieldComTextoFixoArredondado("relatório: ", 35);
-        valorField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        valorField = new JTextFieldComTextoFixoArredondadoRelatorios("relatório: ", 35);
+        valorField.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
         tipoPagamentoComboBox = new JComboBoxArredondado<>();
         tipoPagamentoComboBox.setEditable(true);
@@ -64,11 +62,11 @@ public class AdicionarRelatorioFrame extends JFrame {
         tipoPagamentoComboBox.setEspessuraBorda(1.0F);
         tipoPagamentoComboBox.setCorBorda(Cor.CINZA_ESCURO.brighter());
 
-        campoQuarto = new JTextFieldComTextoFixoArredondado("quarto: ", 7);
-        campoQuarto.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        campoQuarto = new JTextFieldComTextoFixoArredondadoRelatorios("quarto: ", 7);
+        campoQuarto.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-        campoValor = new JTextFieldComTextoFixoArredondado("valor: ", 12);
-        campoValor.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        campoValor = new JTextFieldComTextoFixoArredondadoRelatorios("valor: ", 12);
+        campoValor.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
         laranjaPanel.add(tipoPagamentoComboBox);
         laranjaPanel.add(campoQuarto);
@@ -86,7 +84,6 @@ public class AdicionarRelatorioFrame extends JFrame {
         btnAdicionar.setForeground(Color.WHITE);
         pretoPanel.add(btnAdicionar);
 
-        // Adicionar ação ao botão
         btnAdicionar.addActionListener(e -> adicionarRelatorio());
 
         add(pretoPanel, BorderLayout.SOUTH);
@@ -114,8 +111,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         });
     }
 
-    private void configurarValidacaoCampos(JTextFieldComTextoFixoArredondado campoQuarto, JTextFieldComTextoFixoArredondado campoValor, JTextFieldComTextoFixoArredondado valorField) {
-        // Validação para os campos
+    private void configurarValidacaoCampos(JTextFieldComTextoFixoArredondadoRelatorios campoQuarto, JTextFieldComTextoFixoArredondadoRelatorios campoValor, JTextFieldComTextoFixoArredondadoRelatorios valorField) {
         campoQuarto.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -140,7 +136,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                 String texto = campoValor.getText().replaceAll("[^-0-9]", "");
                 boolean isNegative = texto.startsWith("-");
 
-                if (!texto.isEmpty() && !(texto.equals("-"))) { // Permite o sinal de "-" como entrada válida
+                if (!texto.isEmpty() && !(texto.equals("-"))) {
                     double valor = Double.parseDouble(texto.replace("-", "")) / 100;
 
                     if (valor == 0) {
@@ -163,12 +159,11 @@ public class AdicionarRelatorioFrame extends JFrame {
                             campoValor.setForeground(Cor.VERDE_ESCURO);
                         }
                     }
-                } else if (texto.equals("-")) { // Caso seja apenas o "-"
+                } else if (texto.equals("-")) {
                     campoValor.setText("valor: -");
                     campoValor.setForeground(Color.RED);
                     campoValor.setCaretPosition(campoValor.getText().length());
                 } else {
-                    // Caso o campo esteja vazio, restaurar o estado inicial
                     campoValor.setText("valor: ");
                     campoValor.setForeground(Cor.CINZA_ESCURO.brighter());
                     campoValor.setCaretPosition(campoValor.getText().length());

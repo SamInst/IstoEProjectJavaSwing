@@ -4,18 +4,17 @@ import com.toedter.calendar.JCalendar;
 import principals.tools.*;
 import repository.RelatoriosRepository;
 import response.RelatoriosResponse;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.util.List;
+
 import static principals.tools.Cor.*;
 
 public class RelatoriosPanel extends JPanel {
-
+    JButton relatorioButton;
     RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
     JButton btnPesquisar = new JButton("Pesquisar");
     JButton btnAdicionar = new JButton("Adicionar");
@@ -55,9 +54,9 @@ public class RelatoriosPanel extends JPanel {
         identificadorPanel.add(btnAdicionar);
         identificadorPanel.add(sumarioPanel);
 
-        JLabel totalLabel = new JLabel("Total: R$ " + String.format("%.2f", response.total()).replace(".", ","));
+        JLabel totalLabel = new JLabel("Total: R$ " + FormatarFloat.format(response.total()));
         totalLabel.setFont(new Font("Inter", Font.BOLD, 30));
-        totalLabel.setForeground(VERDE_ESCURO); // Verde escuro
+        totalLabel.setForeground(VERDE_ESCURO);
         totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
 
         topPanel.add(totalLabel, BorderLayout.EAST);
@@ -78,7 +77,7 @@ public class RelatoriosPanel extends JPanel {
             dataLabel.setForeground(Color.white);
             dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
 
-            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + String.format("%.2f", relatorio.total_do_dia()));
+            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
             totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
 
@@ -194,7 +193,7 @@ public class RelatoriosPanel extends JPanel {
             JLabel dataLabel = new JLabel(relatorio.data());
             dataLabel.setForeground(Color.white);
             dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
-            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + String.format("%.2f", relatorio.total_do_dia()));
+            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
             totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
 
@@ -230,7 +229,7 @@ public class RelatoriosPanel extends JPanel {
 
     public void relatoriosDoDia(List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatorioDoDiaList, JPanel relatoriosDoDiaPanel){
         for (RelatoriosResponse.Relatorios.RelatorioDoDia relatorioDoDia : relatorioDoDiaList) {
-            JButton relatorioButton = new JButton();
+            relatorioButton = new JButton();
             relatorioButton.setBackground(Color.WHITE);
             relatorioButton.setBorderPainted(false);
             relatorioButton.setFocusPainted(false);
@@ -250,7 +249,7 @@ public class RelatoriosPanel extends JPanel {
             horarioDescricaoLabel.setFont(new Font("Inter", Font.BOLD, 17));
             horarioDescricaoLabel.setForeground(CINZA_ESCURO);
 
-            JLabel valorLabel = new JLabel(String.format("R$ %.2f", relatorioDoDia.valor()));
+            JLabel valorLabel = new JLabel("R$ " + FormatarFloat.format(relatorioDoDia.valor()));
             valorLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
             valorLabel.setFont(new Font("Inter", Font.BOLD, 18));
 
@@ -298,4 +297,55 @@ public class RelatoriosPanel extends JPanel {
             });
         }
     }
+
+//    public void ativarMouseListener(Boolean isAtivo) {
+//        mouseListenerAtivo = isAtivo;
+//    }
+
+
+
+
+//    private JLabel imagemSobrepostaLabel;
+
+//    public void sobreporImagemComTransparencia() {
+//
+//        if (imagemSobrepostaLabel == null) {
+//            try {
+//                BufferedImage imagemOriginal = ImageIO.read(new File("src/main/resources/paisagens/desfoque5.jpg"));
+//
+//                BufferedImage imagemTransparente = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+//                Graphics2D g2d = imagemTransparente.createGraphics();
+//                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+//                g2d.drawImage(imagemOriginal, 0, 0, getWidth(), getHeight(), null);
+//                g2d.dispose();
+//
+//                imagemSobrepostaLabel = new JLabel(new ImageIcon(imagemTransparente));
+//                imagemSobrepostaLabel.setBounds(0, 0, getWidth(), getHeight());
+//
+//                setLayout(null);
+//                add(imagemSobrepostaLabel);
+//                setComponentZOrder(imagemSobrepostaLabel, 0);
+//
+//                btnAdicionar.setEnabled(false);
+//                btnPesquisar.setEnabled(false);
+//
+//                // Desativa os MouseListeners dos botões quando a imagem é exibida
+//                desativarMouseListenersDosBotoes(relatoriosDoDiaPanel);
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        imagemSobrepostaLabel.setVisible(true);
+//        revalidate();
+//        repaint();
+//    }
+
+
+
+
+
+
+
 }
