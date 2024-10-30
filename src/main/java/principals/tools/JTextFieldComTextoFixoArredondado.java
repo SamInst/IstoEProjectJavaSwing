@@ -16,7 +16,7 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
         this.textoFixo = (textoFixo != null) ? textoFixo : "";
         setText(this.textoFixo);
         setCaretPosition(this.textoFixo.length());
-        setForeground(Color.DARK_GRAY);  // Texto digitado em DARK_GRAY
+        setForeground(Cor.CINZA_ESCURO);  // Texto digitado em DARK_GRAY
         setHorizontalAlignment(SwingConstants.LEFT);
         setMargin(new Insets(0, 10, 5, 10));
         setOpaque(false);
@@ -63,7 +63,7 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
 
         // Desenho da borda arredondada
-        g2.setColor(Cor.CINZA_ESCURO.brighter());
+        g2.setColor(Color.LIGHT_GRAY);
         float espessuraBorda = 1.0f;
         g2.setStroke(new BasicStroke(espessuraBorda));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);

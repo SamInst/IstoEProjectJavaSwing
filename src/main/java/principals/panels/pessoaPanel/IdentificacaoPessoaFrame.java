@@ -3,39 +3,43 @@ package principals.panels.pessoaPanel;
 import principals.tools.Cor;
 import principals.tools.JComboBoxArredondado;
 import principals.tools.JTextFieldComTextoFixoArredondado;
+import principals.tools.UpperCaseDocumentFilter;
 import repository.LocalizacaoRepository;
+import repository.PessoaRepository;
+import request.PessoaRequest;
 import response.Objeto;
-
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class IdentificacaoPessoaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
+    private final PessoaRepository pessoaRepository = new PessoaRepository();
 
-    private final JTextFieldComTextoFixoArredondado campoNome;
-    private final JTextFieldComTextoFixoArredondado campoCPF;
-    private final JTextFieldComTextoFixoArredondado campoRG;
-    private final JTextFieldComTextoFixoArredondado campoTelefone;
-    private final JTextFieldComTextoFixoArredondado campoEmail;
-    private final JTextFieldComTextoFixoArredondado campoDataNascimento;
-    private final JTextFieldComTextoFixoArredondado campoEndereco;
-    private final JTextFieldComTextoFixoArredondado campoNumero;
-    private final JTextFieldComTextoFixoArredondado campoComplemento;
+    JTextFieldComTextoFixoArredondado campoNome;
+    JTextFieldComTextoFixoArredondado campoCPF;
+    JTextFieldComTextoFixoArredondado campoRG;
+    JTextFieldComTextoFixoArredondado campoTelefone;
+    JTextFieldComTextoFixoArredondado campoEmail;
+    JTextFieldComTextoFixoArredondado campoDataNascimento;
+    JTextFieldComTextoFixoArredondado campoEndereco;
+    JTextFieldComTextoFixoArredondado campoNumero;
+    JTextFieldComTextoFixoArredondado campoComplemento;
 
     private final JComboBoxArredondado<String> paisComboBox;
     private final JComboBoxArredondado<String> estadoComboBox;
     private final JComboBoxArredondado<String> municipioComboBox;
 
-    // Campos de radio para "Está Hospedado?" e "Cliente Novo?"
-    private final JRadioButton hospedadoSim;
-    private final JRadioButton hospedadoNao;
-    private final JRadioButton clienteNovoSim;
-    private final JRadioButton clienteNovoNao;
+     JRadioButton hospedadoSim;
+     JRadioButton hospedadoNao;
+     JRadioButton clienteNovoSim;
+     JRadioButton clienteNovoNao;
 
     public IdentificacaoPessoaFrame() {
         setTitle("Identificação de Pessoa");
@@ -52,7 +56,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         tituloPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         tituloPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
         JLabel titulo = new JLabel("Identificação de Pessoa");
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         tituloPanel.add(titulo);
         add(tituloPanel, BorderLayout.NORTH);
@@ -152,9 +156,15 @@ public class IdentificacaoPessoaFrame extends JFrame {
         hospedadoNao.setBorderPainted(false);
         hospedadoNao.setFocusPainted(false);
 
-
         clienteNovoSim = new JRadioButton("Sim");
+        clienteNovoSim.setBackground(Color.WHITE);
+        clienteNovoSim.setBorderPainted(false);
+        clienteNovoSim.setFocusPainted(false);
+
         clienteNovoNao = new JRadioButton("Não");
+        clienteNovoNao.setBackground(Color.WHITE);
+        clienteNovoNao.setBorderPainted(false);
+        clienteNovoNao.setFocusPainted(false);
 
         ButtonGroup hospedadoGroup = new ButtonGroup();
         hospedadoGroup.add(hospedadoSim);
@@ -168,12 +178,15 @@ public class IdentificacaoPessoaFrame extends JFrame {
         hospedadoPanel.add(new JLabel("Está Hospedado?"));
         hospedadoPanel.setBackground(Color.WHITE);
         hospedadoPanel.setForeground(Cor.CINZA_CLARO);
-        hospedadoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        hospedadoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         hospedadoPanel.add(hospedadoSim);
         hospedadoPanel.add(hospedadoNao);
 
         JPanel clienteNovoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         clienteNovoPanel.add(new JLabel("Cliente Novo?"));
+        clienteNovoPanel.setBackground(Color.WHITE);
+        clienteNovoPanel.setForeground(Cor.CINZA_CLARO);
+        clienteNovoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         clienteNovoPanel.add(clienteNovoSim);
         clienteNovoPanel.add(clienteNovoNao);
 
@@ -247,6 +260,14 @@ public class IdentificacaoPessoaFrame extends JFrame {
         btnSalvar.setBackground(new Color(0, 153, 0));
         btnSalvar.setForeground(Color.WHITE);
         botaoPanel.add(btnSalvar);
+
+        btnSalvar.addActionListener(a->{
+            try {
+                adicionarPessoa();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         add(botaoPanel, BorderLayout.SOUTH);
 
@@ -408,6 +429,62 @@ public class IdentificacaoPessoaFrame extends JFrame {
             }
         });
     }
+
+    public void mascaraUpperCase(JTextField textField) {
+        AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        doc.setDocumentFilter(new UpperCaseDocumentFilter());
+    }
+
+
+    public void adicionarPessoa() throws SQLException {
+            String nome = campoNome.getText().replace("Nome:","").trim().toUpperCase();
+            LocalDate dataNascimento = LocalDate.parse(campoDataNascimento.getText().replace("Nascimento: ", "").trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            String cpf = campoCPF.getText().replace("CPF: ", "").trim();
+            String rg = campoRG.getText().replace("RG: ", "").trim();
+            String email = campoEmail.getText().replace("Email:", "").trim().toUpperCase();
+            String telefone = campoTelefone.getText().replace("Fone: ", "").trim();
+
+            Long pais = localizacaoRepository.buscaPaisPorNome((String) paisComboBox.getSelectedItem()).id();
+            Long estado = localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id();
+            Long municipio = localizacaoRepository.buscaMunicipioPorNomeEId((String) municipioComboBox.getSelectedItem(), estado).id();
+
+            String endereco = campoEndereco.getText().replace("Endereco:", "").trim().toUpperCase();
+            String complemento = campoComplemento.getText().replace("Complemento: ", "").trim().toUpperCase();
+            Boolean hospedado = hospedadoSim.isSelected();
+            Integer vezesHospedado = hospedado ? + 1 : 0;
+            Boolean clienteNovo = clienteNovoSim.isSelected();
+
+
+            PessoaRequest pessoa = new PessoaRequest(
+                    nome,
+                    dataNascimento,
+                    cpf,
+                    rg,
+                    email,
+                    telefone,
+                    pais,
+                    estado,
+                    municipio,
+                    endereco,
+                    complemento,
+                    hospedado,
+                    vezesHospedado,
+                    clienteNovo
+            );
+
+           try {
+               pessoaRepository.adicionarPessoa(pessoa);
+
+               System.out.println(pessoa);
+               JOptionPane.showMessageDialog(this, "Pessoa adicionada com sucesso!");
+
+        } catch (Exception e) {
+               JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente.");
+            e.printStackTrace();
+        }
+    }
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(IdentificacaoPessoaFrame::new);

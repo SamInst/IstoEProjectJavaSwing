@@ -2,22 +2,22 @@ package repository;
 
 import config.PostgresDatabaseConnect;
 import request.BuscaPessoaRequest;
+import request.PessoaRequest;
 import response.PessoaResponse;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PessoaRepository extends PostgresDatabaseConnect {
+    Connection connection = PostgresDatabaseConnect.connect();
 
     public PessoaResponse buscarPessoaPorID(Long id) {
         PessoaResponse pessoa = null;
         String sql = "SELECT * FROM pessoa WHERE id = ?";
 
-        try (Connection connection = PostgresDatabaseConnect.connect();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setLong(1, id);
 
@@ -104,8 +104,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         if (isNumeric) sql.append(" AND (id = ? OR cpf = ?)");
         else sql.append(" AND nome LIKE ?");
 
-        try (Connection connection = connect();
-             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
             if (isNumeric) {
                 statement.setLong(1, Long.parseLong(input));
@@ -125,6 +124,71 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         } catch (SQLException throwables) { throwables.printStackTrace(); }
 
         return pessoas;
+    }
+
+
+
+
+    public void adicionarPessoa(PessoaRequest pessoaRequest) throws SQLException {
+        if (cpfExists(pessoaRequest.cpf())) {
+            throw new SQLException("Erro: CPF já está cadastrado no sistema.");
+        }
+
+        String sql = """
+            INSERT INTO public.pessoa (
+                data_hora_cadastro,
+                nome,
+                data_nascimento,
+                cpf,
+                rg,
+                email,
+                telefone,
+                fk_pais,
+                fk_estado,
+                fk_municipio,
+                endereco,
+                complemento,
+                hospedado,
+                vezes_hospedado,
+                cliente_novo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setString(2, pessoaRequest.nome());
+            stmt.setDate(3, pessoaRequest.dataNascimento() != null ? java.sql.Date.valueOf(pessoaRequest.dataNascimento()) : null);
+            stmt.setString(4, pessoaRequest.cpf());
+            stmt.setString(5, pessoaRequest.rg());
+            stmt.setString(6, pessoaRequest.email());
+            stmt.setString(7, pessoaRequest.telefone());
+            stmt.setObject(8, pessoaRequest.pais());
+            stmt.setObject(9, pessoaRequest.estado());
+            stmt.setObject(10, pessoaRequest.municipio());
+            stmt.setString(11, pessoaRequest.endereco());
+            stmt.setString(12, pessoaRequest.complemento());
+            stmt.setObject(13, pessoaRequest.hospedado());
+            stmt.setObject(14, pessoaRequest.vezesHospedado());
+            stmt.setObject(15, pessoaRequest.clienteNovo());
+
+            stmt.executeUpdate();
+        }
+    }
+
+    private boolean cpfExists(String cpf) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM public.pessoa WHERE cpf = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, cpf);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+
+        return false;
     }
 
 
