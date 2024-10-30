@@ -9,10 +9,12 @@ public record PessoaRequest(
         String rg,
         String email,
         String telefone,
-        String pais,
-        String estado,
-        String municipio,
+        Long pais,
+        Long estado,
+        Long municipio,
         String endereco,
         String complemento,
-        Boolean hospedado
+        Boolean hospedado,
+        Integer vezesHospedado,
+        Boolean clienteNovo
 ){}
