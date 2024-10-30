@@ -20,7 +20,7 @@ public class RelatoriosRepository {
         List<LocalDate> datas = new ArrayList<>();
 
         String sql = """
-        SELECT data_hora::date
+        SELECT distinct data_hora::date
         FROM relatorio
         order by data_hora::date desc
         LIMIT ? OFFSET ?;
@@ -106,7 +106,7 @@ public class RelatoriosRepository {
         );
     }
 
-    public RelatoriosResponse.Relatorios buscaRelatorioPorData(LocalDate data) {
+    public RelatoriosResponse.Relatorios  buscaRelatorioPorData(LocalDate data) {
         return new RelatoriosResponse.Relatorios(
                 data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 totalDoDiaRelatorios(data),
