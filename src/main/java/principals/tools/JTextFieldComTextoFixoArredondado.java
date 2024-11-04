@@ -49,11 +49,12 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
 
     @Override
     public void setText(String t) {
-        if (t != null && !t.startsWith(textoFixo)) {
-            t = textoFixo;
+        if (t != null && !t.startsWith(textoFixo) && getText().equals(textoFixo)) {
+            t = textoFixo + t;
         }
         super.setText(t);
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {

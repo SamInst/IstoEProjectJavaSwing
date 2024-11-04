@@ -1,20 +1,19 @@
 package principals.empresaPanels;
 
-import org.hibernate.engine.spi.ValueInclusion;
-import principals.tools.Cor;
-import principals.tools.JComboBoxArredondado;
-import principals.tools.JTextFieldComTextoFixoArredondado;
-import principals.tools.Tool;
+import principals.tools.*;
+import repository.EmpresaRepository;
 import repository.LocalizacaoRepository;
 import repository.PessoaRepository;
 import request.AdicionarEmpresaRequest;
 import request.BuscaPessoaRequest;
-import response.DadosEmpresaResponse;
+import response.CepInfo;
 import response.Objeto;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +21,11 @@ import java.util.List;
 public class IdentificacaoEmpresaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
     private final PessoaRepository pessoaRepository = new PessoaRepository();
+    private final EmpresaRepository empresaRepository = new EmpresaRepository();
+    private final ViaCepService viaCepService = new ViaCepService();
 
     JTextFieldComTextoFixoArredondado campoNomeEmpresa;
+    JTextFieldComTextoFixoArredondado campoBairro;
     JTextFieldComTextoFixoArredondado campoCNPJ;
     JTextFieldComTextoFixoArredondado campoTelefone;
     JTextFieldComTextoFixoArredondado campoEmail;
@@ -45,6 +47,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(750, 600);
         setLocationRelativeTo(null);
+        setResizable(false);
 
         Font font = new Font("Segoe UI", Font.PLAIN, 15);
 
@@ -62,17 +65,44 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         JPanel camposPanel = new JPanel();
         camposPanel.setBackground(Color.WHITE);
 
-        campoNomeEmpresa = criarCampo("Nome/Razão Social: ");
-        campoCNPJ = criarCampo("CNPJ: ");
+        campoNomeEmpresa = criarCampo("* Nome/Razão Social: ");
+        campoCNPJ = criarCampo("* CNPJ: ");
+        campoEndereco = new JTextFieldComTextoFixoArredondado("Endereço: ", 35);
+//        campoEndereco.setPreferredSize(new Dimension(200, 25));
+        campoEndereco.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+
         adicionarMascaraCNPJ(campoCNPJ);
-        campoTelefone = criarCampo("Fone: ");
+        campoTelefone = criarCampo("* Fone: ");
         adicionarMascaraTelefone(campoTelefone);
         campoEmail = criarCampo("Email: ");
-        campoEndereco = criarCampo("Endereco: ");
-        campoCEP = criarCampo("CEP: ");
+//        campoEndereco = criarCampo("Endereco: ");
+
+
+        campoCEP = new JTextFieldComTextoFixoArredondado("* CEP: ", 5);
+        campoCEP.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+//        campoCEP.setPreferredSize(new Dimension(120, 25));
         adicionarMascaraCEP(campoCEP);
-        campoNumero = criarCampo("N*: ");
-        campoComplemento = criarCampo("Complemento: ");
+
+        campoCEP.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String cep = campoCEP.getText().trim().replace("* CEP:", "").replace("-", "").replaceAll("[^0-9]", "");
+
+                if (cep.length() == 8) {
+                    System.out.println("Buscando informações para o CEP: " + cep);
+                    preencherEnderecoComCep(cep);
+                    campoEndereco.setText("AAAAAAAAAAAAAAAAAAAAAAAAAA");
+                }
+            }
+        });
+
+        campoNumero = new JTextFieldComTextoFixoArredondado("N*: ", 2);
+        campoNumero.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoComplemento = new JTextFieldComTextoFixoArredondado("Complemento: ", 20);
+        campoComplemento.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+
+        campoBairro = new JTextFieldComTextoFixoArredondado("Bairro: ", 10);
+        campoBairro.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 
         paisComboBox.setPreferredSize(new Dimension(190, 30));
         estadoComboBox.setPreferredSize(new Dimension(190, 30));
@@ -86,7 +116,9 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         vincularPessoaComboBox.setForeground(Cor.CINZA_ESCURO);
         vincularPessoaComboBox.setEditable(true);
 
+
         JTextField editor = (JTextField) vincularPessoaComboBox.getEditor().getEditorComponent();
+        mascaraUpperCase(editor);
         editor.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -99,7 +131,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    // Confirma a seleção apenas quando o usuário pressiona Enter
                     String selecionado = (String) vincularPessoaComboBox.getSelectedItem();
                     if (selecionado != null && !selecionado.isEmpty()) {
                         List<BuscaPessoaRequest> pessoas = pessoaRepository.buscarPessoaPorIdNomeOuCpf(selecionado.split(" - ")[0]);
@@ -141,6 +172,8 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(campoComplemento)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(campoBairro) // Adiciona campoBairro ao lado de campoComplemento
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(campoNumero))
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(paisComboBox)
@@ -167,6 +200,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                         .addComponent(campoCEP))
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(campoComplemento)
+                        .addComponent(campoBairro) // Adiciona o campoBairro na posição correta
                         .addComponent(campoNumero))
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(paisComboBox)
@@ -189,7 +223,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         add(botaoPanel, BorderLayout.SOUTH);
         btnSalvar.addActionListener(e -> imprimirDadosEmpresa());
 
-
         setVisible(true);
     }
 
@@ -209,16 +242,15 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         pessoaPanel.setBackground(Color.WHITE);
         pessoaPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Efeito de hover
         pessoaPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                pessoaPanel.setBackground(new Color(230, 230, 250)); // cor mais clara ao passar o mouse
+                pessoaPanel.setBackground(new Color(230, 230, 250));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                pessoaPanel.setBackground(Color.WHITE); // retorna à cor original
+                pessoaPanel.setBackground(Color.WHITE);
             }
         });
 
@@ -228,7 +260,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         JLabel nomeLabel = new JLabel(pessoa.nome());
         nomeLabel.setForeground(Cor.CINZA_ESCURO);
 
-        // Painel para o conteúdo da pessoa
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
         contentPanel.setOpaque(false);
@@ -236,7 +267,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         contentPanel.add(cpfLabel);
         contentPanel.add(nomeLabel);
 
-        // Ícone de remoção à direita
         JLabel iconeRemover = new JLabel(Tool.resizeIcon(new ImageIcon("src/main/resources/icons/remove.png"), 20, 20));
         iconeRemover.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         iconeRemover.addMouseListener(new MouseAdapter() {
@@ -249,11 +279,9 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             }
         });
 
-        // Adiciona os componentes ao painel principal da pessoa
         pessoaPanel.add(contentPanel, BorderLayout.WEST);
         pessoaPanel.add(iconeRemover, BorderLayout.EAST);
 
-        // Adiciona o painel da pessoa ao painel principal de lista
         listaPessoasVinculadasPanel.add(pessoaPanel);
         pessoasVinculadas.add(pessoa);
 
@@ -331,7 +359,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                     texto = texto.substring(0, 11);
                 }
 
-                StringBuilder formatado = new StringBuilder("Fone: ");
+                StringBuilder formatado = new StringBuilder("* Fone: ");
                 if (texto.length() >= 2) {
                     formatado.append("(").append(texto, 0, 2).append(") ");
                 } else {
@@ -357,7 +385,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                     texto = texto.substring(0, 14);
                 }
 
-                StringBuilder formatado = new StringBuilder("CNPJ: ");
+                StringBuilder formatado = new StringBuilder("* CNPJ: ");
                 if (texto.length() > 2) {
                     formatado.append(texto, 0, 2).append(".");
                 } else {
@@ -396,7 +424,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                     texto = texto.substring(0, 8);
                 }
 
-                StringBuilder formatado = new StringBuilder("CEP: ");
+                StringBuilder formatado = new StringBuilder("* CEP: ");
                 if (texto.length() > 5) {
                     formatado.append(texto, 0, 5).append("-").append(texto.substring(5));
                 } else {
@@ -409,34 +437,73 @@ public class IdentificacaoEmpresaFrame extends JFrame {
     }
 
     private void imprimirDadosEmpresa() {
-        String nomeEmpresa = campoNomeEmpresa.getText().trim().replace("Nome/Razão Social:", "");
-        String cnpj = campoCNPJ.getText().trim().replace("CNPJ:", "");
-        String telefone = campoTelefone.getText().trim().replace("Fone:", "");
-        String email = campoEmail.getText().trim().replace("Email:", "");
-        String endereco = campoEndereco.getText().trim().replace("Endereco:", "");
-        String cep = campoCEP.getText().trim().replace("CEP:", "");
-        String numero = campoNumero.getText().trim().replace("N*:", "");
-        String complemento = campoComplemento.getText().trim().replace("Complemento:", "");
+        String nomeEmpresa = campoNomeEmpresa.getText().trim().replace("* Nome/Razão Social:", "").toUpperCase();
+        String cnpj = campoCNPJ.getText().trim()
+                .replaceFirst("\\* CNPJ: ", "")
+                .replaceAll("[^0-9]", "");
 
-        // Obtenção dos IDs para país, estado e município diretamente
+        String telefone = campoTelefone.getText().trim()
+                .replaceFirst("\\* Fone: ", "")
+                .replaceAll("[^0-9]", "");
+        String email = campoEmail.getText().trim().replace("Email:", "").toUpperCase();
+        String endereco = campoEndereco.getText().trim().replace("Endereco:", "").toUpperCase();
+        String cep = campoCEP.getText().trim()
+                .replaceFirst("\\* CEP:", "")
+                .replace("-", "");
+        String numero = campoNumero.getText().trim().replace("N*:", "");
+        String complemento = campoComplemento.getText().trim().replace("Complemento:", "").toUpperCase();
+
         Long pais = null;
         Long estado = null;
         Long municipio = null;
         try {
-            pais = localizacaoRepository.buscaPaisPorNome((String) paisComboBox.getSelectedItem()).id();
-            estado = localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id();
-            municipio = localizacaoRepository.buscaMunicipioPorNomeEId((String) municipioComboBox.getSelectedItem(), estado).id();
+            pais = paisComboBox.getSelectedItem() != null ? localizacaoRepository.buscaPaisPorNome((String) paisComboBox.getSelectedItem()).id() : null;
+            estado = estadoComboBox.getSelectedItem() != null ? localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id() : null;
+            municipio = municipioComboBox.getSelectedItem() != null ? localizacaoRepository.buscaMunicipioPorNomeEId((String) municipioComboBox.getSelectedItem(), estado).id() : null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // Coleta os IDs das pessoas vinculadas
         List<Long> pessoasVinculadasIds = new ArrayList<>();
         for (BuscaPessoaRequest pessoa : pessoasVinculadas) {
             pessoasVinculadasIds.add(pessoa.id());
         }
 
-        // Criação da instância de AdicionarEmpresaRequest com os dados coletados
+        if (nomeEmpresa.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Nome da Empresa obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (telefone.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Telefone para contato obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cnpj.isEmpty()){
+            JOptionPane.showMessageDialog(this, "CNPJ obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (cep.isEmpty()){
+            JOptionPane.showMessageDialog(this, "CEP obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (pais == null){
+            JOptionPane.showMessageDialog(this, "País obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (estado == null){
+            JOptionPane.showMessageDialog(this, "Estado obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (municipio == null){
+            JOptionPane.showMessageDialog(this, "Município obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         AdicionarEmpresaRequest dadosEmpresa = new AdicionarEmpresaRequest(
                 nomeEmpresa,
                 cnpj,
@@ -452,9 +519,86 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 pessoasVinculadasIds
         );
 
-        // Impressão do objeto para visualização dos dados no console
-        System.out.println(dadosEmpresa);
+        try {
+            empresaRepository.salvarEmpresa(dadosEmpresa);
+            JOptionPane.showMessageDialog(this, "Empresa salva com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
+
+    private void preencherEnderecoComCep(String cep) {
+        try {
+            CepInfo cepInfo = viaCepService.buscarCep(cep);
+
+            if (cepInfo != null) {
+                System.out.println("CEP encontrado: " + cepInfo);
+
+                String enderecoCompleto = "";
+                if (cepInfo.logradouro() != null && !cepInfo.logradouro().isEmpty()) {
+                    enderecoCompleto += cepInfo.logradouro();
+                }
+                if (cepInfo.bairro() != null && !cepInfo.bairro().isEmpty()) {
+                    enderecoCompleto += (enderecoCompleto.isEmpty() ? "" : ", ") + cepInfo.bairro();
+                }
+
+
+                String finalEnderecoCompleto = enderecoCompleto;
+
+
+
+                SwingUtilities.invokeLater(() -> {
+                    campoEndereco.setText("Endereço: " + cepInfo.logradouro());
+                    campoComplemento.setText("Complemento: " + (cepInfo.complemento() != null ? cepInfo.complemento() : ""));
+                    campoBairro.setText("Bairro: " + cepInfo.bairro());
+                });
+
+                SwingUtilities.invokeLater(() -> {
+                    paisComboBox.setSelectedItem("Brasil");
+                    Objeto estado = null;
+                    try {
+                        estado = localizacaoRepository.buscaEstadoPorNomeEId(
+                                cepInfo.estado(),
+                                localizacaoRepository.buscaPaisPorNome("Brasil").id()
+                        );
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (estado != null) {
+                        estadoComboBox.setSelectedItem(estado.descricao());
+
+                        Objeto municipio = null;
+                        try {
+                            municipio = localizacaoRepository.buscaMunicipioPorNomeEId(cepInfo.localidade(), estado.id());
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                        if (municipio != null) {
+                            municipioComboBox.setSelectedItem(municipio.descricao());
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Município '" + cepInfo.localidade() + "' não encontrado no banco de dados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Estado '" + cepInfo.estado() + "' não encontrado no banco de dados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    }
+                });
+            } else {
+                JOptionPane.showMessageDialog(this, "CEP não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao buscar o CEP: Verifique a Conexão com a internet -> " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    public void mascaraUpperCase(JTextField textField) {
+        AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        doc.setDocumentFilter(new UpperCaseDocumentFilter());
+    }
+
 
 
     public static void main(String[] args) {

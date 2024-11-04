@@ -15,7 +15,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
         setOpaque(false);
         setUI(new ComboBoxUIArredondada());
         setBackground(Color.WHITE);
-        setForeground(Cor.CINZA_ESCURO.brighter());
+        setForeground(Cor.CINZA_ESCURO.darker());
         setPreferredSize(new Dimension(200, 40));
         setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 5));
 
