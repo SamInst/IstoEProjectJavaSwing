@@ -5,6 +5,7 @@ import request.BuscaPessoaRequest;
 import java.util.List;
 
 public record DadosEmpresaResponse(
+        Long id,
         String nomeEmpresa,
         String cnpj,
         String telefone,

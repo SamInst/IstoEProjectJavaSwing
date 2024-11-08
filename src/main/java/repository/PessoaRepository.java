@@ -15,7 +15,28 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
     public PessoaResponse buscarPessoaPorID(Long id) {
         PessoaResponse pessoa = null;
-        String sql = "SELECT * FROM pessoa WHERE id = ?";
+        String sql = """
+            SELECT  p.id,
+                    data_hora_cadastro,
+                    nome,
+                    data_nascimento,
+                    cpf,
+                    rg,
+                    email,
+                    telefone,
+                    pa.descricao pais,
+                    e.descricao estado,
+                    m.descricao municipio,
+                    endereco,
+                    complemento,
+                    hospedado,
+                    vezes_hospedado
+               FROM pessoa p
+               join public.estados e on e.id = p.fk_estado
+               join public.municipios m on e.id = m.fk_municipio
+               join public.paises pa on p.id = e.fk_pais
+               WHERE p.id = ?
+       """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -190,6 +211,40 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
         return false;
     }
+
+    public List<BuscaPessoaRequest> buscaPessoasPorEmpresaCNPJ(String cnpj) {
+        List<BuscaPessoaRequest> pessoas = new ArrayList<>();
+        if (cnpj != null){
+        String sql = """
+        SELECT distinct p.id, p.nome, p.cpf
+        FROM empresa_pessoa ep
+        JOIN empresa e ON ep.fk_empresa = e.id
+        join public.pessoa p on p.id = ep.fk_pessoa
+        WHERE e.cnpj = ?
+        order by p.nome
+        """;
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, cnpj);
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        BuscaPessoaRequest pessoa = new BuscaPessoaRequest(
+                                rs.getLong("id"),
+                                rs.getString("nome"),
+                                rs.getString("cpf")
+                        );
+                        pessoas.add(pessoa);
+                    }
+                }
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+
+        return pessoas;
+    }
+
 
 
 }

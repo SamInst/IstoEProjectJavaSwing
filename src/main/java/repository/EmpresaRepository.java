@@ -2,16 +2,22 @@ package repository;
 
 import config.PostgresDatabaseConnect;
 import request.AdicionarEmpresaRequest;
+import request.BuscaPessoaRequest;
+import response.DadosEmpresaResponse;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class EmpresaRepository {
 
     private final Connection conexao;
+    private final PessoaRepository pessoaRepository;
 
-    public EmpresaRepository() {
+    public EmpresaRepository(PessoaRepository pessoaRepository) {
+        this.pessoaRepository = pessoaRepository;
         this.conexao = PostgresDatabaseConnect.connect();
     }
 
@@ -70,5 +76,113 @@ public class EmpresaRepository {
             throw new SQLException("Erro ao salvar empresa: " + e.getMessage(), e);
         }
     }
+
+    public Boolean empresaCadastrada(String cnpj) {
+        String sql = "SELECT COUNT(*) FROM empresa WHERE cnpj = ?";
+
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setString(1, cnpj);
+
+            try (var rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao verificar se a empresa está cadastrada: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
+    public void vincularPessoaAEmpresa(String cnpj, Long pessoaId) throws SQLException {
+        var empresa = buscarEmpresaPorCnpj(cnpj);
+        String sql = """
+        INSERT INTO public.empresa_pessoa (fk_empresa, fk_pessoa)
+        VALUES (?, ?)
+    """;
+
+        try (PreparedStatement statement = conexao.prepareStatement(sql)) {
+            statement.setLong(1, empresa.id());
+            statement.setLong(2, pessoaId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Erro ao vincular pessoa à empresa: " + e.getMessage());
+        }
+    }
+
+    public void desvincularPessoaDaEmpresa(String cnpj, Long pessoaId) throws SQLException {
+        var empresa = buscarEmpresaPorCnpj(cnpj);
+        String sql = "DELETE FROM public.empresa_pessoa WHERE fk_empresa = ? AND fk_pessoa = ?";
+
+        try (PreparedStatement statement = conexao.prepareStatement(sql)) {
+            statement.setLong(1, empresa.id());
+            statement.setLong(2, pessoaId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Erro ao desvincular pessoa da empresa: " + e.getMessage());
+        }
+    }
+
+
+    public DadosEmpresaResponse buscarEmpresaPorCnpj(String cnpj) {
+        DadosEmpresaResponse dadosEmpresa = null;
+        String sqlEmpresa = """
+         SELECT
+        e.id,
+        e.nome_empresa       nomeEmpresa,
+        e.cnpj,
+        e.telefone,
+        e.email,
+        e.endereco,
+        e.cep,
+        e.numero,
+        e.complemento,
+        paises.descricao     pais,
+        estados.descricao    estado,
+        municipios.descricao municipio
+    
+        FROM empresa e
+        LEFT JOIN paises ON e.fk_pais = paises.id
+        LEFT JOIN estados ON e.fk_estado = estados.id
+        LEFT JOIN municipios ON e.fk_municipio = municipios.id
+        WHERE e.cnpj = ?
+    """;
+
+        try (PreparedStatement statementEmpresa = conexao.prepareStatement(sqlEmpresa)) {
+            statementEmpresa.setString(1, cnpj);
+
+            try (ResultSet rsEmpresa = statementEmpresa.executeQuery()) {
+                if (rsEmpresa.next()) {
+
+                    List<BuscaPessoaRequest> pessoasVinculadas = pessoaRepository.buscaPessoasPorEmpresaCNPJ(cnpj);
+
+                    dadosEmpresa = new DadosEmpresaResponse(
+                            rsEmpresa.getLong("id"),
+                            rsEmpresa.getString("nomeEmpresa"),
+                            rsEmpresa.getString("cnpj"),
+                            rsEmpresa.getString("telefone"),
+                            rsEmpresa.getString("email"),
+                            rsEmpresa.getString("endereco"),
+                            rsEmpresa.getString("cep"),
+                            rsEmpresa.getString("numero"),
+                            rsEmpresa.getString("complemento"),
+                            rsEmpresa.getString("pais"),
+                            rsEmpresa.getString("estado"),
+                            rsEmpresa.getString("municipio"),
+                            pessoasVinculadas
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return dadosEmpresa;
+    }
+
+
+
 }
 
