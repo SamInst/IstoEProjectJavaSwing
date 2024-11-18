@@ -4,6 +4,7 @@ import config.PostgresDatabaseConnect;
 import request.AdicionarEmpresaRequest;
 import request.BuscaPessoaRequest;
 import response.DadosEmpresaResponse;
+import response.Objeto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,8 +23,8 @@ public class EmpresaRepository {
     }
 
     public void salvarEmpresa(AdicionarEmpresaRequest empresaRequest) throws SQLException {
-        String sqlEmpresa = "INSERT INTO empresa (nome_empresa, cnpj, telefone, email, endereco, cep, numero, complemento, fk_pais, fk_estado, fk_municipio) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sqlEmpresa = "INSERT INTO empresa (nome_empresa, cnpj, telefone, email, endereco, cep, numero, complemento, fk_pais, fk_estado, fk_municipio, bairro) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String sqlRelacionamento = "INSERT INTO empresa_pessoa (fk_empresa, fk_pessoa) VALUES (?, ?)";
 
         try {
@@ -41,6 +42,7 @@ public class EmpresaRepository {
                 stmtEmpresa.setLong(9, empresaRequest.pais());
                 stmtEmpresa.setLong(10, empresaRequest.estado());
                 stmtEmpresa.setLong(11, empresaRequest.municipio());
+                stmtEmpresa.setString(12, empresaRequest.bairro());
 
                 int rowsAffected = stmtEmpresa.executeUpdate();
                 if (rowsAffected == 0) {
@@ -131,7 +133,7 @@ public class EmpresaRepository {
         String sqlEmpresa = """
          SELECT
         e.id,
-        e.nome_empresa       nomeEmpresa,
+        e.nome_empresa       AS nomeEmpresa,
         e.cnpj,
         e.telefone,
         e.email,
@@ -139,10 +141,13 @@ public class EmpresaRepository {
         e.cep,
         e.numero,
         e.complemento,
-        paises.descricao     pais,
-        estados.descricao    estado,
-        municipios.descricao municipio
-    
+        e.bairro,
+        paises.id            AS paisId,
+        paises.descricao     AS paisDescricao,
+        estados.id           AS estadoId,
+        estados.descricao    AS estadoDescricao,
+        municipios.id        AS municipioId,
+        municipios.descricao AS municipioDescricao
         FROM empresa e
         LEFT JOIN paises ON e.fk_pais = paises.id
         LEFT JOIN estados ON e.fk_estado = estados.id
@@ -158,6 +163,22 @@ public class EmpresaRepository {
 
                     List<BuscaPessoaRequest> pessoasVinculadas = pessoaRepository.buscaPessoasPorEmpresaCNPJ(cnpj);
 
+                    Objeto pais = null;
+                    Objeto estado = null;
+                    Objeto municipio = null;
+
+                    if (rsEmpresa.getObject("paisId") != null) {
+                        pais = new Objeto(rsEmpresa.getLong("paisId"), rsEmpresa.getString("paisDescricao"));
+                    }
+
+                    if (rsEmpresa.getObject("estadoId") != null) {
+                        estado = new Objeto(rsEmpresa.getLong("estadoId"), rsEmpresa.getString("estadoDescricao"));
+                    }
+
+                    if (rsEmpresa.getObject("municipioId") != null) {
+                        municipio = new Objeto(rsEmpresa.getLong("municipioId"), rsEmpresa.getString("municipioDescricao"));
+                    }
+
                     dadosEmpresa = new DadosEmpresaResponse(
                             rsEmpresa.getLong("id"),
                             rsEmpresa.getString("nomeEmpresa"),
@@ -165,12 +186,13 @@ public class EmpresaRepository {
                             rsEmpresa.getString("telefone"),
                             rsEmpresa.getString("email"),
                             rsEmpresa.getString("endereco"),
+                            rsEmpresa.getString("bairro"),
                             rsEmpresa.getString("cep"),
                             rsEmpresa.getString("numero"),
                             rsEmpresa.getString("complemento"),
-                            rsEmpresa.getString("pais"),
-                            rsEmpresa.getString("estado"),
-                            rsEmpresa.getString("municipio"),
+                            pais,
+                            estado,
+                            municipio,
                             pessoasVinculadas
                     );
                 }
@@ -184,5 +206,48 @@ public class EmpresaRepository {
 
 
 
+
+
+    public void atualizarDadosDaEmpresa(Long empresaId, AdicionarEmpresaRequest empresaRequest) throws SQLException {
+        String sql = """
+                UPDATE empresa SET
+                   nome_empresa = ?,
+                   cnpj = ?,
+                   telefone = ?,
+                   email = ?,
+                   endereco = ?,
+                   cep = ?,
+                   numero = ?,
+                   complemento = ?,
+                   fk_pais = ?,
+                   fk_estado = ?,
+                   fk_municipio = ?,
+                   bairro = ?
+                WHERE id = ?""";
+
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setString(1, empresaRequest.nomeEmpresa());
+            stmt.setString(2, empresaRequest.cnpj());
+            stmt.setString(3, empresaRequest.telefone());
+            stmt.setString(4, empresaRequest.email());
+            stmt.setString(5, empresaRequest.endereco());
+            stmt.setString(6, empresaRequest.cep());
+            stmt.setString(7, empresaRequest.numero());
+            stmt.setString(8, empresaRequest.complemento());
+            stmt.setLong(9, empresaRequest.pais());
+            stmt.setLong(10, empresaRequest.estado());
+            stmt.setLong(11, empresaRequest.municipio());
+            stmt.setString(12, empresaRequest.bairro());
+            stmt.setLong(13, empresaId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Atualização falhou, nenhum registro afetado.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Erro ao atualizar empresa: " + e.getMessage(), e);
+        }
+    }
 }
 

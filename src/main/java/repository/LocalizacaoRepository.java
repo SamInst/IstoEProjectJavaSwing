@@ -13,8 +13,6 @@ import java.util.List;
 public class LocalizacaoRepository {
     Connection conexao = PostgresDatabaseConnect.connect();
 
-
-
     public List<Objeto> buscarPaises() throws SQLException {
         String sql = "SELECT id, descricao FROM paises";
         List<Objeto> estados = new ArrayList<>();
@@ -131,45 +129,62 @@ public class LocalizacaoRepository {
         return estado;
     }
 
+    public Objeto buscarPaisPorId(Long paisId) throws SQLException {
+        String sql = "SELECT id, descricao FROM paises WHERE id = ?";
+        Objeto pais = null;
+
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setLong(1, paisId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Long id = rs.getLong("id");
+                    String descricao = rs.getString("descricao");
+                    pais = new Objeto(id, descricao);
+                }
+            }
+        }
+        return pais;
+    }
 
 
-
-
-    public Objeto buscaEstadoPorNome(String estadoNome) throws SQLException {
-        String sql = "SELECT id, descricao FROM estados WHERE descricao LIKE ?";
-
+    public Objeto buscarEstadoPorId(Long estadoId) throws SQLException {
+        String sql = "SELECT id, descricao FROM estados WHERE id = ?";
         Objeto estado = null;
 
-        PreparedStatement stmt = conexao.prepareStatement(sql);
-        stmt.setString(1, "%" + estadoNome + "%");
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setLong(1, estadoId);
 
-        try (ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Long id = rs.getLong("id");
-                String descricao = rs.getString("descricao");
-                estado = new Objeto(id, descricao);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Long id = rs.getLong("id");
+                    String descricao = rs.getString("descricao");
+                    estado = new Objeto(id, descricao);
+                }
             }
         }
         return estado;
     }
 
-    public Objeto buscaMunicipioPorNome(String municipioNome) throws SQLException {
-        String sql = "SELECT id, descricao FROM municipios WHERE descricao LIKE ?";
+    public Objeto buscarMunicipioPorId(Long municipioId) throws SQLException {
+        String sql = "SELECT id, descricao FROM municipios WHERE id = ?";
+        Objeto municipio = null;
 
-        Objeto estado = null;
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            stmt.setLong(1, municipioId);
 
-        PreparedStatement stmt = conexao.prepareStatement(sql);
-        stmt.setString(1, "%" + municipioNome + "%");
-
-        try (ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                Long id = rs.getLong("id");
-                String descricao = rs.getString("descricao");
-                estado = new Objeto(id, descricao);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Long id = rs.getLong("id");
+                    String descricao = rs.getString("descricao");
+                    municipio = new Objeto(id, descricao);
+                }
             }
         }
-        return estado;
+        return municipio;
     }
+
+
 
 
 

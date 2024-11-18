@@ -7,6 +7,7 @@ import repository.PessoaRepository;
 import request.AdicionarEmpresaRequest;
 import request.BuscaPessoaRequest;
 import response.CepInfo;
+import response.DadosEmpresaResponse;
 import response.Objeto;
 import response.PessoaResponse;
 
@@ -48,7 +49,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
     private final List<BuscaPessoaRequest> pessoasVinculadas = new ArrayList<>();
 
     public IdentificacaoEmpresaFrame() {
-
         setTitle("Identificação de Empresa");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(750, 510);
@@ -88,7 +88,10 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         campoCNPJ.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String cnpj = campoCNPJ.getText().replace("* CNPJ:", "").replaceAll("[^0-9]", "");
+                String cnpj = campoCNPJ.getText()
+                        .replace("* CNPJ:", "")
+                        .replaceAll("[^0-9]", "");
+
                 if (cnpj.length() == 14) {
                     preencherCamposEmpresa(cnpj);
                 }
@@ -228,7 +231,13 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         btnSalvar.setForeground(Color.WHITE);
         botaoPanel.add(btnSalvar);
         add(botaoPanel, BorderLayout.SOUTH);
-        btnSalvar.addActionListener(e -> imprimirDadosEmpresa());
+        btnSalvar.addActionListener(e -> {
+            try {
+                imprimirDadosEmpresa();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         setVisible(true);
     }
@@ -471,26 +480,56 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         });
     }
 
-    private void imprimirDadosEmpresa() {
-        String nomeEmpresa = campoNomeEmpresa.getText().trim().replace("* Nome/Razão Social:", "").toUpperCase();
-        String cnpj = campoCNPJ.getText().trim()
+    private void imprimirDadosEmpresa() throws SQLException {
+        String nomeEmpresa = campoNomeEmpresa.getText()
+                .replace("* Nome/Razão Social:", "")
+                .trim()
+                .toUpperCase();
+        System.out.println(nomeEmpresa);
+
+        String cnpj = campoCNPJ.getText()
+                .trim()
                 .replaceFirst("\\* CNPJ: ", "")
                 .replaceAll("[^0-9]", "");
 
-        String telefone = campoTelefone.getText().trim()
+        String telefone = campoTelefone.getText()
+                .trim()
                 .replaceFirst("\\* Fone: ", "")
                 .replaceAll("[^0-9]", "");
-        String email = campoEmail.getText().trim().replace("Email:", "").toUpperCase();
-        String endereco = campoEndereco.getText().trim().replace("Endereco:", "").toUpperCase();
-        String cep = campoCEP.getText().trim()
+
+        String email = campoEmail.getText()
+                .replace("Email:", "")
+                .trim()
+                .toUpperCase();
+
+        String endereco = campoEndereco.getText()
+                .trim()
+                .replaceAll("(?i)^endereço:\\s*", "")
+                .toUpperCase();
+
+        String cep = campoCEP.getText()
+                .trim()
                 .replaceFirst("\\* CEP:", "")
                 .replace("-", "");
-        String numero = campoNumero.getText().trim().replace("N*:", "");
-        String complemento = campoComplemento.getText().trim().replace("Complemento:", "").toUpperCase();
+
+        String numero = campoNumero.getText()
+                .trim()
+                .replace("N*:", "");
+
+        String complemento = campoComplemento.getText()
+                .replace("Complemento:", "")
+                .trim()
+                .toUpperCase();
+
+        String bairro = campoBairro.getText()
+                .replace("Bairro:", "")
+                .trim()
+                .toUpperCase();
 
         Long pais = null;
         Long estado = null;
         Long municipio = null;
+
         try {
             pais = paisComboBox.getSelectedItem() != null ? localizacaoRepository.buscaPaisPorNome((String) paisComboBox.getSelectedItem()).id() : null;
             estado = estadoComboBox.getSelectedItem() != null ? localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id() : null;
@@ -545,12 +584,13 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 telefone,
                 email,
                 endereco,
-                cep,
-                numero,
+                cep.trim(),
+                numero.trim(),
                 complemento,
                 pais,
                 estado,
                 municipio,
+                bairro,
                 pessoasVinculadasIds
         );
 
@@ -561,36 +601,42 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 .stream()
                 .anyMatch(pessoaCadastrada -> pessoaCadastrada.id().equals(pessoasVinculadasID)));
 
-        try {
-            if (!empresaRepository.empresaCadastrada(cnpj)){
+        if (!empresaRepository.empresaCadastrada(cnpj)){
 
-                empresaRepository.salvarEmpresa(dadosEmpresa);
-                JOptionPane.showMessageDialog(this, "Empresa salva com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
-            } else {
-                if (pessoasCadastradas.size() != listaPessoas) {
-                    StringBuilder pessoasAdicionadas = new StringBuilder("Pessoas adicionadas:\n");
+            empresaRepository.salvarEmpresa(dadosEmpresa);
+            JOptionPane.showMessageDialog(this, "Empresa salva com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
 
-                    pessoasVinculadasIds.forEach(novaPessoa -> {
-                        try {
-                            empresaRepository.vincularPessoaAEmpresa(cnpj, novaPessoa);
+        } else {
+            var empresaCadastrada = empresaRepository.buscarEmpresaPorCnpj(cnpj);
 
-                            PessoaResponse pessoa = pessoaRepository.buscarPessoaPorID(novaPessoa);
-                            if (pessoa != null) {
-                                pessoasAdicionadas.append(pessoa.nome()).append("\n");
-                            }
-                        } catch (SQLException e) { throw new RuntimeException(e); }
-                    });
-                    JOptionPane.showMessageDialog(null, pessoasAdicionadas.toString(), "Pessoas Adicionadas", JOptionPane.INFORMATION_MESSAGE);
-                }
-                else {
-                    JOptionPane.showMessageDialog(this, "empresa ja cadastrada!", "Erro", JOptionPane.ERROR_MESSAGE);
-                }
+            if(verificaDadosAlterados(empresaCadastrada, dadosEmpresa, pais, estado, municipio)){
+                empresaRepository.atualizarDadosDaEmpresa(empresaCadastrada.id(), dadosEmpresa);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Dados da empresa atualizados com sucesso!",
+                        "Atualização",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            if (pessoasCadastradas.size() != listaPessoas) {
+                StringBuilder pessoasAdicionadas = new StringBuilder("Pessoas adicionadas: ");
+
+                pessoasVinculadasIds.forEach(novaPessoa -> {
+                    try {
+                        empresaRepository.vincularPessoaAEmpresa(cnpj, novaPessoa);
+
+                        PessoaResponse pessoa = pessoaRepository.buscarPessoaPorID(novaPessoa);
+                        if (pessoa != null) {
+                            pessoasAdicionadas.append(pessoa.nome()).append("\n");
+                        }
+                    } catch (SQLException e) { throw new RuntimeException(e); }
+                });
+                JOptionPane.showMessageDialog(null, pessoasAdicionadas.toString(), "Pessoas Adicionadas", JOptionPane.INFORMATION_MESSAGE);
+            }
+            else {
+                JOptionPane.showMessageDialog(this, "Empresa já cadastrada!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -658,36 +704,66 @@ public class IdentificacaoEmpresaFrame extends JFrame {
     private void preencherCamposEmpresa(String cnpj) {
         try {
             var empresa = cnpjService.buscarEmpresaPorCnpj(cnpj);
+            var empresaCadastrada = empresaRepository.buscarEmpresaPorCnpj(cnpj);
 
-            sobrescreverCamposEmpresa(
-                    empresa.company().name(),
-                    "(" + empresa.phones().get(0).area() + ") " + empresa.phones().get(0).number(),
-                    !empresa.emails().isEmpty() ? empresa.emails().get(0).address() : "",
-                    empresa.address().zip(),
-                    empresa.address().street(),
-                    empresa.address().details(),
-                    empresa.address().district(),
-                    empresa.address().number()
-            );
+            if (verificarCadastro(cnpj)){
+                sobrescreverCamposEmpresa(
+                        empresaCadastrada.nomeEmpresa(),
+                        empresaCadastrada.telefone(),
+                        empresaCadastrada.email(),
+                        empresaCadastrada.cep(),
+                        empresaCadastrada.endereco(),
+                        empresaCadastrada.complemento(),
+                        empresaCadastrada.bairro(),
+                        empresaCadastrada.numero()
+                );
 
-            preencherEnderecoComCep(empresa.address().zip());
-            verificarCadastro(cnpj);
+                listaPessoasVinculadasPanel.removeAll();
+                pessoasVinculadas.clear();
 
-            listaPessoasVinculadasPanel.removeAll();
-            pessoasVinculadas.clear();
+                List<BuscaPessoaRequest> pessoas = pessoaRepository.buscaPessoasPorEmpresaCNPJ(cnpj);
+                for (BuscaPessoaRequest pessoa : pessoas) {
+                    adicionarPessoaVinculada(pessoa, this);
+                }
 
-            List<BuscaPessoaRequest> pessoas = pessoaRepository.buscaPessoasPorEmpresaCNPJ(cnpj);
-            for (BuscaPessoaRequest pessoa : pessoas) {
-                adicionarPessoaVinculada(pessoa, this);
+                var pais = localizacaoRepository.buscarPaisPorId(empresaCadastrada.pais().id());
+                var estado = localizacaoRepository.buscarEstadoPorId(empresaCadastrada.estado().id());
+                var municipio = localizacaoRepository.buscarMunicipioPorId(empresaCadastrada.municipio().id());
+
+                paisComboBox.setSelectedItem(pais.descricao());
+                estadoComboBox.setSelectedItem(estado.descricao());
+                municipioComboBox.setSelectedItem(municipio.descricao());
+
+            } else {
+                sobrescreverCamposEmpresa(
+                        empresa.company().name(),
+                        "(" + empresa.phones().get(0).area() + ") " + empresa.phones().get(0).number(),
+                        !empresa.emails().isEmpty() ? empresa.emails().get(0).address() : "",
+                        empresa.address().zip(),
+                        empresa.address().street(),
+                        empresa.address().details(),
+                        empresa.address().district(),
+                        empresa.address().number()
+                );
+
+                preencherEnderecoComCep(empresa.address().zip().trim());
+                listaPessoasVinculadasPanel.removeAll();
+                pessoasVinculadas.clear();
+                pack();
             }
-
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao buscar informações da empresa: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao buscar informações da empresa: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private void verificarCadastro(String cnpj) {
+    private boolean verificarCadastro(String cnpj) {
         boolean cadastrado = empresaRepository.empresaCadastrada(cnpj);
         if (cadastrado) {
             statusLabel.setText("Cadastrado");
@@ -698,6 +774,27 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             statusPanel.setBackground(Cor.VERMELHO);
             statusLabel.setForeground(Color.WHITE);
         }
+        return cadastrado;
+    }
+
+    private boolean verificaDadosAlterados(
+            DadosEmpresaResponse empresaCadastrada,
+            AdicionarEmpresaRequest adicionarEmpresaRequest,
+            Long pais,
+            Long estado,
+            Long municipio){
+        boolean hasChanges = !empresaCadastrada.nomeEmpresa().equalsIgnoreCase(adicionarEmpresaRequest.nomeEmpresa());
+        if (!empresaCadastrada.telefone().equals(adicionarEmpresaRequest.telefone())) hasChanges = true;
+        if (!empresaCadastrada.email().equalsIgnoreCase(adicionarEmpresaRequest.email())) hasChanges = true;
+        if (!empresaCadastrada.endereco().equalsIgnoreCase(adicionarEmpresaRequest.endereco())) hasChanges = true;
+        if (!empresaCadastrada.bairro().equalsIgnoreCase(adicionarEmpresaRequest.bairro())) hasChanges = true;
+        if (!empresaCadastrada.cep().equals(adicionarEmpresaRequest.cep())) hasChanges = true;
+        if (!empresaCadastrada.numero().equals(adicionarEmpresaRequest.numero())) hasChanges = true;
+        if (!empresaCadastrada.complemento().equalsIgnoreCase(adicionarEmpresaRequest.complemento())) hasChanges = true;
+        if (!pais.equals(empresaCadastrada.pais().id())) hasChanges = true;
+        if (!estado.equals(empresaCadastrada.estado().id())) hasChanges = true;
+        if (!municipio.equals(empresaCadastrada.municipio().id())) hasChanges = true;
+        return hasChanges;
     }
 
 

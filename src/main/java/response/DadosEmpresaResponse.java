@@ -11,12 +11,13 @@ public record DadosEmpresaResponse(
         String telefone,
         String email,
         String endereco,
+        String bairro,
         String cep,
         String numero,
         String complemento,
-        String pais,
-        String estado,
-        String municipio,
+        Objeto pais,
+        Objeto estado,
+        Objeto municipio,
         List<BuscaPessoaRequest> pessoasVinculadas
 ) {}
 

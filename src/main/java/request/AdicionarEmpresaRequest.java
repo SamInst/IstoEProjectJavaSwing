@@ -14,6 +14,7 @@ public record AdicionarEmpresaRequest (
         Long pais,
         Long estado,
         Long municipio,
+        String bairro,
         List<Long> pessoasVinculadas
 ) {}
 
