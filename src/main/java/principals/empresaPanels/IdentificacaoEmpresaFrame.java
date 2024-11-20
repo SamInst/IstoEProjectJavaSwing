@@ -12,13 +12,17 @@ import response.Objeto;
 import response.PessoaResponse;
 
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static principals.tools.Mascaras.*;
 
 public class IdentificacaoEmpresaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
@@ -394,98 +398,11 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         }
     }
 
-    private void adicionarMascaraTelefone(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 11) {
-                    texto = texto.substring(0, 11);
-                }
-
-                StringBuilder formatado = new StringBuilder("* Fone: ");
-                if (texto.length() >= 2) {
-                    formatado.append("(").append(texto, 0, 2).append(") ");
-                } else {
-                    formatado.append(texto);
-                }
-                if (texto.length() > 7) {
-                    formatado.append(texto, 2, 7).append("-").append(texto.substring(7));
-                } else if (texto.length() > 2) {
-                    formatado.append(texto.substring(2));
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
-    private void adicionarMascaraCNPJ(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 14) {
-                    texto = texto.substring(0, 14);
-                }
-
-                StringBuilder formatado = new StringBuilder("* CNPJ: ");
-                if (texto.length() > 2) {
-                    formatado.append(texto, 0, 2).append(".");
-                } else {
-                    formatado.append(texto);
-                }
-                if (texto.length() > 5) {
-                    formatado.append(texto, 2, 5).append(".");
-                } else if (texto.length() > 2) {
-                    formatado.append(texto.substring(2));
-                }
-                if (texto.length() > 8) {
-                    formatado.append(texto, 5, 8).append("/");
-                } else if (texto.length() > 5) {
-                    formatado.append(texto.substring(5));
-                }
-                if (texto.length() > 12) {
-                    formatado.append(texto, 8, 12).append("-");
-                } else if (texto.length() > 8) {
-                    formatado.append(texto.substring(8));
-                }
-                if (texto.length() > 12) {
-                    formatado.append(texto.substring(12));
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
-    private void adicionarMascaraCEP(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 8) {
-                    texto = texto.substring(0, 8);
-                }
-
-                StringBuilder formatado = new StringBuilder("* CEP: ");
-                if (texto.length() > 5) {
-                    formatado.append(texto, 0, 5).append("-").append(texto.substring(5));
-                } else {
-                    formatado.append(texto);
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
     private void imprimirDadosEmpresa() throws SQLException {
         String nomeEmpresa = campoNomeEmpresa.getText()
                 .replace("* Nome/Razão Social:", "")
                 .trim()
                 .toUpperCase();
-        System.out.println(nomeEmpresa);
 
         String cnpj = campoCNPJ.getText()
                 .trim()
@@ -685,10 +602,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         }
     }
 
-    public void mascaraUpperCase(JTextField textField) {
-        AbstractDocument doc = (AbstractDocument) textField.getDocument();
-        doc.setDocumentFilter(new UpperCaseDocumentFilter());
-    }
+
 
     private void sobrescreverCamposEmpresa(String nomeEmpresa, String telefone, String email, String cep, String endereco, String complemento, String bairro, String numero) {
         campoNomeEmpresa.setText("* Nome/Razão Social: " + nomeEmpresa);
@@ -737,7 +651,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             } else {
                 sobrescreverCamposEmpresa(
                         empresa.company().name(),
-                        "(" + empresa.phones().get(0).area() + ") " + empresa.phones().get(0).number(),
+                        !empresa.phones().isEmpty() ? "(" + empresa.phones().get(0).area() + ") " + empresa.phones().get(0).number() : "",
                         !empresa.emails().isEmpty() ? empresa.emails().get(0).address() : "",
                         empresa.address().zip(),
                         empresa.address().street(),
@@ -751,6 +665,8 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 pessoasVinculadas.clear();
                 pack();
             }
+
+            adicionarMascaraCEP(campoCEP);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                     this,

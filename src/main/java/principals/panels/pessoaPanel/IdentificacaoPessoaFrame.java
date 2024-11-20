@@ -1,22 +1,22 @@
 package principals.panels.pessoaPanel;
 
-import principals.tools.Cor;
-import principals.tools.JComboBoxArredondado;
-import principals.tools.JTextFieldComTextoFixoArredondado;
-import principals.tools.UpperCaseDocumentFilter;
+import principals.tools.*;
 import repository.LocalizacaoRepository;
 import repository.PessoaRepository;
 import request.PessoaRequest;
 import response.Objeto;
+
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static principals.tools.EscurecerImagemDemo.escurecerImagem;
+import static principals.tools.Mascaras.*;
 
 public class IdentificacaoPessoaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
@@ -31,20 +31,24 @@ public class IdentificacaoPessoaFrame extends JFrame {
     JTextFieldComTextoFixoArredondado campoEndereco;
     JTextFieldComTextoFixoArredondado campoNumero;
     JTextFieldComTextoFixoArredondado campoComplemento;
+    JTextFieldComTextoFixoArredondado campoCEP;
 
     private final JComboBoxArredondado<String> paisComboBox;
     private final JComboBoxArredondado<String> estadoComboBox;
     private final JComboBoxArredondado<String> municipioComboBox;
+    private final JComboBoxArredondado<String> genero;
 
      JRadioButton hospedadoSim;
      JRadioButton hospedadoNao;
      JRadioButton clienteNovoSim;
      JRadioButton clienteNovoNao;
+     JPanel statusPanel;
+     JLabel statusLabel;
 
     public IdentificacaoPessoaFrame() {
         setTitle("Identificação de Pessoa");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(700, 550);
+        setSize(800, 500);
         setPreferredSize(new Dimension(700, 500));
         setMinimumSize(new Dimension(700, 500));
         setResizable(false);
@@ -55,11 +59,64 @@ public class IdentificacaoPessoaFrame extends JFrame {
         tituloPanel.setPreferredSize(new Dimension(700, 50));
         tituloPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         tituloPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
+
         JLabel titulo = new JLabel("Identificação de Pessoa");
         titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         tituloPanel.add(titulo);
         add(tituloPanel, BorderLayout.NORTH);
+
+        JPanel painelEsquerdo = new JPanel();
+        painelEsquerdo.setLayout(new BoxLayout(painelEsquerdo, BoxLayout.Y_AXIS));
+        painelEsquerdo.setBackground(Color.LIGHT_GRAY);
+        painelEsquerdo.setPreferredSize(new Dimension(220, 550));
+        add(painelEsquerdo, BorderLayout.WEST);
+
+        JPanel fotoPanel = new JPanel();
+        fotoPanel.setBackground(Color.RED);
+        fotoPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        fotoPanel.setPreferredSize(new Dimension(150, 150));
+        fotoPanel.setMaximumSize(new Dimension(150, 150));
+        fotoPanel.setLayout(new OverlayLayout(fotoPanel));
+
+        JLabel textoLabel = new JLabel("Alterar imagem");
+        textoLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        textoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        textoLabel.setVerticalAlignment(SwingConstants.CENTER);
+        textoLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        textoLabel.setForeground(new Color(255, 255, 255, 200));
+        textoLabel.setVisible(false);
+        fotoPanel.add(textoLabel);
+
+        var user_sem_foto = Resize.resizeIcon(Icones.user_sem_foto, 150,150);
+
+        JLabel fotoLabel = new JLabel();
+        fotoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        fotoLabel.setVerticalAlignment(SwingConstants.CENTER);
+        fotoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        fotoLabel.setIcon(user_sem_foto);
+
+        fotoPanel.add(fotoLabel, BorderLayout.CENTER);
+        painelEsquerdo.add(fotoPanel, BorderLayout.CENTER);
+
+        fotoLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                ImageIcon darkenedImage = escurecerImagem(user_sem_foto, 0.5f);
+                fotoLabel.setIcon(darkenedImage);
+                textoLabel.setVisible(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                fotoLabel.setIcon(user_sem_foto);
+                textoLabel.setVisible(false);
+            }
+        });
+
+
+
+
 
         JPanel camposPanel = new JPanel();
         camposPanel.setBackground(Color.WHITE);
@@ -86,7 +143,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         campoDataNascimento = new JTextFieldComTextoFixoArredondado("Nascimento: ", 10);
         campoDataNascimento.setPreferredSize(fieldDimension);
-        adicionarMascaraDataNascimento(campoDataNascimento);
+        adicionarMascaraData(campoDataNascimento);
 
         campoEndereco = new JTextFieldComTextoFixoArredondado("Endereco: ", 20);
         campoEndereco.setPreferredSize(fieldDimension);
@@ -97,16 +154,38 @@ public class IdentificacaoPessoaFrame extends JFrame {
         campoComplemento = new JTextFieldComTextoFixoArredondado("Complemento: ", 25);
         campoComplemento.setPreferredSize(fieldDimension);
 
+        campoCEP = new JTextFieldComTextoFixoArredondado("* CEP: ", 5);
+        campoCEP.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        adicionarMascaraCEP(campoCEP);
+
         paisComboBox = new JComboBoxArredondado<>();
         estadoComboBox = new JComboBoxArredondado<>();
         municipioComboBox = new JComboBoxArredondado<>();
+        genero = new JComboBoxArredondado<>();
 
         paisComboBox.setEditable(true);
         paisComboBox.setPreferredSize(new Dimension(190, 30));
+
         estadoComboBox.setEditable(true);
         estadoComboBox.setPreferredSize(new Dimension(190, 30));
+
         municipioComboBox.setEditable(true);
         municipioComboBox.setPreferredSize(new Dimension(190, 30));
+
+        statusPanel = new JPanel();
+        statusPanel.setBackground(Color.GREEN);
+        statusPanel.setPreferredSize(new Dimension(200, 30));
+        statusPanel.setMaximumSize(new Dimension(250, 30));
+        statusLabel = new JLabel("Situação");
+        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusPanel.add(statusLabel);
+        painelEsquerdo.add(statusPanel);
+
+
+
+
+
 
         try {
             List<Objeto> paises = localizacaoRepository.buscarPaises();
@@ -174,7 +253,31 @@ public class IdentificacaoPessoaFrame extends JFrame {
         clienteNovoGroup.add(clienteNovoSim);
         clienteNovoGroup.add(clienteNovoNao);
 
+//        JPanel hospedadoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//        hospedadoPanel.add(new JLabel("Está Hospedado?"));
+//        hospedadoPanel.setBackground(Color.WHITE);
+//        hospedadoPanel.setForeground(Cor.CINZA_CLARO);
+//        hospedadoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+//        hospedadoPanel.add(hospedadoSim);
+//        hospedadoPanel.add(hospedadoNao);
+
+
+
+        JPanel clienteNovoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        clienteNovoPanel.setPreferredSize(new Dimension(200, 30));
+        clienteNovoPanel.setMaximumSize(new Dimension(250, 30));
+        clienteNovoPanel.add(new JLabel("Cliente Novo?"));
+        clienteNovoPanel.setBackground(Color.WHITE);
+        clienteNovoPanel.setForeground(Cor.CINZA_CLARO);
+        clienteNovoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        clienteNovoPanel.add(clienteNovoSim);
+        clienteNovoPanel.add(clienteNovoNao);
+
+        painelEsquerdo.add(clienteNovoPanel);
+
         JPanel hospedadoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        hospedadoPanel.setPreferredSize(new Dimension(200, 30));
+        hospedadoPanel.setMaximumSize(new Dimension(250, 30));
         hospedadoPanel.add(new JLabel("Está Hospedado?"));
         hospedadoPanel.setBackground(Color.WHITE);
         hospedadoPanel.setForeground(Cor.CINZA_CLARO);
@@ -182,13 +285,9 @@ public class IdentificacaoPessoaFrame extends JFrame {
         hospedadoPanel.add(hospedadoSim);
         hospedadoPanel.add(hospedadoNao);
 
-        JPanel clienteNovoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        clienteNovoPanel.add(new JLabel("Cliente Novo?"));
-        clienteNovoPanel.setBackground(Color.WHITE);
-        clienteNovoPanel.setForeground(Cor.CINZA_CLARO);
-        clienteNovoPanel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-        clienteNovoPanel.add(clienteNovoSim);
-        clienteNovoPanel.add(clienteNovoNao);
+        painelEsquerdo.add(hospedadoPanel);
+
+
 
         Font font = new Font("Segoe UI", Font.PLAIN, 15);
 
@@ -213,7 +312,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                                 .addComponent(campoTelefone)
                                 .addComponent(campoDataNascimento))
                         .addComponent(campoEmail)
-                        .addGap(70)
+                        .addGap(50)
                         .addComponent(campoEndereco)
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(campoComplemento)
@@ -222,8 +321,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
                                 .addComponent(paisComboBox)
                                 .addComponent(estadoComboBox)
                                 .addComponent(municipioComboBox))
-                        .addComponent(hospedadoPanel)
-                        .addComponent(clienteNovoPanel)
+//                        .addComponent(hospedadoPanel)
+//                        .addComponent(clienteNovoPanel)
                 )
         );
 
@@ -245,8 +344,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
                         .addComponent(paisComboBox)
                         .addComponent(estadoComboBox)
                         .addComponent(municipioComboBox))
-                .addComponent(hospedadoPanel)
-                .addComponent(clienteNovoPanel)
+//                .addComponent(hospedadoPanel)
+//                .addComponent(clienteNovoPanel)
         );
 
         add(camposPanel, BorderLayout.CENTER);
@@ -300,141 +399,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
         Objeto pais = localizacaoRepository.buscaPaisPorNome(paisNome);
         return pais != null ? pais.id() : 0L;
     }
-
-
-
-    private void adicionarMascaraDataNascimento(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 8) {
-                    texto = texto.substring(0, 8);
-                }
-
-                StringBuilder formatado = new StringBuilder("Nascimento: ");
-                if (texto.length() >= 2) {
-                    formatado.append(texto, 0, 2).append("/");
-                } else {
-                    formatado.append(texto);
-                }
-                if (texto.length() > 4) {
-                    formatado.append(texto, 2, 4).append("/").append(texto.substring(4));
-                } else if (texto.length() > 2) {
-                    formatado.append(texto.substring(2));
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
-
-    private void adicionarMascaraTelefone(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 11) {
-                    texto = texto.substring(0, 11);
-                }
-
-                StringBuilder formatado = new StringBuilder("Fone: ");
-                if (texto.length() >= 2) {
-                    formatado.append("(").append(texto, 0, 2).append(") ");
-                } else {
-                    formatado.append(texto);
-                }
-                if (texto.length() > 7) {
-                    formatado.append(texto, 2, 7).append("-").append(texto.substring(7));
-                } else if (texto.length() > 2) {
-                    formatado.append(texto.substring(2));
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
-
-    private void adicionarMascaraCPF(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-                if (texto.length() > 11) {
-                    texto = texto.substring(0, 11);
-                }
-
-                StringBuilder formatado = new StringBuilder("CPF: ");
-                if (texto.length() > 3) {
-                    formatado.append(texto, 0, 3).append(".");
-                } else {
-                    formatado.append(texto);
-                }
-                if (texto.length() > 6) {
-                    formatado.append(texto, 3, 6).append(".");
-                } else if (texto.length() > 3) {
-                    formatado.append(texto.substring(3));
-                }
-                if (texto.length() > 9) {
-                    formatado.append(texto, 6, 9).append("-");
-                } else if (texto.length() > 6) {
-                    formatado.append(texto.substring(6));
-                }
-                if (texto.length() > 9) {
-                    formatado.append(texto.substring(9));
-                }
-
-                campo.setText(formatado.toString());
-            }
-        });
-    }
-
-    private void adicionarMascaraRG(JTextFieldComTextoFixoArredondado campo) {
-        campo.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
-
-
-                if (texto.length() > 13) {
-                    texto = texto.substring(0, 13);
-                }
-
-                StringBuilder formatado = new StringBuilder("RG: ");
-                if (texto.length() > 2) {
-                    formatado.append(texto, 0, 2).append(".");
-                    if (texto.length() > 5) {
-                        formatado.append(texto, 2, 5).append(".");
-                        if (texto.length() > 8) {
-                            formatado.append(texto, 5, 8).append(".");
-                            if (texto.length() > 12) {
-                                formatado.append(texto, 8, 12).append("-");
-                            } else {
-                                formatado.append(texto.substring(8));
-                            }
-                        } else {
-                            formatado.append(texto.substring(5));
-                        }
-                    } else {
-                        formatado.append(texto.substring(2));
-                    }
-                } else {
-                    formatado.append(texto);
-                }
-
-                campo.setText(formatado.toString());
-                campo.setCaretPosition(campo.getText().length());
-            }
-        });
-    }
-
-    public void mascaraUpperCase(JTextField textField) {
-        AbstractDocument doc = (AbstractDocument) textField.getDocument();
-        doc.setDocumentFilter(new UpperCaseDocumentFilter());
-    }
-
 
     public void adicionarPessoa() throws SQLException {
             String nome = campoNome.getText().replace("Nome:","").trim().toUpperCase();

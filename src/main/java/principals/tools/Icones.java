@@ -30,4 +30,7 @@ public class Icones {
     public static ImageIcon cartao = new ImageIcon("src/main/resources/icons/cartao.png");
     public static ImageIcon dinheiro = new ImageIcon("src/main/resources/icons/dinheiro.png");
     public static ImageIcon pix = new ImageIcon("src/main/resources/icons/pix.png");
+    public static ImageIcon user_sem_foto = new ImageIcon("src/main/resources/icons/user_sem_foto.jpg");
+    public static ImageIcon alterar_imagem = new ImageIcon("src/main/resources/icons/alterar_imagem.png");
+
 }
