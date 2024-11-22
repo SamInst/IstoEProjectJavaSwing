@@ -9,12 +9,18 @@ public record PessoaResponse(
         String rg,
         String email,
         String telefone,
-        String pais,
-        String estado,
-        String municipio,
+        Objeto pais,
+        Objeto estado,
+        Objeto municipio,
         String endereco,
         String complemento,
         Boolean hospedado,
-        Integer vezes_hospedado
+        Boolean clienteNovo,
+        Integer vezes_hospedado,
+        String cep,
+        String bairro,
+        Integer idade,
+        String numero,
+        Integer sexo
 ) {}
 

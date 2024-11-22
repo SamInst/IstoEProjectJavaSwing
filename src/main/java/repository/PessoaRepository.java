@@ -1,10 +1,14 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
+import principals.tools.Resize;
 import request.BuscaPessoaRequest;
 import request.PessoaRequest;
+import response.Objeto;
 import response.PessoaResponse;
 
+import javax.swing.*;
+import java.io.File;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,28 +19,38 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
     public PessoaResponse buscarPessoaPorID(Long id) {
         PessoaResponse pessoa = null;
+
         String sql = """
-            SELECT  p.id,
-                    data_hora_cadastro,
-                    nome,
-                    data_nascimento,
-                    cpf,
-                    rg,
-                    email,
-                    telefone,
-                    pa.descricao pais,
-                    e.descricao estado,
-                    m.descricao municipio,
-                    endereco,
-                    complemento,
-                    hospedado,
-                    vezes_hospedado
-               FROM pessoa p
-               join public.estados e on e.id = p.fk_estado
-               join public.municipios m on e.id = m.fk_municipio
-               join public.paises pa on p.id = e.fk_pais
-               WHERE p.id = ?
-       """;
+        SELECT  p.id,
+                data_hora_cadastro,
+                nome,
+                data_nascimento,
+                idade,
+                cep,
+                numero,
+                bairro,
+                cpf,
+                rg,
+                email,
+                telefone,
+                pa.id pais_id,
+                pa.descricao pais,
+                e.id estado_id,
+                e.descricao estado,
+                m.id municipio_id,
+                m.descricao municipio,
+                endereco,
+                complemento,
+                hospedado,
+                cliente_novo,
+                vezes_hospedado,
+                sexo
+           FROM pessoa p
+           JOIN public.estados e ON e.id = p.fk_estado
+           JOIN public.municipios m ON m.id = p.fk_municipio
+           JOIN public.paises pa ON pa.id = p.fk_pais
+           WHERE p.id = ?
+    """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -53,66 +67,104 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                             rs.getString("rg"),
                             rs.getString("email"),
                             rs.getString("telefone"),
-                            rs.getString("pais"),
-                            rs.getString("estado"),
-                            rs.getString("municipio"),
+                            new Objeto(rs.getLong("pais_id"), rs.getString("pais")),
+                            new Objeto(rs.getLong("estado_id"), rs.getString("estado")),
+                            new Objeto(rs.getLong("municipio_id"), rs.getString("municipio")),
                             rs.getString("endereco"),
                             rs.getString("complemento"),
                             rs.getBoolean("hospedado"),
-                            rs.getInt("vezes_hospedado")
+                            rs.getBoolean("cliente_novo"),
+                            rs.getInt("vezes_hospedado"),
+                            rs.getString("cep"),
+                            rs.getString("bairro"),
+                            rs.getInt("idade"),
+                            rs.getString("numero"),
+                            rs.getInt("sexo")
                     );
                 }
             }
 
-        } catch (SQLException throwables) { throwables.printStackTrace(); }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
 
         return pessoa;
     }
 
-    public List<BuscaPessoaRequest> buscarPessoaPorNomeCpfOuID(BuscaPessoaRequest request) {
-        List<BuscaPessoaRequest> pessoas = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM pessoas WHERE 1=1");
 
-        if (request.id() != null) {
-            sql.append(" AND id = ?");
-        }
-        if (request.nome() != null && !request.nome().isBlank()) {
-            sql.append(" AND nome LIKE ?");
-        }
-        if (request.cpf() != null && !request.cpf().isBlank()) {
-            sql.append(" AND cpf = ?");
-        }
+    public PessoaResponse buscarPessoaPorCPF(String cpf) {
+        PessoaResponse pessoa = null;
 
-        try (Connection connection = connect();
-             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+        String sql = """
+        SELECT  p.id,
+                data_hora_cadastro,
+                nome,
+                data_nascimento,
+                idade,
+                cep,
+                numero,
+                bairro,
+                cpf,
+                rg,
+                email,
+                telefone,
+                pa.id pais_id,
+                pa.descricao pais,
+                e.id estado_id,
+                e.descricao estado,
+                m.id municipio_id,
+                m.descricao municipio,
+                endereco,
+                complemento,
+                hospedado,
+                cliente_novo,
+                vezes_hospedado,
+                sexo
+           FROM pessoa p
+           JOIN public.estados e ON e.id = p.fk_estado
+           JOIN public.municipios m ON m.id = p.fk_municipio
+           JOIN public.paises pa ON pa.id = p.fk_pais
+           WHERE p.cpf = ?
+    """;
 
-            int index = 1;
-
-            if (request.id() != null) {
-                statement.setLong(index++, request.id());
-            }
-            if (request.nome() != null && !request.nome().isBlank()) {
-                statement.setString(index++, "%" + request.nome() + "%");
-            }
-            if (request.cpf() != null && !request.cpf().isBlank()) {
-                statement.setString(index++, request.cpf());
-            }
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, cpf);
 
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-
-                    BuscaPessoaRequest pessoa = new BuscaPessoaRequest(
+                if (rs.next()) {
+                    pessoa = new PessoaResponse(
                             rs.getLong("id"),
+                            rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
                             rs.getString("nome"),
-                            rs.getString("cpf")
+                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toString() : null,
+                            rs.getString("cpf"),
+                            rs.getString("rg"),
+                            rs.getString("email"),
+                            rs.getString("telefone"),
+                            new Objeto(rs.getLong("pais_id"), rs.getString("pais")),
+                            new Objeto(rs.getLong("estado_id"), rs.getString("estado")),
+                            new Objeto(rs.getLong("municipio_id"), rs.getString("municipio")),
+                            rs.getString("endereco"),
+                            rs.getString("complemento"),
+                            rs.getBoolean("hospedado"),
+                            rs.getBoolean("cliente_novo"),
+                            rs.getInt("vezes_hospedado"),
+                            rs.getString("cep"),
+                            rs.getString("bairro"),
+                            rs.getInt("idade"),
+                            rs.getString("numero"),
+                            rs.getInt("sexo")
                     );
-                    pessoas.add(pessoa);
                 }
             }
 
-        } catch (SQLException throwables) { throwables.printStackTrace(); }
-        return pessoas;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return pessoa;
     }
+
 
 
     public List<BuscaPessoaRequest> buscarPessoaPorIdNomeOuCpf(String input) {
@@ -150,30 +202,32 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
 
 
-    public void adicionarPessoa(PessoaRequest pessoaRequest) throws SQLException {
-        if (cpfExists(pessoaRequest.cpf())) {
-            throw new SQLException("Erro: CPF já está cadastrado no sistema.");
-        }
-
+    public Long adicionarPessoa(PessoaRequest pessoaRequest) throws SQLException {
         String sql = """
-            INSERT INTO public.pessoa (
-                data_hora_cadastro,
-                nome,
-                data_nascimento,
-                cpf,
-                rg,
-                email,
-                telefone,
-                fk_pais,
-                fk_estado,
-                fk_municipio,
-                endereco,
-                complemento,
-                hospedado,
-                vezes_hospedado,
-                cliente_novo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """;
+        INSERT INTO public.pessoa (
+            data_hora_cadastro,
+            nome,
+            data_nascimento,
+            cpf,
+            rg,
+            email,
+            telefone,
+            fk_pais,
+            fk_estado,
+            fk_municipio,
+            endereco,
+            complemento,
+            hospedado,
+            vezes_hospedado,
+            cliente_novo,
+            sexo,
+            idade,
+            bairro,
+            cep,
+            numero
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        RETURNING id;
+        """;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
@@ -191,12 +245,21 @@ public class PessoaRepository extends PostgresDatabaseConnect {
             stmt.setObject(13, pessoaRequest.hospedado());
             stmt.setObject(14, pessoaRequest.vezesHospedado());
             stmt.setObject(15, pessoaRequest.clienteNovo());
+            stmt.setObject(16, pessoaRequest.sexo());
+            stmt.setObject(17, pessoaRequest.idade());
+            stmt.setObject(18, pessoaRequest.bairro());
+            stmt.setObject(19, pessoaRequest.cep());
+            stmt.setObject(20, pessoaRequest.numero());
 
-            stmt.executeUpdate();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getLong("id");
+                else throw new SQLException("Erro ao inserir pessoa: Nenhum ID retornado.");
+            }
         }
     }
 
-    private boolean cpfExists(String cpf) throws SQLException {
+
+    public boolean cpfExists(String cpf) throws SQLException {
         String sql = "SELECT COUNT(*) FROM public.pessoa WHERE cpf = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -245,6 +308,39 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         return pessoas;
     }
 
+    public void adicionarFotoPessoa(Long pessoaID, String path) throws SQLException {
+        String sql = "insert into foto_pessoa (fk_pessoa, path) VALUES (?,?);";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, pessoaID);
+            stmt.setString(2, path);
+            stmt.executeUpdate();
+        }
+    }
+
+    public ImageIcon buscarFotoPessoaPorId(Long pessoaID) throws SQLException {
+        String sql = "SELECT path FROM foto_pessoa WHERE fk_pessoa = ?;";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, pessoaID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String path = rs.getString("path");
+                    File fotoArquivo = new File(path);
+
+                    if (fotoArquivo.exists()) {
+                        ImageIcon imageIcon = new ImageIcon(path);
+                        return Resize.resizeIcon(imageIcon, 180, 180);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Imagem não encontrada", "Aviso", JOptionPane.WARNING_MESSAGE);
+                        throw new RuntimeException("Arquivo de imagem não encontrado: " + path);
+                    }
+                } else {
+                    throw new RuntimeException("Nenhuma foto encontrada para a pessoa com ID: " + pessoaID);
+                }
+            }
+        }
+    }
 
 
 }

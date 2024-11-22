@@ -425,8 +425,8 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 .toUpperCase();
 
         String cep = campoCEP.getText()
-                .trim()
                 .replaceFirst("\\* CEP:", "")
+                .trim()
                 .replace("-", "");
 
         String numero = campoNumero.getText()

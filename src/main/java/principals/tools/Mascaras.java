@@ -145,7 +145,7 @@ public class Mascaras {
                     texto = texto.substring(0, 11);
                 }
 
-                StringBuilder formatado = new StringBuilder("CPF: ");
+                StringBuilder formatado = new StringBuilder("* CPF: ");
                 if (texto.length() > 3) {
                     formatado.append(texto, 0, 3).append(".");
                 } else {
