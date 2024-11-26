@@ -174,7 +174,13 @@ public class Mascaras {
         campo.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
+                String texto = campo.getText().replace("Nascimento: ", "").replaceAll("[^0-9]", "");
+
+                if (texto.isEmpty()) {
+                    campo.setText("Nascimento: ");
+                    return;
+                }
+
                 if (texto.length() > 8) {
                     texto = texto.substring(0, 8);
                 }
@@ -195,5 +201,6 @@ public class Mascaras {
             }
         });
     }
+
 
 }

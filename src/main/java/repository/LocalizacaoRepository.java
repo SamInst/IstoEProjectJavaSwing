@@ -89,7 +89,7 @@ public class LocalizacaoRepository {
     }
 
     public Objeto buscaEstadoPorNomeEId(String estadoNome, Long pais_id) throws SQLException {
-        String sql = "SELECT id, descricao FROM estados WHERE descricao LIKE ? and fk_pais = ?";
+        String sql = "SELECT id, descricao FROM estados WHERE descricao LIKE ? and fk_pais = ? limit 1";
 
         Objeto estado = null;
 
@@ -110,12 +110,12 @@ public class LocalizacaoRepository {
 
 
     public Objeto buscaMunicipioPorNomeEId(String municipioNome, Long estado_id) throws SQLException {
-        String sql = "SELECT id, descricao FROM municipios WHERE descricao LIKE ? and fk_municipio = ?";
+        String sql = "SELECT id, descricao FROM municipios WHERE descricao like ? and fk_municipio = ?";
 
-        Objeto estado = null;
+        Objeto municipio = null;
 
         PreparedStatement stmt = conexao.prepareStatement(sql);
-        stmt.setString(1, "%" + municipioNome + "%");
+        stmt.setString(1, municipioNome);
         stmt.setLong(2, estado_id);
 
 
@@ -123,10 +123,10 @@ public class LocalizacaoRepository {
             while (rs.next()) {
                 Long id = rs.getLong("id");
                 String descricao = rs.getString("descricao");
-                estado = new Objeto(id, descricao);
+                municipio = new Objeto(id, descricao);
             }
         }
-        return estado;
+        return municipio;
     }
 
     public Objeto buscarPaisPorId(Long paisId) throws SQLException {

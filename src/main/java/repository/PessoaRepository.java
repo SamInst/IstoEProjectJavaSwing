@@ -62,7 +62,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                             rs.getLong("id"),
                             rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
                             rs.getString("nome"),
-                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toString() : null,
+                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toLocalDate() : null,
                             rs.getString("cpf"),
                             rs.getString("rg"),
                             rs.getString("email"),
@@ -136,7 +136,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                             rs.getLong("id"),
                             rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
                             rs.getString("nome"),
-                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toString() : null,
+                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toLocalDate() : null,
                             rs.getString("cpf"),
                             rs.getString("rg"),
                             rs.getString("email"),
@@ -266,12 +266,9 @@ public class PessoaRepository extends PostgresDatabaseConnect {
             stmt.setString(1, cpf);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
+                if (rs.next()) return rs.getInt(1) > 0;
             }
         }
-
         return false;
     }
 
@@ -331,16 +328,95 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                     if (fotoArquivo.exists()) {
                         ImageIcon imageIcon = new ImageIcon(path);
                         return Resize.resizeIcon(imageIcon, 180, 180);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Imagem não encontrada", "Aviso", JOptionPane.WARNING_MESSAGE);
-                        throw new RuntimeException("Arquivo de imagem não encontrado: " + path);
                     }
-                } else {
-                    throw new RuntimeException("Nenhuma foto encontrada para a pessoa com ID: " + pessoaID);
                 }
+               return null;
+            }
+        }
+    }
+
+    public Objeto buscarPathFotoPessoaPorId(Long pessoaID) throws SQLException {
+        String sql = "SELECT id, path FROM foto_pessoa WHERE fk_pessoa = ?;";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, pessoaID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return new Objeto(
+                        rs.getLong("id"),
+                        rs.getString("path")
+                );
+                }
+                return null;
+            }
+    }
+
+    public void atualizarPathFotoPessoaPorFotoId(Long fotoID, String novoPath) throws SQLException {
+        String sql = "UPDATE foto_pessoa SET path = ? WHERE id = ?;";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, novoPath);
+            stmt.setLong(2, fotoID);
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new SQLException("Nenhuma foto encontrada para a pessoa com ID: " + fotoID);
             }
         }
     }
 
 
+
+    public boolean atualizarPessoa(Long pessoaID, PessoaRequest pessoaRequest) throws SQLException {
+        String sql = """
+        UPDATE public.pessoa
+        SET nome = ?,
+            data_nascimento = ?,
+            cpf = ?,
+            rg = ?,
+            email = ?,
+            telefone = ?,
+            fk_pais = ?,
+            fk_estado = ?,
+            fk_municipio = ?,
+            endereco = ?,
+            complemento = ?,
+            hospedado = ?,
+            vezes_hospedado = ?,
+            cliente_novo = ?,
+            sexo = ?,
+            idade = ?,
+            bairro = ?,
+            cep = ?,
+            numero = ?
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, pessoaRequest.nome());
+            stmt.setDate(2, pessoaRequest.dataNascimento() != null ? Date.valueOf(pessoaRequest.dataNascimento()) : null);
+            stmt.setString(3, pessoaRequest.cpf());
+            stmt.setString(4, pessoaRequest.rg());
+            stmt.setString(5, pessoaRequest.email());
+            stmt.setString(6, pessoaRequest.telefone());
+            stmt.setObject(7, pessoaRequest.pais());
+            stmt.setObject(8, pessoaRequest.estado());
+            stmt.setObject(9, pessoaRequest.municipio());
+            stmt.setString(10, pessoaRequest.endereco());
+            stmt.setString(11, pessoaRequest.complemento());
+            stmt.setObject(12, pessoaRequest.hospedado());
+            stmt.setObject(13, pessoaRequest.vezesHospedado());
+            stmt.setObject(14, pessoaRequest.clienteNovo());
+            stmt.setObject(15, pessoaRequest.sexo());
+            stmt.setObject(16, pessoaRequest.idade());
+            stmt.setObject(17, pessoaRequest.bairro());
+            stmt.setObject(18, pessoaRequest.cep());
+            stmt.setObject(19, pessoaRequest.numero());
+            stmt.setLong(20, pessoaID);
+
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+
 }
+

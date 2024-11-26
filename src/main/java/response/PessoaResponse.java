@@ -1,10 +1,12 @@
 package response;
 
+import java.time.LocalDate;
+
 public record PessoaResponse(
         Long id,
         String data_hora_cadastro,
         String nome,
-        String data_nascimento,
+        LocalDate data_nascimento,
         String cpf,
         String rg,
         String email,

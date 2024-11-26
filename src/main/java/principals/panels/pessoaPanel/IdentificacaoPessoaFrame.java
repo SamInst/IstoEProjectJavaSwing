@@ -1,14 +1,18 @@
 package principals.panels.pessoaPanel;
 
 import enums.GeneroEnum;
+import jakarta.persistence.EntityExistsException;
+import lombok.SneakyThrows;
 import principals.tools.*;
 import repository.LocalizacaoRepository;
 import repository.PessoaRepository;
 import request.PessoaRequest;
 import response.CepInfo;
 import response.Objeto;
+import response.PessoaResponse;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -18,11 +22,14 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static principals.tools.EscurecerImagemDemo.escurecerImagem;
 import static principals.tools.Mascaras.*;
 
 public class IdentificacaoPessoaFrame extends JFrame {
+
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
     private final PessoaRepository pessoaRepository = new PessoaRepository();
     private final ViaCepService viaCepService = new ViaCepService();
@@ -46,7 +53,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
     private final JComboBoxArredondado<String> genero;
 
     JLabel fotoLabel = new JLabel();
-
     JRadioButton hospedadoSim;
     JRadioButton hospedadoNao;
     JRadioButton clienteNovoSim;
@@ -54,11 +60,20 @@ public class IdentificacaoPessoaFrame extends JFrame {
     JPanel statusPanel;
     JLabel statusLabel;
     String foto_usuario_path = "";
+    JLabel textoLabel = new JLabel("Alterar imagem");
 
     Font font = new Font("Segoe UI", Font.PLAIN, 15);
     final int[] generoSelecionado = new int[1];
+    int idadeCalculada;
 
-    ImageIcon foto_usuario = Resize.resizeIcon(Icones.user_sem_foto, 180,180);
+    int largura_foto = 180;
+    int altura_foto = 211;
+
+    ImageIcon user_sem_foto_masculino = Resize.resizeIcon(Icones.user_sem_foto, largura_foto, altura_foto);
+    ImageIcon user_sem_foto_feminino = Resize.resizeIcon(Icones.user_sem_foto_feminino, largura_foto, altura_foto);
+
+    AtomicReference<ImageIcon> foto_usuario = new AtomicReference<>(user_sem_foto_masculino);
+
 
     public IdentificacaoPessoaFrame() {
         setTitle("Identificação de Pessoa");
@@ -99,6 +114,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         campoIdade = new JTextFieldComTextoFixoArredondado("Idade: ", 10);
         campoIdade.setPreferredSize(fieldDimension);
+        campoIdade.setEditable(false);
 
         campoTelefone = new JTextFieldComTextoFixoArredondado("* Fone: ", 15);
         campoTelefone.setPreferredSize(fieldDimension);
@@ -147,7 +163,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
         }
 
 
-
         JPanel painelEsquerdo = new JPanel();
         painelEsquerdo.setLayout(new BoxLayout(painelEsquerdo, BoxLayout.Y_AXIS));
         painelEsquerdo.setBackground(Color.LIGHT_GRAY);
@@ -157,11 +172,10 @@ public class IdentificacaoPessoaFrame extends JFrame {
         JPanel fotoPanel = new JPanel();
         fotoPanel.setBackground(Color.LIGHT_GRAY);
         fotoPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        fotoPanel.setPreferredSize(new Dimension(180, 180));
-        fotoPanel.setMaximumSize(new Dimension(180, 180));
+        fotoPanel.setPreferredSize(new Dimension(largura_foto, altura_foto));
+        fotoPanel.setMaximumSize(new Dimension(largura_foto, altura_foto));
         fotoPanel.setLayout(new OverlayLayout(fotoPanel));
 
-        JLabel textoLabel = new JLabel("Alterar imagem");
         textoLabel.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 0));
         textoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         textoLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -170,79 +184,83 @@ public class IdentificacaoPessoaFrame extends JFrame {
         textoLabel.setVisible(false);
         fotoPanel.add(textoLabel);
 
-
         fotoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         fotoLabel.setVerticalAlignment(SwingConstants.CENTER);
         fotoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        fotoLabel.setIcon(foto_usuario);
+        fotoLabel.setIcon(foto_usuario.get());
 
         fotoPanel.add(fotoLabel, BorderLayout.CENTER);
         painelEsquerdo.add(fotoPanel, BorderLayout.CENTER);
 
-        fotoLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                ImageIcon darkenedImage = escurecerImagem(foto_usuario, 0.5f);
-                fotoLabel.setIcon(darkenedImage);
-                textoLabel.setVisible(true);
-            }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                fotoLabel.setIcon(foto_usuario);
-                textoLabel.setVisible(false);
-            }
-        });
+            fotoLabel.addMouseListener(new MouseAdapter() {
 
-        genero.addActionListener(e -> {
-            String selecionado = (String) genero.getSelectedItem();
-
-            if (selecionado != null) {
-                GeneroEnum generoEnum = GeneroEnum.valueOf(selecionado);
-                generoSelecionado[0] = generoEnum.ordinal() + 1;
-            }
-            if (selecionado != null) {
-                GeneroEnum generoEnum = GeneroEnum.valueOf(selecionado);
-                if (generoEnum == GeneroEnum.MASCULINO) {
-                    foto_usuario = Resize.resizeIcon(Icones.user_sem_foto, 180,180);
-                    fotoLabel.setIcon(foto_usuario);
-                    fotoLabel.addMouseListener(new MouseAdapter() {
-
-                        @Override
-                        public void mouseEntered(MouseEvent e) {
-                            ImageIcon darkenedImage = escurecerImagem(foto_usuario, 0.5f);
-                            fotoLabel.setIcon(darkenedImage);
-                            textoLabel.setVisible(true);
-                        }
-
-                        @Override
-                        public void mouseExited(MouseEvent e) {
-                            fotoLabel.setIcon(foto_usuario);
-                            textoLabel.setVisible(false);
-                        }
-                    });
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                    fotoLabel.setIcon(darkenedImage);
+                    textoLabel.setVisible(true);
                 }
 
-                if (generoEnum == GeneroEnum.FEMININO) {
-                    foto_usuario = Resize.resizeIcon(Icones.user_sem_foto_feminino, 180,180);
-                    fotoLabel.setIcon(foto_usuario);
-                    fotoLabel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseEntered(MouseEvent e) {
-                            ImageIcon darkenedImage = escurecerImagem(foto_usuario, 0.5f);
-                            fotoLabel.setIcon(darkenedImage);
-                            textoLabel.setVisible(true);
-                        }
-
-                        @Override
-                        public void mouseExited(MouseEvent e) {
-                            fotoLabel.setIcon(foto_usuario);
-                            textoLabel.setVisible(false);
-                        }
-                    });
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    fotoLabel.setIcon(foto_usuario.get());
+                    textoLabel.setVisible(false);
                 }
-            }
-        });
+            });
+
+
+
+            genero.addActionListener(e -> {
+                String selecionado = (String) genero.getSelectedItem();
+
+                if (selecionado != null) {
+                    GeneroEnum generoEnum = GeneroEnum.valueOf(selecionado);
+                    generoSelecionado[0] = generoEnum.ordinal();
+
+
+                    if (generoEnum == GeneroEnum.MASCULINO) {
+                        foto_usuario.set(user_sem_foto_masculino);
+                        fotoLabel.setIcon(foto_usuario.get());
+                        fotoLabel.addMouseListener(new MouseAdapter() {
+
+                            @Override
+                            public void mouseEntered(MouseEvent e) {
+                                ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                                fotoLabel.setIcon(darkenedImage);
+                                textoLabel.setVisible(true);
+                            }
+
+                            @Override
+                            public void mouseExited(MouseEvent e) {
+                                fotoLabel.setIcon(foto_usuario.get());
+                                textoLabel.setVisible(false);
+                            }
+                        });
+                    }
+
+                    if (generoEnum == GeneroEnum.FEMININO) {
+                        foto_usuario.set(user_sem_foto_feminino);
+                        fotoLabel.setIcon(foto_usuario.get());
+                        fotoLabel.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseEntered(MouseEvent e) {
+                                ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                                fotoLabel.setIcon(darkenedImage);
+                                textoLabel.setVisible(true);
+                            }
+
+                            @Override
+                            public void mouseExited(MouseEvent e) {
+                                fotoLabel.setIcon(foto_usuario.get());
+                                textoLabel.setVisible(false);
+                            }
+                        });
+                    }
+                }
+
+            });
+
 
         fotoLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -251,8 +269,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 fileChooser.setCurrentDirectory(new File("C:\\IstoEPousada\\Usuarios\\Fotos"));
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-                javax.swing.filechooser.FileNameExtensionFilter imageFilter =
-                        new javax.swing.filechooser.FileNameExtensionFilter("Imagens (JPG, JPEG, PNG, GIF)", "jpg", "jpeg", "png", "gif");
+                FileNameExtensionFilter imageFilter =
+                        new FileNameExtensionFilter("Imagens (JPG, JPEG, PNG, GIF)", "jpg", "jpeg", "png", "gif");
                 fileChooser.setFileFilter(imageFilter);
 
                 int returnValue = fileChooser.showOpenDialog(null);
@@ -261,8 +279,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
                     foto_usuario_path = selectedFile.getAbsolutePath();
                     try {
                         ImageIcon selectedImage = new ImageIcon(selectedFile.getAbsolutePath());
-                        foto_usuario = Resize.resizeIcon(selectedImage, 180, 180);
-                        fotoLabel.setIcon(foto_usuario);
+                        foto_usuario.set(Resize.resizeIcon(selectedImage, largura_foto, altura_foto));
+                        fotoLabel.setIcon(foto_usuario.get());
 
                         for (ActionListener listener : genero.getActionListeners()) {
                             genero.removeActionListener(listener);
@@ -284,7 +302,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
         statusLabel.setFont(font);
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setForeground(Color.WHITE);
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,10,0));
         statusPanel.add(statusLabel);
         painelEsquerdo.add(statusPanel);
 
@@ -332,12 +349,11 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 String dataNascimentoTexto = campoDataNascimento.getText()
                         .replace("Nascimento: ", "")
                         .trim();
-                System.out.println(dataNascimentoTexto);
 
                 if (dataNascimentoTexto.length() == 10) {
                     try {
                         LocalDate dataNascimento = LocalDate.parse(dataNascimentoTexto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                        int idadeCalculada = Period.between(dataNascimento, LocalDate.now()).getYears();
+                        idadeCalculada = Period.between(dataNascimento, LocalDate.now()).getYears();
                         campoIdade.setText("Idade: " + idadeCalculada + " ANOS");
                     } catch (Exception ex) {
                         campoIdade.setText("Idade: ");
@@ -477,8 +493,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
                         .addComponent(municipioComboBox))
                 .addGap(10)
         );
-
-
         add(camposPanel, BorderLayout.CENTER);
 
         JPanel botaoPanel = new JPanel();
@@ -486,12 +500,14 @@ public class IdentificacaoPessoaFrame extends JFrame {
         botaoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         campoCPF.addKeyListener(new KeyAdapter() {
+            @SneakyThrows
             @Override
             public void keyReleased(KeyEvent e) {
                 String cpf = campoCPF.getText()
                         .replace("* CPF:", "").trim();
 
                 if (cpf.length() == 14) {
+                    verificarSituacao(cpf);
                     preencherCamposPessoa(cpf);
                 }
             }
@@ -524,7 +540,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         btnSalvar.setForeground(Color.WHITE);
         botaoPanel.add(btnSalvar);
 
-        btnSalvar.addActionListener(a->{
+        btnSalvar.addActionListener(a -> {
             try {
                 adicionarPessoa();
             } catch (SQLException e) {
@@ -564,10 +580,10 @@ public class IdentificacaoPessoaFrame extends JFrame {
     }
 
     public void adicionarPessoa() throws SQLException {
-            String nomeEmpresa = campoNomePessoa.getText()
-                    .replace("* Nome:","")
-                    .trim()
-                    .toUpperCase();
+        String nomePessoa = campoNomePessoa.getText()
+                .replace("* Nome:", "")
+                .trim()
+                .toUpperCase();
 
         String dataNascimento = campoDataNascimento.getText()
                 .replace("Nascimento: ", "")
@@ -578,8 +594,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 : null;
 
         String cpf = campoCPF.getText()
-                    .trim()
-                    .replaceFirst("\\* CPF: ", "");
+                .trim()
+                .replaceFirst("\\* CPF: ", "");
 
         String rg = campoRG.getText()
                 .trim()
@@ -627,6 +643,11 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 .trim()
                 .toUpperCase();
 
+        String idade = campoIdade.getText()
+                .replaceFirst("Idade: ", "")
+                .replace("ANOS", "")
+                .trim();
+
         Long pais = null;
         Long estado = null;
         Long municipio = null;
@@ -639,72 +660,111 @@ public class IdentificacaoPessoaFrame extends JFrame {
             e.printStackTrace();
         }
 
-        if (nomeEmpresa.isEmpty()){
+        generoSelecionado[0] = GeneroEnum.valueOf((String) genero.getSelectedItem()).ordinal();
+
+        if (!CPFValidator.isCPFValid(cpf)) {
+            JOptionPane.showMessageDialog(this, "CPF inválido", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (nomePessoa.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nome da Pessoa obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (telefone.isEmpty()){
+        if (telefone.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Telefone para contato obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (cpf.isEmpty()){
+        if (cpf.isEmpty()) {
             JOptionPane.showMessageDialog(this, "CPF obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (cep.isEmpty()){
+        if (cep.isEmpty()) {
             JOptionPane.showMessageDialog(this, "CEP obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (pais == null){
+        if (pais == null) {
             JOptionPane.showMessageDialog(this, "País obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (estado == null){
+        if (estado == null) {
             JOptionPane.showMessageDialog(this, "Estado obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (municipio == null){
+        if (municipio == null) {
             JOptionPane.showMessageDialog(this, "Município obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-            PessoaRequest pessoa = new PessoaRequest(
-                    foto_usuario_path,
-                    nomeEmpresa,
-                    novaDataNascimento,
-                    25,
-                    generoSelecionado[0],
-                    cpf,
-                    rg,
-                    email,
-                    telefone,
-                    pais,
-                    estado,
-                    municipio,
-                    cep,
-                    endereco,
-                    bairro,
-                    complemento,
-                    hospedado,
-                    vezesHospedado,
-                    clienteNovo,
-                    numero
-            );
+        if (!(clienteNovoSim.isSelected() ||  clienteNovoNao.isSelected())) {
+            JOptionPane.showMessageDialog(this, "É necessário informar se a pessoa é um cliente novo", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        System.out.println(pessoa);
-           try {
-               var pessoaID = pessoaRepository.adicionarPessoa(pessoa);
-               pessoaRepository.adicionarFotoPessoa(pessoaID, foto_usuario_path);
+        if (!(hospedadoSim.isSelected() ||  hospedadoNao.isSelected())) {
+            JOptionPane.showMessageDialog(this, "É necessário informar se a pessoa está hospedada", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-               JOptionPane.showMessageDialog(this, "Pessoa adicionada com sucesso!");
+        PessoaRequest pessoaRequest = new PessoaRequest(
+                foto_usuario_path,
+                nomePessoa,
+                novaDataNascimento,
+                !idade.isEmpty() ? Integer.parseInt(idade) : 0,
+                generoSelecionado[0],
+                cpf,
+                rg,
+                email,
+                telefone,
+                pais,
+                estado,
+                municipio,
+                cep,
+                endereco,
+                bairro,
+                complemento,
+                hospedado,
+                vezesHospedado,
+                clienteNovo,
+                numero
+        );
+
+        try {
+            PessoaResponse pessoaResponse = pessoaRepository.buscarPessoaPorCPF(cpf);
+
+            if (pessoaRepository.cpfExists(cpf)) {
+                var pathAntigo = pessoaRepository.buscarPathFotoPessoaPorId(pessoaResponse.id());
+
+                if (foto_usuario_path.isEmpty()) foto_usuario_path = pathAntigo.descricao();
+
+                if (verificaDadosAlterados(pessoaRequest, pessoaResponse, pathAntigo.descricao(), foto_usuario_path)) {
+                    pessoaRepository.atualizarPessoa(pessoaResponse.id(), pessoaRequest);
+                    JOptionPane.showMessageDialog(this, "Dados pessoa atualizados com sucesso!");
+
+                    if (!pathAntigo.descricao().equals(foto_usuario_path)) {
+                        pessoaRepository.atualizarPathFotoPessoaPorFotoId(pathAntigo.id(), foto_usuario_path);
+                        JOptionPane.showMessageDialog(this, "Foto atualizada com sucesso!");
+                    }
+                }
+                 else {
+                    JOptionPane.showMessageDialog(this, "Pessoa ja Cadastrada!", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    throw new EntityExistsException("Pessoa ja Cadastrada!");
+                }
+            } else {
+                var pessoaID = pessoaRepository.adicionarPessoa(pessoaRequest);
+
+                pessoaRepository.adicionarFotoPessoa(pessoaID, foto_usuario_path);
+                verificarSituacao(cpf);
+                JOptionPane.showMessageDialog(this, "Pessoa adicionada com sucesso!");
+            }
         } catch (Exception e) {
-               JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente.");
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente.");
             e.printStackTrace();
         }
     }
@@ -716,17 +776,12 @@ public class IdentificacaoPessoaFrame extends JFrame {
     private void preencherEnderecoComCep(String cep) {
         try {
             CepInfo cepInfo = viaCepService.buscarCep(cep);
-            System.out.println(cepInfo);
 
             if (cepInfo != null) {
-
                 SwingUtilities.invokeLater(() -> {
-
-                    campoEndereco.setText("Endereço: " + cepInfo.logradouro() +", " + cepInfo.unidade());
+                    campoEndereco.setText("Endereço: " + cepInfo.logradouro() + ", " + cepInfo.unidade());
                     campoBairro.setText("Bairro: " + cepInfo.bairro());
-                    campoNumero.setText("* CEP: " + cepInfo.complemento());
-
-
+                    campoNumero.setText("N*: " + cepInfo.complemento());
                     paisComboBox.setSelectedItem("Brasil");
                     Objeto estado;
                     try {
@@ -765,7 +820,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         }
     }
 
-    private boolean verificarCadastro(String cpf) throws SQLException {
+    private boolean verificarSituacao(String cpf) throws SQLException {
         boolean cadastrado = pessoaRepository.cpfExists(cpf);
         if (cadastrado) {
             statusLabel.setText("Cadastrado");
@@ -779,7 +834,22 @@ public class IdentificacaoPessoaFrame extends JFrame {
         return cadastrado;
     }
 
-    private void sobrescreverCamposPessoa(String nomePessoa, String telefone, String email, String cep, String endereco, String complemento, String bairro, String numero, Boolean hospedado, Boolean clienteNovo, ImageIcon foto, Integer idade, Integer sexo, String dataNascimento, String rg) {
+    private void sobrescreverCamposPessoa(
+            String nomePessoa,
+            String telefone,
+            String email,
+            String cep,
+            String endereco,
+            String complemento,
+            String bairro,
+            String numero,
+            Boolean hospedado,
+            Boolean clienteNovo,
+            ImageIcon foto,
+            Integer idade,
+            Integer sexo,
+            String dataNascimento,
+            String rg) {
         campoNomePessoa.setText("* Nome: " + nomePessoa);
         campoTelefone.setText("* Fone: " + telefone);
         campoEmail.setText("Email: " + email);
@@ -798,21 +868,37 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         if (clienteNovo) clienteNovoSim.setSelected(true);
         else clienteNovoNao.setSelected(true);
-        foto_usuario = foto;
-        fotoLabel.setIcon(foto);
 
+        if (foto != null) {
+
+            for (ActionListener listener : genero.getActionListeners()) {
+                genero.removeActionListener(listener);
+            }
+
+            foto_usuario.set(foto);
+            fotoLabel.setIcon(foto);
+        } else {
+            switch (sexo) {
+                case 0, 2 ->{
+                    foto_usuario.set(user_sem_foto_masculino);
+                    fotoLabel.setIcon(user_sem_foto_masculino);
+                }
+                case 1 -> {
+                    foto_usuario.set(user_sem_foto_feminino);
+                    fotoLabel.setIcon(user_sem_foto_feminino);
+                }
+            }
+        }
     }
 
     private void preencherCamposPessoa(String cpf) {
         try {
             var pessoa = pessoaRepository.buscarPessoaPorCPF(cpf);
-            if (pessoa != null) {
 
-                var pessoaCadastrada = verificaCPF(cpf);
+            if (pessoa != null) {
                 var foto = pessoaRepository.buscarFotoPessoaPorId(pessoa.id());
 
-                verificarCadastro(cpf);
-                if (pessoaCadastrada){
+                if (verificaCPF(cpf)) {
                     sobrescreverCamposPessoa(
                             pessoa.nome(),
                             pessoa.telefone(),
@@ -827,7 +913,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                             foto,
                             pessoa.idade(),
                             pessoa.sexo(),
-                            pessoa.data_nascimento().formatted(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            pessoa.data_nascimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                             pessoa.rg()
                     );
 
@@ -840,9 +926,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
                     municipioComboBox.setSelectedItem(municipio.descricao());
                 }
             }
-
-
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(
                     this,
@@ -853,6 +936,49 @@ public class IdentificacaoPessoaFrame extends JFrame {
         }
     }
 
+    public boolean verificaDadosAlterados(PessoaRequest pessoaRequest, PessoaResponse pessoa, String pathAntigo, String pathNovo) {
+        System.out.println("Foto path: " + pathAntigo + " : " + pathNovo);
+        System.out.println("Nome: " + pessoaRequest.nome() + " : " + pessoa.nome());
+        System.out.println("Data de Nascimento: " + pessoaRequest.dataNascimento() + " : " + pessoa.data_nascimento());
+        System.out.println("Idade: " + pessoaRequest.idade() + " : " + pessoa.idade());
+        System.out.println("Sexo: " + pessoaRequest.sexo() + " : " + pessoa.sexo());
+        System.out.println("CPF: " + pessoaRequest.cpf() + " : " + pessoa.cpf());
+        System.out.println("RG: " + pessoaRequest.rg() + " : " + pessoa.rg());
+        System.out.println("Email: " + pessoaRequest.email() + " : " + pessoa.email());
+        System.out.println("Telefone: " + pessoaRequest.telefone() + " : " + pessoa.telefone());
+        System.out.println("País: " + pessoaRequest.pais() + " : " + pessoa.pais().id());
+        System.out.println("Estado: " + pessoaRequest.estado() + " : " + pessoa.estado().id());
+        System.out.println("Município: " + pessoaRequest.municipio() + " : " + pessoa.municipio().id());
+        System.out.println("CEP: " + pessoaRequest.cep() + " : " + pessoa.cep());
+        System.out.println("Endereço: " + pessoaRequest.endereco() + " : " + pessoa.endereco());
+        System.out.println("Bairro: " + pessoaRequest.bairro() + " : " + pessoa.bairro());
+        System.out.println("Complemento: " + pessoaRequest.complemento() + " : " + pessoa.complemento());
+        System.out.println("Hospedado: " + pessoaRequest.hospedado() + " : " + pessoa.hospedado());
+        System.out.println("Cliente Novo: " + pessoaRequest.clienteNovo() + " : " + pessoa.clienteNovo());
+        System.out.println("Número: " + pessoaRequest.numero() + " : " + pessoa.numero());
+
+        return !(
+                Objects.equals(pathAntigo, pathNovo) &&
+                        Objects.equals(pessoaRequest.nome(), pessoa.nome()) &&
+                        Objects.equals(pessoaRequest.dataNascimento(), pessoa.data_nascimento()) &&
+                        Objects.equals(pessoaRequest.idade(), pessoa.idade()) &&
+                        Objects.equals(pessoaRequest.sexo(), pessoa.sexo()) &&
+                        Objects.equals(pessoaRequest.cpf(), pessoa.cpf()) &&
+                        Objects.equals(pessoaRequest.rg(), pessoa.rg()) &&
+                        Objects.equals(pessoaRequest.email(), pessoa.email()) &&
+                        Objects.equals(pessoaRequest.telefone(), pessoa.telefone()) &&
+                        Objects.equals(pessoaRequest.pais(), pessoa.pais().id()) &&
+                        Objects.equals(pessoaRequest.estado(), pessoa.estado().id()) &&
+                        Objects.equals(pessoaRequest.municipio(), pessoa.municipio().id()) &&
+                        Objects.equals(pessoaRequest.cep(), pessoa.cep()) &&
+                        Objects.equals(pessoaRequest.endereco(), pessoa.endereco()) &&
+                        Objects.equals(pessoaRequest.bairro(), pessoa.bairro()) &&
+                        Objects.equals(pessoaRequest.complemento(), pessoa.complemento()) &&
+                        Objects.equals(pessoaRequest.hospedado(), pessoa.hospedado()) &&
+                        Objects.equals(pessoaRequest.clienteNovo(), pessoa.clienteNovo()) &&
+                        Objects.equals(pessoaRequest.numero(), pessoa.numero())
+        );
+    }
 
 
     public static void main(String[] args) {

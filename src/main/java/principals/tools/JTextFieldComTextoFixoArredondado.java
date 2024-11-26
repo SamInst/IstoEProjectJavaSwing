@@ -1,13 +1,11 @@
 package principals.tools;
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class JTextFieldComTextoFixoArredondado extends JTextField {
-
     private final String textoFixo;
     private Color promptForegroundColor = Color.LIGHT_GRAY;
 
@@ -16,7 +14,7 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
         this.textoFixo = (textoFixo != null) ? textoFixo : "";
         setText(this.textoFixo);
         setCaretPosition(this.textoFixo.length());
-        setForeground(Cor.CINZA_ESCURO);  // Texto digitado em DARK_GRAY
+        setForeground(Cor.CINZA_ESCURO);
         setHorizontalAlignment(SwingConstants.LEFT);
         setMargin(new Insets(0, 10, 5, 10));
         setOpaque(false);
@@ -55,26 +53,21 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
         super.setText(t);
     }
 
-
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-
-        // Desenho da borda arredondada
         g2.setColor(Color.LIGHT_GRAY);
+
         float espessuraBorda = 1.0f;
+
         g2.setStroke(new BasicStroke(espessuraBorda));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
 
-        // Cor do texto dependendo se está vazio ou preenchido
-        if (getText().equals(textoFixo)) {
-            setForeground(promptForegroundColor);  // Cor do placeholder (texto fixo)
-        } else {
-            setForeground(Color.DARK_GRAY);  // Cor do texto digitado
-        }
+        if (getText().equals(textoFixo)) setForeground(promptForegroundColor);
+        else setForeground(Color.DARK_GRAY);
 
         g2.dispose();
         super.paintComponent(g);
@@ -87,7 +80,6 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
 
     @Override
     public void paintBorder(Graphics g) {
-        // Desabilitar a borda padrão
     }
 }
 
