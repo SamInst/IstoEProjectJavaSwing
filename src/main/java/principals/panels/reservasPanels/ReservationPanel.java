@@ -1,5 +1,6 @@
 package principals.panels.reservasPanels;
 
+import principals.panels.pessoaPanel.IdentificacaoPessoaFrame;
 import principals.tools.Icones;
 import repository.ReservasRepository;
 import request.AdicionarReservasRequest;
@@ -38,8 +39,12 @@ public class ReservationPanel extends javax.swing.JPanel {
 
         JButton btnAdicionar = new JButton("Adicionar");
         btnAdicionar.setPreferredSize(new Dimension(125, 40));
+//        btnAdicionar.addActionListener(e -> {
+//            new ReservaCalendarioCustomizado();
+//        });
+
         btnAdicionar.addActionListener(e -> {
-            new ReservaCalendarioCustomizado();
+            new IdentificacaoPessoaFrame("666.666.666-66");
         });
 
         buttonPanel.add(btnAdicionar);

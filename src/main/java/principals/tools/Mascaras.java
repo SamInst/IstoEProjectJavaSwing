@@ -136,11 +136,11 @@ public class Mascaras {
         });
     }
 
-    public static void adicionarMascaraCPF(JTextFieldComTextoFixoArredondado campo) {
+    public static void adicionarMascaraCPF(JTextFieldComTextoFixoArredondado campo, String cpf) {
         campo.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String texto = campo.getText().replaceAll("[^0-9]", "");
+                String texto = cpf != null ? cpf : campo.getText().replaceAll("[^0-9]", "");
                 if (texto.length() > 11) {
                     texto = texto.substring(0, 11);
                 }

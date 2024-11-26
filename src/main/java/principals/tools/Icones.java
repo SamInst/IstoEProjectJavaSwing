@@ -32,5 +32,6 @@ public class Icones {
     public static ImageIcon pix = new ImageIcon("src/main/resources/icons/pix.png");
     public static ImageIcon user_sem_foto = new ImageIcon("src/main/resources/icons/user_sem_foto_2.jpg");
     public static ImageIcon user_sem_foto_feminino = new ImageIcon("src/main/resources/icons/user_sem_foto_feminino.jpg");
+    public static ImageIcon user_funcionario = new ImageIcon("src/main/resources/icons/menu/user.png");
 
 }

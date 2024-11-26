@@ -62,12 +62,17 @@ public class IdentificacaoPessoaFrame extends JFrame {
     String foto_usuario_path = "";
     JLabel textoLabel = new JLabel("Alterar imagem");
 
-    Font font = new Font("Segoe UI", Font.PLAIN, 15);
+    PanelArredondado quantidadeHospedagemPanel = new PanelArredondado();
+    JLabel quantidadeHospedagemLabel = new JLabel("0");
+
+    Font font = new Font("Segoe UI", Font.PLAIN, 16);
     final int[] generoSelecionado = new int[1];
     int idadeCalculada;
 
     int largura_foto = 180;
     int altura_foto = 211;
+
+    String cpfExterno;
 
     ImageIcon user_sem_foto_masculino = Resize.resizeIcon(Icones.user_sem_foto, largura_foto, altura_foto);
     ImageIcon user_sem_foto_feminino = Resize.resizeIcon(Icones.user_sem_foto_feminino, largura_foto, altura_foto);
@@ -75,7 +80,8 @@ public class IdentificacaoPessoaFrame extends JFrame {
     AtomicReference<ImageIcon> foto_usuario = new AtomicReference<>(user_sem_foto_masculino);
 
 
-    public IdentificacaoPessoaFrame() {
+    public IdentificacaoPessoaFrame(String cpf) {
+        cpfExterno = cpf;
         setTitle("Identificação de Pessoa");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(900, 440);
@@ -106,7 +112,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         campoCPF = new JTextFieldComTextoFixoArredondado("* CPF: ", 10);
         campoCPF.setPreferredSize(fieldDimension);
-        adicionarMascaraCPF(campoCPF);
+        adicionarMascaraCPF(campoCPF, cpfExterno);
 
         campoRG = new JTextFieldComTextoFixoArredondado("RG: ", 10);
         campoRG.setPreferredSize(fieldDimension);
@@ -192,75 +198,24 @@ public class IdentificacaoPessoaFrame extends JFrame {
         fotoPanel.add(fotoLabel, BorderLayout.CENTER);
         painelEsquerdo.add(fotoPanel, BorderLayout.CENTER);
 
+//            fotoLabel.addMouseListener(new MouseAdapter() {
+//
+//                @Override
+//                public void mouseEntered(MouseEvent e) {
+//                    ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+//                    fotoLabel.setIcon(darkenedImage);
+//                    textoLabel.setVisible(true);
+//                }
+//
+//                @Override
+//                public void mouseExited(MouseEvent e) {
+//                    fotoLabel.setIcon(foto_usuario.get());
+//                    textoLabel.setVisible(false);
+//                }
+//            });
+        fotoLabel.addMouseListener(mouseAdapter());
 
-            fotoLabel.addMouseListener(new MouseAdapter() {
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
-                    fotoLabel.setIcon(darkenedImage);
-                    textoLabel.setVisible(true);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    fotoLabel.setIcon(foto_usuario.get());
-                    textoLabel.setVisible(false);
-                }
-            });
-
-
-
-            genero.addActionListener(e -> {
-                String selecionado = (String) genero.getSelectedItem();
-
-                if (selecionado != null) {
-                    GeneroEnum generoEnum = GeneroEnum.valueOf(selecionado);
-                    generoSelecionado[0] = generoEnum.ordinal();
-
-
-                    if (generoEnum == GeneroEnum.MASCULINO) {
-                        foto_usuario.set(user_sem_foto_masculino);
-                        fotoLabel.setIcon(foto_usuario.get());
-                        fotoLabel.addMouseListener(new MouseAdapter() {
-
-                            @Override
-                            public void mouseEntered(MouseEvent e) {
-                                ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
-                                fotoLabel.setIcon(darkenedImage);
-                                textoLabel.setVisible(true);
-                            }
-
-                            @Override
-                            public void mouseExited(MouseEvent e) {
-                                fotoLabel.setIcon(foto_usuario.get());
-                                textoLabel.setVisible(false);
-                            }
-                        });
-                    }
-
-                    if (generoEnum == GeneroEnum.FEMININO) {
-                        foto_usuario.set(user_sem_foto_feminino);
-                        fotoLabel.setIcon(foto_usuario.get());
-                        fotoLabel.addMouseListener(new MouseAdapter() {
-                            @Override
-                            public void mouseEntered(MouseEvent e) {
-                                ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
-                                fotoLabel.setIcon(darkenedImage);
-                                textoLabel.setVisible(true);
-                            }
-
-                            @Override
-                            public void mouseExited(MouseEvent e) {
-                                fotoLabel.setIcon(foto_usuario.get());
-                                textoLabel.setVisible(false);
-                            }
-                        });
-                    }
-                }
-
-            });
-
+        genero.addActionListener(e -> generoActionListener());
 
         fotoLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -287,12 +242,24 @@ public class IdentificacaoPessoaFrame extends JFrame {
                         }
 
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "Erro ao carregar a imagem.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Erro ao carregar a imagem." + ex, "Erro", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         });
+
+        quantidadeHospedagemPanel.setBackground(Color.RED);
+        quantidadeHospedagemPanel.setBounds(135, 4, 40, 40);
+        quantidadeHospedagemPanel.setToolTipText("Quantidade de Hospedagens");
+        quantidadeHospedagemPanel.setVisible(false);
+
+        quantidadeHospedagemLabel.setForeground(Color.WHITE);
+        quantidadeHospedagemLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        quantidadeHospedagemLabel.setVerticalAlignment(SwingConstants.CENTER);
+        quantidadeHospedagemLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        quantidadeHospedagemPanel.add(quantidadeHospedagemLabel);
+
+        fotoLabel.add(quantidadeHospedagemPanel);
 
         statusPanel = new JPanel();
         statusPanel.setBackground(Color.DARK_GRAY);
@@ -503,7 +470,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
             @SneakyThrows
             @Override
             public void keyReleased(KeyEvent e) {
-                String cpf = campoCPF.getText()
+                String cpf = cpfExterno != null ? cpfExterno : campoCPF.getText()
                         .replace("* CPF:", "").trim();
 
                 if (cpf.length() == 14) {
@@ -530,15 +497,19 @@ public class IdentificacaoPessoaFrame extends JFrame {
         JButton btnLimpar = new JButton("Limpar");
         btnLimpar.setFont(font);
         btnLimpar.setFocusPainted(false);
-        btnLimpar.setBackground(Color.YELLOW.darker());
-        btnLimpar.setForeground(Color.WHITE);
+        btnLimpar.setBackground(Color.WHITE);
+        btnLimpar.setForeground(Color.DARK_GRAY);
+        btnLimpar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JButton btnSalvar = new JButton("Salvar");
         btnSalvar.setFont(font);
         btnSalvar.setFocusPainted(false);
         btnSalvar.setBackground(new Color(0, 153, 0));
         btnSalvar.setForeground(Color.WHITE);
+        btnSalvar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         botaoPanel.add(btnSalvar);
+        botaoPanel.add(btnLimpar);
 
         btnSalvar.addActionListener(a -> {
             try {
@@ -548,8 +519,24 @@ public class IdentificacaoPessoaFrame extends JFrame {
             }
         });
 
+        btnLimpar.addActionListener(a -> limparCampos());
+
         add(botaoPanel, BorderLayout.SOUTH);
         setVisible(true);
+
+        if (cpfExterno != null && !cpfExterno.isBlank()) {
+            btnSalvar.setVisible(false);
+            btnLimpar.setVisible(false);
+            try {
+                campoCPF.setText("* CPF: " + cpfExterno);
+                if (verificarSituacao(cpfExterno)){
+                    preencherCamposPessoa(cpfExterno);
+                    desabilitarCamposParaPesquisa();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao buscar dados da pessoa: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void carregarEstados(long paisId) {
@@ -657,7 +644,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
             estado = estadoComboBox.getSelectedItem() != null ? localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id() : null;
             municipio = municipioComboBox.getSelectedItem() != null ? localizacaoRepository.buscaMunicipioPorNomeEId((String) municipioComboBox.getSelectedItem(), estado).id() : null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Não foi possivel associar país, estado ou município. " + e, "Aviso", JOptionPane.WARNING_MESSAGE);
         }
 
         generoSelecionado[0] = GeneroEnum.valueOf((String) genero.getSelectedItem()).ordinal();
@@ -764,8 +751,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Pessoa adicionada com sucesso!");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente.");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente." + e);
         }
     }
 
@@ -816,7 +802,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
             }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Erro ao buscar o CEP: Verifique a Conexão com a internet -> " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
     }
 
@@ -870,7 +855,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
         else clienteNovoNao.setSelected(true);
 
         if (foto != null) {
-
             for (ActionListener listener : genero.getActionListeners()) {
                 genero.removeActionListener(listener);
             }
@@ -924,6 +908,9 @@ public class IdentificacaoPessoaFrame extends JFrame {
                     paisComboBox.setSelectedItem(pais.descricao());
                     estadoComboBox.setSelectedItem(estado.descricao());
                     municipioComboBox.setSelectedItem(municipio.descricao());
+
+                    quantidadeHospedagemLabel.setText(pessoa.vezes_hospedado().toString());
+                    quantidadeHospedagemPanel.setVisible(true);
                 }
             }
         } catch (SQLException e) {
@@ -980,8 +967,142 @@ public class IdentificacaoPessoaFrame extends JFrame {
         );
     }
 
+    private void limparCampos(){
+        campoNomePessoa.setText("* Nome: ");
+        campoTelefone.setText("* Fone: ");
+        campoEmail.setText("Email: ");
+        campoCEP.setText("* CEP: ");
+        campoEndereco.setText("Endereço: ");
+        campoComplemento.setText("Complemento: ");
+        campoBairro.setText("Bairro: ");
+        campoNumero.setText("N*: ");
+        campoIdade.setText("Idade: ");
+        genero.setSelectedItem(GeneroEnum.fromCodigo(0).name());
+        campoDataNascimento.setText("Nascimento: ");
+        campoRG.setText("RG: ");
+        campoCPF.setText("* CPF: ");
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(IdentificacaoPessoaFrame::new);
+        hospedadoSim.setSelected(false);
+        hospedadoNao.setSelected(false);
+
+        clienteNovoSim.setSelected(false);
+        clienteNovoNao.setSelected(false);
+
+        statusPanel.setBackground(Color.DARK_GRAY);
+        statusLabel.setText("Situação");
+
+        quantidadeHospedagemPanel.setVisible(false);
+
+        foto_usuario.set(user_sem_foto_masculino);
+        fotoLabel.setIcon(foto_usuario.get());
+
+        estadoComboBox.setSelectedItem(null);
+        municipioComboBox.setSelectedItem(null);
+        paisComboBox.setSelectedItem(null);
+
+        genero.addActionListener(e -> generoActionListener());
+    }
+
+    private void generoActionListener(){
+        String selecionado = (String) genero.getSelectedItem();
+
+        if (selecionado != null) {
+            GeneroEnum generoEnum = GeneroEnum.valueOf(selecionado);
+            generoSelecionado[0] = generoEnum.ordinal();
+
+            if (generoEnum == GeneroEnum.MASCULINO) {
+                foto_usuario.set(user_sem_foto_masculino);
+                fotoLabel.setIcon(foto_usuario.get());
+                fotoLabel.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                        fotoLabel.setIcon(darkenedImage);
+                        textoLabel.setVisible(true);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        fotoLabel.setIcon(foto_usuario.get());
+                        textoLabel.setVisible(false);
+                    }
+                });
+            }
+
+            if (generoEnum == GeneroEnum.FEMININO) {
+                foto_usuario.set(user_sem_foto_feminino);
+                fotoLabel.setIcon(foto_usuario.get());
+                fotoLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                        fotoLabel.setIcon(darkenedImage);
+                        textoLabel.setVisible(true);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        fotoLabel.setIcon(foto_usuario.get());
+                        textoLabel.setVisible(false);
+                    }
+                });
+            }
+        }
+    }
+
+    private MouseAdapter mouseAdapter(){
+        return new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
+                fotoLabel.setIcon(darkenedImage);
+                textoLabel.setVisible(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                fotoLabel.setIcon(foto_usuario.get());
+                textoLabel.setVisible(false);
+            }
+        };
+    }
+
+
+    private void desabilitarCamposParaPesquisa(){
+        campoNomePessoa.setEditable(false);
+        campoTelefone.setEditable(false);
+        campoEmail.setEditable(false);
+        campoCEP.setEditable(false);
+        campoEndereco.setEditable(false);
+        campoComplemento.setEditable(false);
+        campoBairro.setEditable(false);
+        campoNumero.setEditable(false);
+        campoIdade.setEditable(false);
+        genero.setEditable(false);
+        campoDataNascimento.setEditable(false);
+        campoRG.setEditable(false);
+        campoCPF.setEditable(false);
+
+        hospedadoSim.setEnabled(false);
+        hospedadoNao.setEnabled(false);
+
+        clienteNovoSim.setEnabled(false);
+        clienteNovoNao.setEnabled(false);
+
+        estadoComboBox.setEnabled(false);
+        municipioComboBox.setEnabled(false);
+        paisComboBox.setEnabled(false);
+
+        for (ActionListener listener : genero.getActionListeners()) {
+            genero.removeActionListener(listener);
+        }
+
+        for (MouseListener mouseListener : fotoLabel.getMouseListeners()) {
+            fotoLabel.removeMouseListener(mouseListener);
+        }
+
+        genero.setEnabled(false);
+
     }
 }

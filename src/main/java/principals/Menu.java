@@ -8,11 +8,15 @@ import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.Icones;
 import principals.tools.LabelArredondado;
+import principals.tools.Resize;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import static principals.tools.Icones.*;
+import static principals.tools.Resize.resizeIcon;
 
 public class Menu extends JFrame {
 
@@ -20,10 +24,10 @@ public class Menu extends JFrame {
     private final Color defaultColor = new Color(66, 75, 152);
 
     public Menu() {
-        setTitle("ISTO E POUSADA");
+        setTitle("ISTO É POUSADA");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setIconImage(Icones.logo.getImage());
+        setIconImage(logo.getImage());
         setMinimumSize(new Dimension(600, 600));
         setLayout(new BorderLayout());
         setVisible(true);
@@ -37,15 +41,15 @@ public class Menu extends JFrame {
         sideMenu.add(employeeInfoPanel);
         sideMenu.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(Icones.dashboard, 24, 24));
-        JButton btnQuartos = createMenuButton("Apartamentos", resizeIcon(Icones.quartos, 24, 24));
-        JButton btnEntradas = createMenuButton("Entradas", resizeIcon(Icones.entradas, 24, 24));
-        JButton btnPernoites = createMenuButton("Pernoites", resizeIcon(Icones.pernoites, 24, 24));
-        JButton btnRelatorio = createMenuButton("Relatorio", resizeIcon(Icones.relatorios, 24, 24));
-        JButton btnClientes = createMenuButton("Clientes", resizeIcon(Icones.clientes, 24, 24));
-        JButton btnItens = createMenuButton("Itens",  resizeIcon(Icones.itens, 24, 24));
-        JButton btnReservas = createMenuButton("Reservas", resizeIcon(Icones.reservas, 24, 24));
-        JButton btnPrice = createMenuButton("Precos",  resizeIcon(Icones.preco, 24, 24));
+        JButton btnDashboard = createMenuButton("Dashboard", resizeIcon(dashboard, 24, 24));
+        JButton btnQuartos = createMenuButton("Apartamentos", resizeIcon(quartos, 24, 24));
+        JButton btnEntradas = createMenuButton("Entradas", resizeIcon(entradas, 24, 24));
+        JButton btnPernoites = createMenuButton("Pernoites", resizeIcon(pernoites, 24, 24));
+        JButton btnRelatorio = createMenuButton("Relatorio", resizeIcon(relatorios, 24, 24));
+        JButton btnClientes = createMenuButton("Clientes", resizeIcon(clientes, 24, 24));
+        JButton btnItens = createMenuButton("Itens",  resizeIcon(itens, 24, 24));
+        JButton btnReservas = createMenuButton("Reservas", resizeIcon(reservas, 24, 24));
+        JButton btnPrice = createMenuButton("Precos",  resizeIcon(preco, 24, 24));
 
         sideMenu.add(btnDashboard);
         sideMenu.add(btnQuartos);
@@ -90,8 +94,7 @@ public class Menu extends JFrame {
         employeePanel.setPreferredSize(new Dimension(250, 150));
         employeePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
-        ImageIcon icon = new ImageIcon(new ImageIcon("src/main/resources/icons/menu/user.png").getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
-        JLabel labelIcon = new JLabel(icon);
+        JLabel labelIcon = new JLabel(resizeIcon(user_funcionario, 60,60));
         labelIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel labelName = new JLabel("Sam Helson");
@@ -133,11 +136,6 @@ public class Menu extends JFrame {
         return button;
     }
 
-    private static ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
-        Image img = icon.getImage();
-        Image resizedImage = img.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
-        return new ImageIcon(resizedImage);
-    }
 
     private void addHoverAndSelectionEffect(JButton button, JPanel panel) {
 
