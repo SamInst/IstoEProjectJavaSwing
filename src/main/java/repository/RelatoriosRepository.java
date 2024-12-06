@@ -1,7 +1,6 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
-import org.springframework.jdbc.core.RowMapper;
 import request.RelatorioRequest;
 import response.RelatorioRowmapper;
 import response.RelatoriosResponse;
@@ -115,7 +114,6 @@ public class RelatoriosRepository {
     }
 
 
-
     public List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatoriosDoDia(LocalDate data) {
         List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatoriosDoDia = new ArrayList<>();
 
@@ -177,7 +175,7 @@ public class RelatoriosRepository {
 
         if (request.quarto_id() != null){
             QuartosRepository quartosRepository = new QuartosRepository();
-             quartosRepository.buscaQuartoById(request.quarto_id());
+             quartosRepository.buscaQuartoPorId(request.quarto_id());
         }
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -188,9 +186,9 @@ public class RelatoriosRepository {
 
             // Verifica se quarto_id é null e configura o parâmetro adequadamente
             if (request.quarto_id() == null) {
-                statement.setNull(5, java.sql.Types.BIGINT); // Define null para o tipo BIGINT
+                statement.setNull(5, java.sql.Types.BIGINT);
             } else {
-                statement.setLong(5, request.quarto_id()); // Define o valor de quarto_id
+                statement.setLong(5, request.quarto_id());
             }
 
             statement.executeUpdate();

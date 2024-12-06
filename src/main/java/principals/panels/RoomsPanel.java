@@ -1,84 +1,65 @@
 package principals.panels;
 
+import enums.StatusPernoiteEnum;
+import principals.panels.pernoitePanels.BlocosPernoitesAtivos;
 import principals.tools.Botoes;
 import principals.tools.Icones;
 import principals.tools.Tool;
 import repository.PessoaRepository;
+import repository.QuartosRepository;
 import response.PessoaResponse;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static principals.tools.Cor.VERDE_ESCURO;
+
 public class RoomsPanel extends JPanel {
+    JPanel quartosPanel = new JPanel();
+    QuartosRepository quartosRepository = new QuartosRepository();
 
     public RoomsPanel() {
-        setBackground(new Color(230, 230, 230));
         setLayout(new BorderLayout());
 
-        // Botão Adicionar
-        JButton btnAdicionar = Botoes.botaoEstilizado(
-                "Adicionar Quarto",
-                25,
-                "src/main/resources/icons/plus_icon.png",
-                40,
-                40,
-                new Color(76, 175, 80),
-                130,30
-        );
-
-        JButton btnAdicionar2 = Botoes.botaoEstilizado(
-                "Pesquisar",
-                25,
-                "src/main/resources/icons/lupa.png",
-                40,
-                40,
-                new Color(66, 75, 152),
-                130,30
-        );
-
-        // Painel para o botão no topo à direita
-        JPanel topRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 20)); // 10px da borda direita e do topo
-        topRightPanel.setOpaque(false); // Transparente para combinar com o fundo
-        topRightPanel.setBackground(Color.BLUE);
-        topRightPanel.add(btnAdicionar); // Adiciona o botão "Adicionar" no lado direito
-        topRightPanel.add(btnAdicionar2);
-
-        // Label Título à esquerda
-        JLabel labelTitulo = new JLabel("Quartos", Tool.resizeIcon(Icones.quartos, 50, 50), JLabel.LEFT);
-        labelTitulo.setFont(new Font("Inter", Font.BOLD, 30));
-        labelTitulo.setForeground(Color.WHITE);
-        labelTitulo.setOpaque(true);
-        labelTitulo.setBackground(new Color(66, 75, 152));  // Cor de fundo
-        labelTitulo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));  // Espaçamento interno
-        labelTitulo.setIconTextGap(10);
-
-        // Painel superior que vai conter o título à esquerda e os botões à direita
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setOpaque(false); // Deixa o fundo transparente
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
 
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Margens ao redor do label
-        topPanel.add(labelTitulo, BorderLayout.WEST); // Coloca o label no lado esquerdo
-        topPanel.add(topRightPanel, BorderLayout.EAST); // Coloca o painel dos botões no lado direito
+        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Apartamentos", Icones.quartos);
+        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
 
-        // Adiciona o painel superior ao topo do layout principal
+        topPanel.add(identificadorPanel);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        buttonPanel.setMinimumSize(new Dimension(20, 20));
+
+        JButton btnAdicionar = new JButton("Adicionar");
+        btnAdicionar.setPreferredSize(new Dimension(125, 40));
+        btnAdicionar.addActionListener(e -> {});
+
+        buttonPanel.add(btnAdicionar);
+
+
+        identificadorPanel.add(buttonPanel, BorderLayout.WEST);
+
+
         add(topPanel, BorderLayout.NORTH);
 
+        JPanel backgroundPanel = new JPanel();
+        backgroundPanel.setBackground(Color.WHITE);
+        backgroundPanel.setLayout(new BorderLayout());
+        backgroundPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        for (int i = 0; i < StatusPernoiteEnum.values().length; i++){
+//            pernoitesPanel.add(new BlocosPernoitesAtivos().blocoPernoitesAtivos(new JPanel(), pernoitesRepository, StatusPernoiteEnum.values()[i]));
+        }
 
-
-        JPanel panel = new JPanel();
-        topRightPanel.setOpaque(false); // Transparente para combinar com o fundo
-        topRightPanel.setBackground(Color.RED);
-        topRightPanel.add(btnAdicionar); // Adiciona o botão "Adicionar" no lado direito
-        topRightPanel.add(btnAdicionar2);
-        add(panel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(quartosPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
 
     }
 
-    public PessoaResponse buscarPessoaPorID(Long id) {
-        PessoaRepository pessoaRepository = new PessoaRepository();
-        return pessoaRepository.buscarPessoaPorID(id);
-    }
 }
 
 

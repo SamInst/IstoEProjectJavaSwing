@@ -338,6 +338,8 @@ public class PessoaRepository extends PostgresDatabaseConnect {
     public Objeto buscarPathFotoPessoaPorId(Long pessoaID) throws SQLException {
         String sql = "SELECT id, path FROM foto_pessoa WHERE fk_pessoa = ?;";
 
+        var pessoa = buscarPessoaPorID(pessoaID);
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, pessoaID);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -345,9 +347,9 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                         rs.getLong("id"),
                         rs.getString("path")
                 );
-                }
-                return null;
             }
+            return null;
+        }
     }
 
     public void atualizarPathFotoPessoaPorFotoId(Long fotoID, String novoPath) throws SQLException {

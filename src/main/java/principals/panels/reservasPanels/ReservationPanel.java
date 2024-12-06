@@ -39,12 +39,8 @@ public class ReservationPanel extends javax.swing.JPanel {
 
         JButton btnAdicionar = new JButton("Adicionar");
         btnAdicionar.setPreferredSize(new Dimension(125, 40));
-//        btnAdicionar.addActionListener(e -> {
-//            new ReservaCalendarioCustomizado();
-//        });
-
         btnAdicionar.addActionListener(e -> {
-            new IdentificacaoPessoaFrame("666.666.666-66");
+            new ReservaCalendarioCustomizado();
         });
 
         buttonPanel.add(btnAdicionar);

@@ -1,5 +1,6 @@
 package principals.empresaPanels;
 
+import principals.panels.pessoaPanel.IdentificacaoPessoaFrame;
 import principals.tools.*;
 import repository.EmpresaRepository;
 import repository.LocalizacaoRepository;
@@ -324,6 +325,14 @@ public class IdentificacaoEmpresaFrame extends JFrame {
 
         pessoaPanel.add(contentPanel, BorderLayout.WEST);
         pessoaPanel.add(iconeRemover, BorderLayout.EAST);
+        pessoaPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        pessoaPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new IdentificacaoPessoaFrame(pessoa.cpf());
+            }
+        });
 
         pessoaRepository.buscaPessoasPorEmpresaCNPJ(campoCNPJ.getText() != null ? campoCNPJ.getText() : null)
                 .forEach(pessoaCadastrada->{
@@ -601,7 +610,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             e.printStackTrace();
         }
     }
-
 
 
     private void sobrescreverCamposEmpresa(String nomeEmpresa, String telefone, String email, String cep, String endereco, String complemento, String bairro, String numero) {

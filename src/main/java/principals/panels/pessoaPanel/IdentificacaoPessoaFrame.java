@@ -18,6 +18,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -198,21 +199,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
         fotoPanel.add(fotoLabel, BorderLayout.CENTER);
         painelEsquerdo.add(fotoPanel, BorderLayout.CENTER);
 
-//            fotoLabel.addMouseListener(new MouseAdapter() {
-//
-//                @Override
-//                public void mouseEntered(MouseEvent e) {
-//                    ImageIcon darkenedImage = escurecerImagem(foto_usuario.get(), 0.5f);
-//                    fotoLabel.setIcon(darkenedImage);
-//                    textoLabel.setVisible(true);
-//                }
-//
-//                @Override
-//                public void mouseExited(MouseEvent e) {
-//                    fotoLabel.setIcon(foto_usuario.get());
-//                    textoLabel.setVisible(false);
-//                }
-//            });
         fotoLabel.addMouseListener(mouseAdapter());
 
         genero.addActionListener(e -> generoActionListener());
@@ -567,13 +553,17 @@ public class IdentificacaoPessoaFrame extends JFrame {
     }
 
     public void adicionarPessoa() throws SQLException {
-        String nomePessoa = campoNomePessoa.getText()
-                .replace("* Nome:", "")
-                .trim()
-                .toUpperCase();
+        String nomePessoa = Normalizer.normalize(
+                campoNomePessoa.getText()
+                        .replace("* Nome:", "")
+                        .trim()
+                        .toUpperCase(),
+                Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "");
 
         String dataNascimento = campoDataNascimento.getText()
                 .replace("Nascimento: ", "")
+                .replace("null", "")
                 .trim();
 
         LocalDate novaDataNascimento = !dataNascimento.isEmpty() ?
@@ -596,8 +586,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         String telefone = campoTelefone.getText()
                 .trim()
-                .replaceFirst("\\* Fone: ", "")
-                .replaceAll("[^0-9]", "");
+                .replaceFirst("\\* Fone: ", "");
 
         String endereco = campoEndereco.getText()
                 .trim()
@@ -622,7 +611,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         String cep = campoCEP.getText()
                 .replaceFirst("\\* CEP:", "")
-                .replace("-", "")
                 .trim();
 
         String bairro = campoBairro.getText()
@@ -642,7 +630,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         try {
             pais = paisComboBox.getSelectedItem() != null ? localizacaoRepository.buscaPaisPorNome((String) paisComboBox.getSelectedItem()).id() : null;
             estado = estadoComboBox.getSelectedItem() != null ? localizacaoRepository.buscaEstadoPorNomeEId((String) estadoComboBox.getSelectedItem(), pais).id() : null;
-            municipio = municipioComboBox.getSelectedItem() != null ? localizacaoRepository.buscaMunicipioPorNomeEId((String) municipioComboBox.getSelectedItem(), estado).id() : null;
+            municipio = municipioComboBox.getSelectedItem() != null ? localizacaoRepository.buscaMunicipioPorNomeEId(municipioComboBox.getSelectedItem().toString(), estado).id() : null;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Não foi possivel associar país, estado ou município. " + e, "Aviso", JOptionPane.WARNING_MESSAGE);
         }
@@ -726,18 +714,27 @@ public class IdentificacaoPessoaFrame extends JFrame {
             PessoaResponse pessoaResponse = pessoaRepository.buscarPessoaPorCPF(cpf);
 
             if (pessoaRepository.cpfExists(cpf)) {
-                var pathAntigo = pessoaRepository.buscarPathFotoPessoaPorId(pessoaResponse.id());
+                String pathAntigo = "";
+                var pessoaPathAtual = pessoaRepository.buscarPathFotoPessoaPorId(pessoaResponse.id());
 
-                if (foto_usuario_path.isEmpty()) foto_usuario_path = pathAntigo.descricao();
 
-                if (verificaDadosAlterados(pessoaRequest, pessoaResponse, pathAntigo.descricao(), foto_usuario_path)) {
+                if (verificaDadosAlterados(pessoaRequest, pessoaResponse, pathAntigo, foto_usuario_path)) {
                     pessoaRepository.atualizarPessoa(pessoaResponse.id(), pessoaRequest);
                     JOptionPane.showMessageDialog(this, "Dados pessoa atualizados com sucesso!");
 
-                    if (!pathAntigo.descricao().equals(foto_usuario_path)) {
-                        pessoaRepository.atualizarPathFotoPessoaPorFotoId(pathAntigo.id(), foto_usuario_path);
-                        JOptionPane.showMessageDialog(this, "Foto atualizada com sucesso!");
+
+                    if (pessoaPathAtual == null){
+                        pessoaRepository.adicionarFotoPessoa(pessoaResponse.id(), foto_usuario_path);
                     }
+                    else {
+                        if (foto_usuario_path.isEmpty()) foto_usuario_path = pathAntigo;
+
+                        if (!pathAntigo.equals(foto_usuario_path)) {
+                            pessoaRepository.atualizarPathFotoPessoaPorFotoId(pessoaPathAtual.id(), foto_usuario_path);
+                            JOptionPane.showMessageDialog(this, "Foto atualizada com sucesso!");
+                        }
+                    }
+                    foto_usuario_path = "";
                 }
                  else {
                     JOptionPane.showMessageDialog(this, "Pessoa ja Cadastrada!", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -749,8 +746,10 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 pessoaRepository.adicionarFotoPessoa(pessoaID, foto_usuario_path);
                 verificarSituacao(cpf);
                 JOptionPane.showMessageDialog(this, "Pessoa adicionada com sucesso!");
+                foto_usuario_path = "";
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao adicionar pessoa. Verifique os dados e tente novamente." + e);
         }
     }
@@ -897,7 +896,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                             foto,
                             pessoa.idade(),
                             pessoa.sexo(),
-                            pessoa.data_nascimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            pessoa.data_nascimento() != null ? pessoa.data_nascimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")): null,
                             pessoa.rg()
                     );
 
@@ -995,6 +994,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
         foto_usuario.set(user_sem_foto_masculino);
         fotoLabel.setIcon(foto_usuario.get());
+        foto_usuario_path = "";
 
         estadoComboBox.setSelectedItem(null);
         municipioComboBox.setSelectedItem(null);
@@ -1101,8 +1101,17 @@ public class IdentificacaoPessoaFrame extends JFrame {
         for (MouseListener mouseListener : fotoLabel.getMouseListeners()) {
             fotoLabel.removeMouseListener(mouseListener);
         }
+        fotoLabel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
         genero.setEnabled(false);
-
     }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+
+            IdentificacaoPessoaFrame identificacaoPessoaFrame = new IdentificacaoPessoaFrame(null);
+            identificacaoPessoaFrame.setVisible(true);
+        });
+    }
+
 }
