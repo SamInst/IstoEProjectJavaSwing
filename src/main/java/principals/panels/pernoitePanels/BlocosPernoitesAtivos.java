@@ -133,7 +133,6 @@ public class BlocosPernoitesAtivos {
             quadranteAzul.add(leftPanel, BorderLayout.WEST);
 
 
-
             PanelArredondado rightPanel = new PanelArredondado();
             rightPanel.setLayout(new BorderLayout());
             rightPanel.setOpaque(false);

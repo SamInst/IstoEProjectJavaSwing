@@ -15,17 +15,24 @@ import java.util.List;
 public class QuartosRepository {
     Connection connection = PostgresDatabaseConnect.connect();
 
+    StringBuilder quarto_sql = new StringBuilder("""
+        SELECT distinct q.id AS quarto_id,
+        q.descricao,
+        q.quantidade_pessoas,
+        q.qtd_cama_casal,
+        q.qtd_cama_solteiro,
+        q.qtd_beliche,
+        q.qtd_rede,
+        q.status_quarto_enum,
+        c.id AS categoria_id,
+        c.categoria
+        FROM quarto q
+        LEFT JOIN categoria c ON q.fk_categoria = c.id
+        """);
+
     public List<QuartoResponse> buscaQuartosPorStatus(StatusQuartoEnum status) {
         List<QuartoResponse> quartos = new ArrayList<>();
-        String sql = """
-                SELECT q.id AS quarto_id, q.descricao, q.quantidade_pessoas, q.qtd_cama_casal, q.qtd_cama_solteiro, q.qtd_beliche, q.qtd_rede,
-                       q.status_quarto_enum, c.id AS categoria_id, c.categoria,
-                       ppc.qtd_pessoa, ppc.valor
-                FROM quarto q
-                LEFT JOIN categoria c ON q.fk_categoria = c.id
-                LEFT JOIN preco_pessoa_categoria ppc ON c.id = ppc.fk_categoria
-                WHERE q.status_quarto_enum = ?
-                """;
+        String sql =quarto_sql.append("WHERE q.status_quarto_enum = ? ").toString();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, status.getCodigo());
@@ -60,26 +67,8 @@ public class QuartosRepository {
 
     public List<QuartoResponse> buscaTodosOsQuartos() {
         List<QuartoResponse> quartos = new ArrayList<>();
-        String sql = """
-                SELECT
-                    q.id quarto_id,
-                    q.descricao,
-                    q.quantidade_pessoas,
-                    q.qtd_cama_casal,
-                    q.qtd_cama_solteiro,
-                    q.qtd_beliche,
-                    q.qtd_rede,
-                    q.status_quarto_enum,
-                    c.id categoria_id,
-                    c.categoria,
-                    ppc.qtd_pessoa,
-                    ppc.valor
-                FROM quarto q
-                LEFT JOIN categoria c ON q.fk_categoria = c.id
-                LEFT JOIN preco_pessoa_categoria ppc ON c.id = ppc.fk_categoria
-                """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(quarto_sql.toString())) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Long quartoId = resultSet.getLong("quarto_id");
@@ -176,22 +165,7 @@ public class QuartosRepository {
     }
 
     public QuartoResponse buscaQuartoPorId(Long id) {
-        String sql = """
-            SELECT
-           q.id AS quarto_id, 
-           q.descricao, 
-           q.quantidade_pessoas, 
-           q.status_quarto_enum, 
-           q.qtd_cama_casal, 
-           q.qtd_cama_solteiro, 
-           q.qtd_beliche, 
-           q.qtd_rede, 
-           c.id AS categoria_id, 
-           c.categoria 
-            FROM quarto q
-            LEFT JOIN categoria c ON q.fk_categoria = c.id
-            WHERE q.id = ?
-            """;
+        String sql = quarto_sql.append(" WHERE q.id = ? ").toString();
 
         QuartoResponse quartoResponse = null;
 
@@ -226,5 +200,36 @@ public class QuartosRepository {
         return quartoResponse;
     }
 
+    public void salvarQuarto(AtualizarDadosQuartoRequest request) {
+        String sql = """
+        INSERT INTO quarto (
+            descricao,
+            quantidade_pessoas,
+            qtd_cama_casal,
+            qtd_cama_solteiro,
+            qtd_beliche, 
+            qtd_rede, 
+            fk_categoria, 
+            status_quarto_enum
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 2)
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, request.descricao());
+            statement.setInt(2, request.quantidadePessoas());
+            statement.setInt(3, request.qtdCamaCasal());
+            statement.setInt(4, request.qtdCamaSolteiro());
+            statement.setInt(5, request.qtdCamaBeliche());
+            statement.setInt(6, request.qtdRede());
+            statement.setLong(7, request.categoriaId());
+
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Erro ao salvar o quarto: Nenhuma linha foi inserida.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar o quarto: " + e.getMessage(), e);
+        }
+    }
 
 }

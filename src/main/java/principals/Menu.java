@@ -4,11 +4,10 @@ package principals;
 
 import principals.panels.*;
 import principals.panels.pernoitePanels.PernoitePanel;
+import principals.panels.quartosPanel.RoomsPanel;
 import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
-import principals.tools.Icones;
 import principals.tools.LabelArredondado;
-import principals.tools.Resize;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,7 +79,7 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
         addHoverAndSelectionEffect(btnPrice, new PricePanel());
 
-        showPanel(new PernoitePanel());
+        showPanel(new RoomsPanel());
         setVisible(true);
     }
 

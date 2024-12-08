@@ -18,8 +18,6 @@ public class Icones {
     public static ImageIcon desconto = new ImageIcon("src/main/resources/icons/desconto.png");
     public static ImageIcon sacola = new ImageIcon("src/main/resources/icons/sacola.png");
     public static ImageIcon diarias_quantidade = new ImageIcon("src/main/resources/icons/diarias_quantidade.png");
-    public static ImageIcon diaria_atual = new ImageIcon("src/main/resources/icons/diaria_atual.png");
-    public static ImageIcon diaria_atual_laranja = new ImageIcon("src/main/resources/icons/diaria_atual_laranja.png");
     public static ImageIcon esquerda = new ImageIcon("src/main/resources/icons/esquerda.png");
     public static ImageIcon direita = new ImageIcon("src/main/resources/icons/direita.png");
     public static ImageIcon sacola_branca = new ImageIcon("src/main/resources/icons/sacola branca.png");
@@ -33,5 +31,13 @@ public class Icones {
     public static ImageIcon user_sem_foto = new ImageIcon("src/main/resources/icons/user_sem_foto_2.jpg");
     public static ImageIcon user_sem_foto_feminino = new ImageIcon("src/main/resources/icons/user_sem_foto_feminino.jpg");
     public static ImageIcon user_funcionario = new ImageIcon("src/main/resources/icons/menu/user.png");
+    public static ImageIcon rede = new ImageIcon("src/main/resources/icons/rede.png");
+    public static ImageIcon cama_casal = new ImageIcon("src/main/resources/icons/cama_casal.png");
+    public static ImageIcon cama_solteiro = new ImageIcon("src/main/resources/icons/cama_solteiro.png");
+    public static ImageIcon beliche = new ImageIcon("src/main/resources/icons/beliche.png");
+
+
+
+
 
 }
