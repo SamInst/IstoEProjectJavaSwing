@@ -7,11 +7,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class RoomsPanel extends JPanel {
 
-
-    public RoomsPanel() {
+    public RoomsPanel(QuartosRepository quartosRepository) {
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -25,11 +26,19 @@ public class RoomsPanel extends JPanel {
         identificadorPanel.add(btnAdicionar, BorderLayout.EAST);
         topPanel.add(identificadorPanel, BorderLayout.NORTH);
 
+
+        btnAdicionar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new AdicionarQuartoFrame(quartosRepository,"Adicionar Quarto");
+            }
+        });
+
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel quartoPanel = new QuartoIndividualJPanel().mainPanel();
+        JPanel quartoPanel = new ListaDeQuartosJPanel().mainPanel(quartosRepository);
 
-        JScrollPane scrollPane = new JScrollPane(quartoPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(quartoPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scrollPane, BorderLayout.CENTER);

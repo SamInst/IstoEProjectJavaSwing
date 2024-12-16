@@ -9,105 +9,23 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static principals.tools.Cor.*;
 
-public class RelatoriosPanel extends JPanel {
+public class RelatoriosPanel extends JPanel implements Refreshable{
+
+    private final RelatoriosRepository relatoriosRepository;
+
     JButton relatorioButton;
-    RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
     JButton btnPesquisar = new JButton("Pesquisar");
     JButton btnAdicionar = new JButton("Adicionar");
 
-    public RelatoriosPanel() {
-        setLayout(new BorderLayout());
-
-        RelatoriosResponse response = relatorios();
-
-        JPanel topPanel = new JPanel(new BorderLayout());
-
-        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Relatórios", Icones.relatorios);
-        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
-
-        topPanel.add(identificadorPanel);
-
-        btnPesquisar.setPreferredSize(new Dimension(125, 40));
-        btnPesquisar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                buscarRelatorioPorData();
-            }
-        });
-
-        btnAdicionar.setPreferredSize(new Dimension(125, 40));
-        btnAdicionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AdicionarRelatorioFrame();
-            }
-        });
-
-        JPanel sumarioPanel = new JPanel();
-        sumarioPanel(sumarioPanel);
-
-        identificadorPanel.add(btnPesquisar);
-        identificadorPanel.add(btnAdicionar);
-        identificadorPanel.add(sumarioPanel);
-
-        JLabel totalLabel = new JLabel("Total: R$ " + FormatarFloat.format(response.total()));
-        totalLabel.setFont(new Font("Inter", Font.BOLD, 30));
-        totalLabel.setForeground(VERDE_ESCURO);
-        totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
-
-        topPanel.add(totalLabel, BorderLayout.EAST);
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        add(topPanel, BorderLayout.NORTH);
-
-        JPanel relatoriosPanel = new JPanel();
-        relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
-
-        for (RelatoriosResponse.Relatorios relatorio : response.relatorios()) {
-            JPanel relatorioDiaPanel = new JPanel();
-            relatorioDiaPanel.setBackground(Color.white);
-            relatorioDiaPanel.setLayout(new BorderLayout());
-            relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-            JLabel dataLabel = new JLabel(relatorio.data().toString());
-            dataLabel.setForeground(Color.white);
-            dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
-
-            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
-            totalDoDiaLabel.setForeground(Color.white);
-            totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
-
-            JPanel headerPanel = new JPanel(new BorderLayout());
-            headerPanel.setBackground(new Color(66, 75, 152));
-            headerPanel.add(dataLabel, BorderLayout.WEST);
-            headerPanel.add(totalDoDiaLabel, BorderLayout.EAST);
-            headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 45));
-
-            relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
-
-            JPanel relatoriosDoDiaPanel = new JPanel();
-            relatoriosDoDiaPanel.setLayout(new GridLayout(0, 1, 0, 1));
-            relatoriosDoDiaPanel.setBackground(Cor.CINZA_CLARO);
-            relatoriosDoDiaPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-            relatoriosDoDiaPanel.setPreferredSize(null);
-            relatoriosDoDiaPanel.setMinimumSize(null);
-            relatoriosDoDiaPanel.setMaximumSize(null);
-
-            relatoriosDoDia(relatorio.relatorioDoDia(), relatoriosDoDiaPanel);
-
-            relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
-            relatoriosPanel.add(relatorioDiaPanel);
-        }
-
-        JScrollPane scrollPane = new JScrollPane(relatoriosPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        add(scrollPane, BorderLayout.CENTER);
+    public RelatoriosPanel(RelatoriosRepository relatoriosRepository) {
+        this.relatoriosRepository = relatoriosRepository;
+        refreshPanel();
     }
-
 
     public void sumarioPanel(JPanel sumarioPanel){
         sumarioPanel.setLayout(new BoxLayout(sumarioPanel, BoxLayout.Y_AXIS));
@@ -144,14 +62,7 @@ public class RelatoriosPanel extends JPanel {
         sumarioPanel.add(retiradaPanel);
     }
 
-
-    public RelatoriosResponse relatorios() {
-        RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
-        return relatoriosRepository.relatoriosResponse();
-    }
-
-
-    public void buscarRelatorioPorData() {
+    public void buscarRelatorioPorData(RelatoriosRepository relatoriosRepository) {
         JFrame janelaPesquisar = new JFrame("Pesquisar Relatórios por Data");
         janelaPesquisar.setBackground(Color.BLUE);
 
@@ -192,7 +103,7 @@ public class RelatoriosPanel extends JPanel {
 
             JLabel dataLabel = new JLabel(relatorio.data());
             dataLabel.setForeground(Color.white);
-            dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
+            dataLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
             JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
             totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
@@ -221,7 +132,7 @@ public class RelatoriosPanel extends JPanel {
 
         janelaPesquisar.setSize(1900, 1000);
         janelaPesquisar.setBackground(Color.BLUE);
-        janelaPesquisar.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        janelaPesquisar.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         janelaPesquisar.setLocationRelativeTo(null);
         janelaPesquisar.setVisible(true);
     }
@@ -244,7 +155,7 @@ public class RelatoriosPanel extends JPanel {
 
             String tipoPagamento = Converter.converterTipoPagamento(relatorioDoDia.tipo_pagamento());
 
-            JLabel horarioDescricaoLabel = new JLabel(relatorioDoDia.horario() + "      " + relatorioDoDia.relatorio() + " (" + tipoPagamento + ")");
+            JLabel horarioDescricaoLabel = new JLabel(relatorioDoDia.horario().format(DateTimeFormatter.ofPattern("HH:mm")) + "      " + relatorioDoDia.relatorio() + " (" + tipoPagamento + ")");
             horarioDescricaoLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
             horarioDescricaoLabel.setFont(new Font("Inter", Font.BOLD, 17));
             horarioDescricaoLabel.setForeground(CINZA_ESCURO);
@@ -298,54 +209,100 @@ public class RelatoriosPanel extends JPanel {
         }
     }
 
-//    public void ativarMouseListener(Boolean isAtivo) {
-//        mouseListenerAtivo = isAtivo;
-//    }
+    private void initializePanel() {
+        setLayout(new BorderLayout());
 
+        RelatoriosResponse response = relatoriosRepository.relatoriosResponse();
 
+        JPanel topPanel = new JPanel(new BorderLayout());
 
+        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Relatórios", Icones.relatorios);
+        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
 
-//    private JLabel imagemSobrepostaLabel;
+        topPanel.add(identificadorPanel);
 
-//    public void sobreporImagemComTransparencia() {
-//
-//        if (imagemSobrepostaLabel == null) {
-//            try {
-//                BufferedImage imagemOriginal = ImageIO.read(new File("src/main/resources/paisagens/desfoque5.jpg"));
-//
-//                BufferedImage imagemTransparente = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-//                Graphics2D g2d = imagemTransparente.createGraphics();
-//                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-//                g2d.drawImage(imagemOriginal, 0, 0, getWidth(), getHeight(), null);
-//                g2d.dispose();
-//
-//                imagemSobrepostaLabel = new JLabel(new ImageIcon(imagemTransparente));
-//                imagemSobrepostaLabel.setBounds(0, 0, getWidth(), getHeight());
-//
-//                setLayout(null);
-//                add(imagemSobrepostaLabel);
-//                setComponentZOrder(imagemSobrepostaLabel, 0);
-//
-//                btnAdicionar.setEnabled(false);
-//                btnPesquisar.setEnabled(false);
-//
-//                // Desativa os MouseListeners dos botões quando a imagem é exibida
-//                desativarMouseListenersDosBotoes(relatoriosDoDiaPanel);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        imagemSobrepostaLabel.setVisible(true);
-//        revalidate();
-//        repaint();
-//    }
+        btnPesquisar.setPreferredSize(new Dimension(125, 40));
+        btnPesquisar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                buscarRelatorioPorData(relatoriosRepository);
+            }
+        });
 
+        btnAdicionar.setPreferredSize(new Dimension(125, 40));
+        btnAdicionar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AdicionarRelatorioFrame(relatoriosRepository, RelatoriosPanel.this);
+            }
+        });
 
+        JPanel sumarioPanel = new JPanel();
+        sumarioPanel(sumarioPanel);
 
+        identificadorPanel.add(btnPesquisar);
+        identificadorPanel.add(btnAdicionar);
+        identificadorPanel.add(sumarioPanel);
 
+        JLabel totalLabel = new JLabel("Total: R$ " + FormatarFloat.format(response.total()));
+        totalLabel.setFont(new Font("Inter", Font.BOLD, 30));
+        totalLabel.setForeground(VERDE_ESCURO);
+        totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
 
+        topPanel.add(totalLabel, BorderLayout.EAST);
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        add(topPanel, BorderLayout.NORTH);
 
+        JPanel relatoriosPanel = new JPanel();
+        relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
+
+        for (RelatoriosResponse.Relatorios relatorio : response.relatorios()) {
+            JPanel relatorioDiaPanel = new JPanel();
+            relatorioDiaPanel.setBackground(Color.white);
+            relatorioDiaPanel.setLayout(new BorderLayout());
+            relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JLabel dataLabel = new JLabel(relatorio.data());
+            dataLabel.setForeground(Color.white);
+            dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
+
+            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
+            totalDoDiaLabel.setForeground(Color.white);
+            totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
+
+            JPanel headerPanel = new JPanel(new BorderLayout());
+            headerPanel.setBackground(new Color(66, 75, 152));
+            headerPanel.add(dataLabel, BorderLayout.WEST);
+            headerPanel.add(totalDoDiaLabel, BorderLayout.EAST);
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 45));
+
+            relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
+
+            JPanel relatoriosDoDiaPanel = new JPanel();
+            relatoriosDoDiaPanel.setLayout(new GridLayout(0, 1, 0, 1));
+            relatoriosDoDiaPanel.setBackground(Cor.CINZA_CLARO);
+            relatoriosDoDiaPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+            relatoriosDoDiaPanel.setPreferredSize(null);
+            relatoriosDoDiaPanel.setMinimumSize(null);
+            relatoriosDoDiaPanel.setMaximumSize(null);
+
+            relatoriosDoDia(relatorio.relatorioDoDia(), relatoriosDoDiaPanel);
+
+            relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+            relatoriosPanel.add(relatorioDiaPanel);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(relatoriosPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void refreshPanel() {
+        removeAll();
+        initializePanel();
+        revalidate();
+        repaint();
+    }
 }

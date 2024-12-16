@@ -1,24 +1,24 @@
 package principals;
 
-
-
 import principals.panels.*;
 import principals.panels.pernoitePanels.PernoitePanel;
 import principals.panels.quartosPanel.RoomsPanel;
 import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.LabelArredondado;
+import repository.QuartosRepository;
+import repository.RelatoriosRepository;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.Supplier;
 
 import static principals.tools.Icones.*;
 import static principals.tools.Resize.resizeIcon;
 
 public class Menu extends JFrame {
-
     private final JPanel mainPanel;
     private final Color defaultColor = new Color(66, 75, 152);
 
@@ -68,18 +68,18 @@ public class Menu extends JFrame {
         add(sideMenu, BorderLayout.WEST);
         add(mainPanel, BorderLayout.CENTER);
 
-        addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
-        addHoverAndSelectionEffect(btnQuartos, new RoomsPanel());
-        addHoverAndSelectionEffect(btnEntradas, new EntryPanel());
-        addHoverAndSelectionEffect(btnPernoites, new PernoitePanel());
-        addHoverAndSelectionEffect(btnRelatorio, new RelatoriosPanel());
-        addHoverAndSelectionEffect(btnClientes, new CustomersPanel());
-        addHoverAndSelectionEffect(btnDashboard, new DashBoardPanel());
-        addHoverAndSelectionEffect(btnItens, new ItensPanel());
-        addHoverAndSelectionEffect(btnReservas, new ReservationPanel());
-        addHoverAndSelectionEffect(btnPrice, new PricePanel());
+        addHoverAndSelectionEffect(btnDashboard, DashBoardPanel::new);
+        addHoverAndSelectionEffect(btnQuartos, () -> new RoomsPanel(new QuartosRepository()));
+        addHoverAndSelectionEffect(btnEntradas, EntryPanel::new);
+        addHoverAndSelectionEffect(btnPernoites, PernoitePanel::new);
+        addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository()));
+        addHoverAndSelectionEffect(btnClientes, CustomersPanel::new);
+        addHoverAndSelectionEffect(btnItens, ItensPanel::new);
+        addHoverAndSelectionEffect(btnReservas, ReservationPanel::new);
+        addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
-        showPanel(new RoomsPanel());
+
+        showPanel(new RoomsPanel(new QuartosRepository()));
         setVisible(true);
     }
 
@@ -136,8 +136,7 @@ public class Menu extends JFrame {
     }
 
 
-    private void addHoverAndSelectionEffect(JButton button, JPanel panel) {
-
+    private void addHoverAndSelectionEffect(JButton button, Supplier<JPanel> panelSupplier) {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -153,7 +152,7 @@ public class Menu extends JFrame {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                showPanel(panel);
+                showPanel(panelSupplier.get());
                 resetButtonColors();
                 button.setBackground(new Color(100, 75, 237));
             }

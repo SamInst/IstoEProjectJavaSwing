@@ -1,4 +1,4 @@
-package principals.empresaPanels;
+package principals.panels.empresaPanels;
 
 import principals.panels.pessoaPanel.IdentificacaoPessoaFrame;
 import principals.tools.*;

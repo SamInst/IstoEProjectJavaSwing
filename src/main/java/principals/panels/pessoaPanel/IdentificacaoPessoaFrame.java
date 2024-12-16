@@ -1108,7 +1108,6 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-
             IdentificacaoPessoaFrame identificacaoPessoaFrame = new IdentificacaoPessoaFrame(null);
             identificacaoPessoaFrame.setVisible(true);
         });

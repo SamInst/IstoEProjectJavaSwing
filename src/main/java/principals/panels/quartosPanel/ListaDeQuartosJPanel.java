@@ -9,17 +9,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
-public class QuartoIndividualJPanel {
-    QuartosRepository quartosRepository = new QuartosRepository();
-    int largura = 30;
-    int altura = 30;
+public class ListaDeQuartosJPanel {
+
+    int largura = 25;
+    int altura = 25;
     Font font = new Font("Segoe UI", Font.BOLD, 18);
     Color cor = Cor.AZUL_ESCURO;
 
-    public JPanel mainPanel() {
+    public JPanel mainPanel(QuartosRepository quartosRepository) {
         var quartos = quartosRepository.buscaTodosOsQuartos();
         quartos.sort(Comparator.comparingLong(QuartoResponse::quarto_id));
 
@@ -42,7 +42,6 @@ public class QuartoIndividualJPanel {
             JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox = new JComboBoxArredondado<>();
             statusQuartoComboBox.setEditable(false);
             statusQuartoComboBox.setPreferredSize(new Dimension(200, 30));
-            Arrays.stream(StatusQuartoEnum.values()).forEach(statusQuartoComboBox::addItem);
 
             JTextFieldComTextoFixoArredondadoRelatorios tabelaPreco = new JTextFieldComTextoFixoArredondadoRelatorios("$",0);
             tabelaPreco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -60,6 +59,11 @@ public class QuartoIndividualJPanel {
                 @Override
                 public void mouseExited(MouseEvent e) {
                     tabelaPreco.setBackground(Cor.VERDE_ESCURO);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    new TabelaPrecoPorQuartoFrame(quarto.categoria().valorPessoaList());
                 }
             });
 
@@ -121,6 +125,7 @@ public class QuartoIndividualJPanel {
                int columnSize = (int) (categoriaLength * 0.75);
                categoria.setColumns(columnSize);
 
+               categoria.setHorizontalAlignment(JTextField.CENTER);
                categoria.setText(quarto.categoria().categoria());
                categoria.setColumns(columnSize);
                categoria.setForeground(Color.WHITE);
@@ -195,73 +200,66 @@ public class QuartoIndividualJPanel {
 
             quartoPanel.add(quartoButton);
 
-            switch (quarto.status_quarto_enum()){
-                case OCUPADO -> {
-                   panelVermelho.setBackground(new Color(0xF88E8E));
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.OCUPADO);
-                    statusQuartoComboBox.setEnabled(false);
-                }
-                case RESERVADO -> {
-                    panelVermelho.setBackground(new Color(0xE7CE8A));
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.RESERVADO);
-                }
-                case DISPONIVEL -> {
-                    panelVermelho.setBackground(new Color(0x9EDFA5));
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DISPONIVEL);
-                }
-                case DIARIA_ENCERRADA -> {
-                    panelVermelho.setBackground(new Color(0xB65D5D));
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DIARIA_ENCERRADA);
-                }
-                case LIMPEZA -> {
-                    panelVermelho.setBackground(Color.ORANGE);
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.LIMPEZA);
-                }
-                case MANUTENCAO -> {
-                    panelVermelho.setBackground(new Color(0xA19D9D));
-                    statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.MANUTENCAO);
-                }
-            }
+            atualizarStatusQuarto(quarto.status_quarto_enum(), statusQuartoComboBox, panelVermelho);
 
             statusQuartoComboBox.addActionListener(e -> {
-                switch (statusQuartoComboBox.getSelectedItem().toString()) {
-                    case "OCUPADO":
-                        panelVermelho.setBackground(new Color(0xF88E8E));
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.OCUPADO);
-                        break;
-                    case "RESERVADO":
-                        panelVermelho.setBackground(new Color(0xE7CE8A));
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.RESERVADO);
-                        break;
-                    case "DISPONIVEL":
-                        panelVermelho.setBackground(new Color(0x9EDFA5));
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.DISPONIVEL);
-                        break;
-                    case "DIARIA_ENCERRADA":
-                        panelVermelho.setBackground(new Color(0xB65D5D));
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.DIARIA_ENCERRADA);
-                        break;
-                    case "LIMPEZA":
-                        panelVermelho.setBackground(Color.ORANGE);
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.LIMPEZA);
-                        break;
-                    case "MANUTENCAO":
-                        panelVermelho.setBackground(new Color(0xA19D9D));
-                        quartosRepository.alterarStatusQuarto(quarto.quarto_id(), StatusQuartoEnum.MANUTENCAO);
-                        break;
-                    default:
-                        panelVermelho.setBackground(Color.GRAY);
-                }
-            });
+                String selectedItem = Objects.requireNonNull(statusQuartoComboBox.getSelectedItem()).toString();
+                StatusQuartoEnum novoStatus = StatusQuartoEnum.valueOf(selectedItem);
 
+                quartosRepository.alterarStatusQuarto(quarto.quarto_id(), novoStatus);
+
+                atualizarStatusQuarto(novoStatus, statusQuartoComboBox, panelVermelho);
+            });
         }
 
         return quartoPanel;
     }
 
+    private void atualizarStatusQuarto(StatusQuartoEnum status, JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox, JPanel panelVermelho) {
+        statusQuartoComboBox.removeAllItems();
 
-
-
-
+        switch (status) {
+            case OCUPADO -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.OCUPADO);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.OCUPADO);
+                statusQuartoComboBox.setEnabled(false);
+                panelVermelho.setBackground(new Color(0xF88E8E));
+            }
+            case RESERVADO -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.RESERVADO);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.RESERVADO);
+                panelVermelho.setBackground(new Color(0xE7CE8A));
+            }
+            case DISPONIVEL -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.LIMPEZA);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.RESERVADO);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DISPONIVEL);
+                panelVermelho.setBackground(new Color(0x9EDFA5));
+            }
+            case DIARIA_ENCERRADA -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DIARIA_ENCERRADA);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DIARIA_ENCERRADA);
+                panelVermelho.setBackground(new Color(0xB65D5D));
+            }
+            case LIMPEZA -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.LIMPEZA);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.LIMPEZA);
+                panelVermelho.setBackground(Color.ORANGE);
+            }
+            case MANUTENCAO -> {
+                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
+                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
+                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.MANUTENCAO);
+                panelVermelho.setBackground(new Color(0xA19D9D));
+            }
+            default -> panelVermelho.setBackground(Color.BLACK);
+        }
+    }
 }
 

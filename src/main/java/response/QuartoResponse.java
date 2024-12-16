@@ -1,7 +1,6 @@
 package response;
 
 import enums.StatusQuartoEnum;
-import enums.TipoQuartoEnum;
 
 import java.util.List;
 

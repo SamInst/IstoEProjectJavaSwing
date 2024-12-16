@@ -3,6 +3,7 @@ package repository;
 import config.PostgresDatabaseConnect;
 import enums.StatusQuartoEnum;
 import request.AtualizarDadosQuartoRequest;
+import response.Objeto;
 import response.QuartoResponse;
 
 import java.sql.Connection;
@@ -32,7 +33,7 @@ public class QuartosRepository {
 
     public List<QuartoResponse> buscaQuartosPorStatus(StatusQuartoEnum status) {
         List<QuartoResponse> quartos = new ArrayList<>();
-        String sql =quarto_sql.append("WHERE q.status_quarto_enum = ? ").toString();
+        String sql = quarto_sql.append("WHERE q.status_quarto_enum = ? ").toString();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, status.getCodigo());
@@ -63,6 +64,26 @@ public class QuartosRepository {
             throw new RuntimeException(e);
         }
         return quartos;
+    }
+
+
+    public List<Objeto> listarCategorias() {
+        List<Objeto> categorias = new ArrayList<>();
+        String sql = "select id, categoria.categoria from categoria; ";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Objeto categoria = new Objeto(
+                            resultSet.getLong("id"),
+                            resultSet.getString("categoria")
+                    );
+                    categorias.add(categoria);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return categorias;
     }
 
     public List<QuartoResponse> buscaTodosOsQuartos() {
@@ -207,9 +228,9 @@ public class QuartosRepository {
             quantidade_pessoas,
             qtd_cama_casal,
             qtd_cama_solteiro,
-            qtd_beliche, 
-            qtd_rede, 
-            fk_categoria, 
+            qtd_beliche,
+            qtd_rede,
+            fk_categoria,
             status_quarto_enum
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 2)
         """;

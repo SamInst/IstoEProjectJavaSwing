@@ -22,11 +22,9 @@ public class AdicionarRelatorioFrame extends JFrame {
     private JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
     private JTextFieldComTextoFixoArredondadoRelatorios campoValor;
 
-    RelatoriosRepository relatoriosRepository = new RelatoriosRepository();
-
-    public AdicionarRelatorioFrame() {
+    public AdicionarRelatorioFrame(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         setTitle("Adicionar Relatorio");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(600, 200);
         setPreferredSize(new Dimension(600, 250));
         setMinimumSize(new Dimension(600, 250));
@@ -84,7 +82,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         btnAdicionar.setForeground(Color.WHITE);
         pretoPanel.add(btnAdicionar);
 
-        btnAdicionar.addActionListener(e -> adicionarRelatorio());
+        btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel));
 
         add(pretoPanel, BorderLayout.SOUTH);
 
@@ -188,7 +186,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         });
     }
 
-    private void adicionarRelatorio() {
+    private void adicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         try {
             String relatorio = valorField.getText().replace("relatório: ", "").trim().toUpperCase();
             TipoPagamentoEnum tipoPagamento = (TipoPagamentoEnum) tipoPagamentoComboBox.getSelectedItem();
@@ -206,20 +204,14 @@ public class AdicionarRelatorioFrame extends JFrame {
 
             RelatorioRequest relatorioRequest = new RelatorioRequest(relatorio, tipoPagamento, quartoId, valor);
 
-             relatoriosRepository.adicionarRelatorio(relatorioRequest);
+            relatoriosRepository.adicionarRelatorio(relatorioRequest);
 
-            System.out.println(relatorioRequest);
             JOptionPane.showMessageDialog(this, "Relatório adicionado com sucesso!");
             dispose();
+            relatoriosPanel.refreshPanel();
+
         } catch (Exception ex) {
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao adicionar o relatório: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(AdicionarRelatorioFrame::new);
     }
 }
