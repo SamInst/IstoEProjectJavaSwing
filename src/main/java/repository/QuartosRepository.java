@@ -6,6 +6,7 @@ import request.AtualizarDadosQuartoRequest;
 import response.Objeto;
 import response.QuartoResponse;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,24 +17,45 @@ import java.util.List;
 public class QuartosRepository {
     Connection connection = PostgresDatabaseConnect.connect();
 
-    StringBuilder quarto_sql = new StringBuilder("""
-        SELECT distinct q.id AS quarto_id,
-        q.descricao,
-        q.quantidade_pessoas,
-        q.qtd_cama_casal,
-        q.qtd_cama_solteiro,
-        q.qtd_beliche,
-        q.qtd_rede,
-        q.status_quarto_enum,
-        c.id AS categoria_id,
-        c.categoria
-        FROM quarto q
-        LEFT JOIN categoria c ON q.fk_categoria = c.id
-        """);
+    String quarto_sql = """
+    SELECT distinct q.id AS quarto_id,
+    q.descricao,
+    q.quantidade_pessoas,
+    q.qtd_cama_casal,
+    q.qtd_cama_solteiro,
+    q.qtd_beliche,
+    q.qtd_rede,
+    q.status_quarto_enum,
+    c.id AS categoria_id,
+    c.categoria
+    FROM quarto q
+    LEFT JOIN categoria c ON q.fk_categoria = c.id
+    """;
+
+
+    public Objeto buscaCategoriaPorNome(String categoria){
+        String sql = """
+                select categoria.id, categoria.categoria from categoria where categoria.categoria = ?;
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, categoria);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                   return new Objeto(
+                            resultSet.getLong("id"),
+                            resultSet.getString("categoria")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Categoria de quarto nao encontrada " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
 
     public List<QuartoResponse> buscaQuartosPorStatus(StatusQuartoEnum status) {
         List<QuartoResponse> quartos = new ArrayList<>();
-        String sql = quarto_sql.append("WHERE q.status_quarto_enum = ? ").toString();
+        String sql = quarto_sql + " WHERE q.status_quarto_enum = ? ";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, status.getCodigo());
@@ -160,8 +182,7 @@ public class QuartosRepository {
                 qtd_cama_solteiro = ?,
                 qtd_beliche = ?,
                 qtd_rede = ?,
-                fk_categoria = ?,
-                status_quarto_enum = ?
+                fk_categoria = ?
             WHERE id = ?
             """;
 
@@ -173,7 +194,6 @@ public class QuartosRepository {
             statement.setInt(5, request.qtdCamaBeliche());
             statement.setInt(6, request.qtdRede());
             statement.setLong(7, request.categoriaId());
-            statement.setInt(8, request.statusQuarto().getCodigo());
             statement.setLong(9, request.id());
 
             int rowsAffected = statement.executeUpdate();
@@ -186,7 +206,7 @@ public class QuartosRepository {
     }
 
     public QuartoResponse buscaQuartoPorId(Long id) {
-        String sql = quarto_sql.append(" WHERE q.id = ? ").toString();
+        String sql = quarto_sql + " WHERE q.id = ?";
 
         QuartoResponse quartoResponse = null;
 
@@ -221,6 +241,7 @@ public class QuartosRepository {
         return quartoResponse;
     }
 
+
     public void salvarQuarto(AtualizarDadosQuartoRequest request) {
         String sql = """
         INSERT INTO quarto (
@@ -252,5 +273,23 @@ public class QuartosRepository {
             throw new RuntimeException("Erro ao salvar o quarto: " + e.getMessage(), e);
         }
     }
+
+    public boolean verificaQuartoExistente(Long numeroQuarto) {
+        String sql = "SELECT COUNT(*) AS total FROM quarto WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, numeroQuarto);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("total") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar a existência do quarto: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
 
 }

@@ -2,6 +2,7 @@ package principals;
 
 import principals.panels.*;
 import principals.panels.pernoitePanels.PernoitePanel;
+import principals.panels.pessoaPanel.PessoaEmpresaPanel;
 import principals.panels.quartosPanel.RoomsPanel;
 import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
@@ -73,13 +74,13 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnEntradas, EntryPanel::new);
         addHoverAndSelectionEffect(btnPernoites, PernoitePanel::new);
         addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository()));
-        addHoverAndSelectionEffect(btnClientes, CustomersPanel::new);
+        addHoverAndSelectionEffect(btnClientes, PessoaEmpresaPanel::new);
         addHoverAndSelectionEffect(btnItens, ItensPanel::new);
         addHoverAndSelectionEffect(btnReservas, ReservationPanel::new);
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
 
-        showPanel(new RoomsPanel(new QuartosRepository()));
+        showPanel(new PessoaEmpresaPanel());
         setVisible(true);
     }
 

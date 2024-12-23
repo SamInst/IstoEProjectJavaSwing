@@ -17,10 +17,7 @@ import java.util.List;
 public class PessoaRepository extends PostgresDatabaseConnect {
     Connection connection = PostgresDatabaseConnect.connect();
 
-    public PessoaResponse buscarPessoaPorID(Long id) {
-        PessoaResponse pessoa = null;
-
-        String sql = """
+    String sql = """
         SELECT  p.id,
                 data_hora_cadastro,
                 nome,
@@ -49,120 +46,35 @@ public class PessoaRepository extends PostgresDatabaseConnect {
            JOIN public.estados e ON e.id = p.fk_estado
            JOIN public.municipios m ON m.id = p.fk_municipio
            JOIN public.paises pa ON pa.id = p.fk_pais
-           WHERE p.id = ?
-    """;
+        """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+    public PessoaResponse buscarPessoaPorID(Long id) {
+        try (PreparedStatement statement = connection.prepareStatement(sql + " WHERE p.id = ?")) {
 
             statement.setLong(1, id);
 
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    pessoa = new PessoaResponse(
-                            rs.getLong("id"),
-                            rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
-                            rs.getString("nome"),
-                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toLocalDate() : null,
-                            rs.getString("cpf"),
-                            rs.getString("rg"),
-                            rs.getString("email"),
-                            rs.getString("telefone"),
-                            new Objeto(rs.getLong("pais_id"), rs.getString("pais")),
-                            new Objeto(rs.getLong("estado_id"), rs.getString("estado")),
-                            new Objeto(rs.getLong("municipio_id"), rs.getString("municipio")),
-                            rs.getString("endereco"),
-                            rs.getString("complemento"),
-                            rs.getBoolean("hospedado"),
-                            rs.getBoolean("cliente_novo"),
-                            rs.getInt("vezes_hospedado"),
-                            rs.getString("cep"),
-                            rs.getString("bairro"),
-                            rs.getInt("idade"),
-                            rs.getString("numero"),
-                            rs.getInt("sexo")
-                    );
-                }
+                if (rs.next()) return pessoaResponse(rs);
             }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
 
-        return pessoa;
+        return null;
     }
 
 
     public PessoaResponse buscarPessoaPorCPF(String cpf) {
-        PessoaResponse pessoa = null;
-
-        String sql = """
-        SELECT  p.id,
-                data_hora_cadastro,
-                nome,
-                data_nascimento,
-                idade,
-                cep,
-                numero,
-                bairro,
-                cpf,
-                rg,
-                email,
-                telefone,
-                pa.id pais_id,
-                pa.descricao pais,
-                e.id estado_id,
-                e.descricao estado,
-                m.id municipio_id,
-                m.descricao municipio,
-                endereco,
-                complemento,
-                hospedado,
-                cliente_novo,
-                vezes_hospedado,
-                sexo
-           FROM pessoa p
-           JOIN public.estados e ON e.id = p.fk_estado
-           JOIN public.municipios m ON m.id = p.fk_municipio
-           JOIN public.paises pa ON pa.id = p.fk_pais
-           WHERE p.cpf = ?
-    """;
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql + " WHERE p.cpf = ?")) {
             statement.setString(1, cpf);
 
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    pessoa = new PessoaResponse(
-                            rs.getLong("id"),
-                            rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
-                            rs.getString("nome"),
-                            rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toLocalDate() : null,
-                            rs.getString("cpf"),
-                            rs.getString("rg"),
-                            rs.getString("email"),
-                            rs.getString("telefone"),
-                            new Objeto(rs.getLong("pais_id"), rs.getString("pais")),
-                            new Objeto(rs.getLong("estado_id"), rs.getString("estado")),
-                            new Objeto(rs.getLong("municipio_id"), rs.getString("municipio")),
-                            rs.getString("endereco"),
-                            rs.getString("complemento"),
-                            rs.getBoolean("hospedado"),
-                            rs.getBoolean("cliente_novo"),
-                            rs.getInt("vezes_hospedado"),
-                            rs.getString("cep"),
-                            rs.getString("bairro"),
-                            rs.getInt("idade"),
-                            rs.getString("numero"),
-                            rs.getInt("sexo")
-                    );
-                }
+                if (rs.next()) return pessoaResponse(rs);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return pessoa;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
     }
 
 
@@ -420,5 +332,49 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         }
     }
 
-}
+    public List<PessoaResponse> buscarTodasAsPessoasComPaginacao(int page, int size) {
+        List<PessoaResponse> pessoas = new ArrayList<>();
+        int offset = (page - 1) * size;
 
+        try (PreparedStatement statement = connection.prepareStatement(sql + " ORDER BY p.nome" + " LIMIT ? OFFSET ?")) {
+            statement.setInt(1, size);
+            statement.setInt(2, offset);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    pessoas.add(pessoaResponse(rs));
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return pessoas;
+    }
+
+    private PessoaResponse pessoaResponse(ResultSet rs) throws SQLException {
+        return new PessoaResponse(
+                rs.getLong("id"),
+                rs.getTimestamp("data_hora_cadastro") != null ? rs.getTimestamp("data_hora_cadastro").toString() : null,
+                rs.getString("nome"),
+                rs.getDate("data_nascimento") != null ? rs.getDate("data_nascimento").toLocalDate() : null,
+                rs.getString("cpf"),
+                rs.getString("rg"),
+                rs.getString("email"),
+                rs.getString("telefone"),
+                new Objeto(rs.getLong("pais_id"), rs.getString("pais")),
+                new Objeto(rs.getLong("estado_id"), rs.getString("estado")),
+                new Objeto(rs.getLong("municipio_id"), rs.getString("municipio")),
+                rs.getString("endereco"),
+                rs.getString("complemento"),
+                rs.getBoolean("hospedado"),
+                rs.getBoolean("cliente_novo"),
+                rs.getInt("vezes_hospedado"),
+                rs.getString("cep"),
+                rs.getString("bairro"),
+                rs.getInt("idade"),
+                rs.getString("numero"),
+                rs.getInt("sexo")
+        );
+    }
+}

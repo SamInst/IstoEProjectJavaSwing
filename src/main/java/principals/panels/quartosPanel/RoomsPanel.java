@@ -1,6 +1,7 @@
 package principals.panels.quartosPanel;
 
 import principals.tools.Icones;
+import principals.tools.Refreshable;
 import repository.QuartosRepository;
 
 import javax.swing.*;
@@ -10,9 +11,14 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class RoomsPanel extends JPanel {
+public class RoomsPanel extends JPanel implements Refreshable {
+    private final QuartosRepository quartosRepository;
+    public RoomsPanel(QuartosRepository quartosRepository1) {
+        this.quartosRepository = quartosRepository1;
+        initializePanel();
+    }
 
-    public RoomsPanel(QuartosRepository quartosRepository) {
+    private void initializePanel() {
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -30,13 +36,13 @@ public class RoomsPanel extends JPanel {
         btnAdicionar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new AdicionarQuartoFrame(quartosRepository,"Adicionar Quarto");
+                new AdicionarQuartoFrame(quartosRepository, null, RoomsPanel.this);
             }
         });
 
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel quartoPanel = new ListaDeQuartosJPanel().mainPanel(quartosRepository);
+        JPanel quartoPanel = new ListaDeQuartosJPanel().mainPanel(quartosRepository, RoomsPanel.this);
 
         JScrollPane scrollPane = new JScrollPane(quartoPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -62,6 +68,15 @@ public class RoomsPanel extends JPanel {
                 }
             }
         });
+    }
+
+
+    @Override
+    public void refreshPanel() {
+        removeAll();
+        initializePanel();
+        revalidate();
+        repaint();
     }
 
 

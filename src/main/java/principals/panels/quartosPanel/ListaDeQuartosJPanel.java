@@ -13,13 +13,12 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public class ListaDeQuartosJPanel {
-
     int largura = 25;
     int altura = 25;
-    Font font = new Font("Segoe UI", Font.BOLD, 18);
+    Font font = new Font("Roboto", Font.BOLD, 18);
     Color cor = Cor.AZUL_ESCURO;
 
-    public JPanel mainPanel(QuartosRepository quartosRepository) {
+    public JPanel mainPanel(QuartosRepository quartosRepository, RoomsPanel roomsPanel) {
         var quartos = quartosRepository.buscaTodosOsQuartos();
         quartos.sort(Comparator.comparingLong(QuartoResponse::quarto_id));
 
@@ -84,6 +83,11 @@ public class ListaDeQuartosJPanel {
                 @Override
                 public void mouseExited(MouseEvent e) {
                     ((BotaoArredondado) e.getSource()).setShowBorder(false, Color.WHITE);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    new AdicionarQuartoFrame(quartosRepository, quarto.quarto_id(), roomsPanel);
                 }
             });
 
