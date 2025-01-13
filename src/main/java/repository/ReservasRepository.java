@@ -4,7 +4,6 @@ import config.PostgresDatabaseConnect;
 import org.springframework.transaction.annotation.Transactional;
 import request.AdicionarReservasRequest;
 import request.BuscaReservasResponse;
-import response.DiariaResponse;
 
 import java.sql.*;
 import java.time.LocalDate;

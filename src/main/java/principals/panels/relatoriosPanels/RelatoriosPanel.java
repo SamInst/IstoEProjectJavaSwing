@@ -7,7 +7,10 @@ import response.RelatoriosResponse;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -103,7 +106,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
             JLabel dataLabel = new JLabel(relatorio.data());
             dataLabel.setForeground(Color.white);
-            dataLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            dataLabel.setFont(new Font("Roboto", Font.BOLD, 19));
             JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
             totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
@@ -157,12 +160,12 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
             JLabel horarioDescricaoLabel = new JLabel(relatorioDoDia.horario().format(DateTimeFormatter.ofPattern("HH:mm")) + "      " + relatorioDoDia.relatorio() + " (" + tipoPagamento + ")");
             horarioDescricaoLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
-            horarioDescricaoLabel.setFont(new Font("Inter", Font.BOLD, 17));
+            horarioDescricaoLabel.setFont(new Font("Roboto", Font.BOLD, 15));
             horarioDescricaoLabel.setForeground(CINZA_ESCURO);
 
             JLabel valorLabel = new JLabel("R$ " + FormatarFloat.format(relatorioDoDia.valor()));
             valorLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
-            valorLabel.setFont(new Font("Inter", Font.BOLD, 18));
+            valorLabel.setFont(new Font("Roboto", Font.BOLD, 15));
 
             if (relatorioDoDia.valor() < 0) valorLabel.setForeground(VERMELHO);
             else if (Integer.parseInt(relatorioDoDia.tipo_pagamento()) == 1) valorLabel.setForeground(VERDE_ESCURO);
@@ -189,7 +192,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
             relatorioButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    relatorioButton.setFont(new Font("Inter", Font.BOLD, 25));
+                    relatorioButton.setFont(new Font("Roboto", Font.PLAIN, 25));
                     relatorioButton.setBackground(CINZA_CLARO);
                     relatorioButton.setForeground(CINZA_CLARO);
                     leftPanel.setBackground(CINZA_CLARO);
@@ -199,7 +202,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    relatorioButton.setFont(new Font("Inter", Font.BOLD, 20));
+                    relatorioButton.setFont(new Font("Roboto", Font.PLAIN, 20));
                     relatorioButton.setBackground(Color.white);
                     leftPanel.setBackground(Color.white);
                     rightPanel.setBackground(Color.white);
@@ -245,7 +248,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
         identificadorPanel.add(sumarioPanel);
 
         JLabel totalLabel = new JLabel("Total: R$ " + FormatarFloat.format(response.total()));
-        totalLabel.setFont(new Font("Inter", Font.BOLD, 30));
+        totalLabel.setFont(new Font("Roboto", Font.PLAIN, 30));
         totalLabel.setForeground(VERDE_ESCURO);
         totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
 
@@ -265,11 +268,11 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
             JLabel dataLabel = new JLabel(relatorio.data());
             dataLabel.setForeground(Color.white);
-            dataLabel.setFont(new Font("Inter", Font.BOLD, 20));
+            dataLabel.setFont(new Font("Roboto", Font.PLAIN, 20));
 
             JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
-            totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
+            totalDoDiaLabel.setFont(new Font("Roboto", Font.PLAIN, 20));
 
             JPanel headerPanel = new JPanel(new BorderLayout());
             headerPanel.setBackground(new Color(66, 75, 152));

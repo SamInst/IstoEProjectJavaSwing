@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static buttons.Botoes.*;
 import static principals.tools.EscurecerImagemDemo.escurecerImagem;
+import static principals.tools.Icones.user_sem_foto;
 import static principals.tools.Mascaras.*;
+import static principals.tools.Resize.resizeIcon;
 
 public class IdentificacaoPessoaFrame extends JFrame {
 
@@ -66,7 +69,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
     PanelArredondado quantidadeHospedagemPanel = new PanelArredondado();
     JLabel quantidadeHospedagemLabel = new JLabel("0");
 
-    Font font = new Font("Segoe UI", Font.PLAIN, 16);
+    Font font = new Font("Roboto", Font.PLAIN, 16);
     final int[] generoSelecionado = new int[1];
     int idadeCalculada;
 
@@ -75,13 +78,13 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
     String cpfExterno;
 
-    ImageIcon user_sem_foto_masculino = Resize.resizeIcon(Icones.user_sem_foto, largura_foto, altura_foto);
-    ImageIcon user_sem_foto_feminino = Resize.resizeIcon(Icones.user_sem_foto_feminino, largura_foto, altura_foto);
+    ImageIcon user_sem_foto_masculino = resizeIcon(user_sem_foto, largura_foto, altura_foto);
+    ImageIcon user_sem_foto_feminino = resizeIcon(Icones.user_sem_foto_feminino, largura_foto, altura_foto);
 
     AtomicReference<ImageIcon> foto_usuario = new AtomicReference<>(user_sem_foto_masculino);
 
 
-    public IdentificacaoPessoaFrame(String cpf) {
+    public IdentificacaoPessoaFrame(String cpf, boolean somenteLeitura) {
         cpfExterno = cpf;
         setTitle("Identificação de Pessoa");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -98,7 +101,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         tituloPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
 
         JLabel titulo = new JLabel("Identificação de Pessoa");
-        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        titulo.setFont(new Font("Roboto", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         tituloPanel.add(titulo);
         add(tituloPanel, BorderLayout.NORTH);
@@ -220,7 +223,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                     foto_usuario_path = selectedFile.getAbsolutePath();
                     try {
                         ImageIcon selectedImage = new ImageIcon(selectedFile.getAbsolutePath());
-                        foto_usuario.set(Resize.resizeIcon(selectedImage, largura_foto, altura_foto));
+                        foto_usuario.set(resizeIcon(selectedImage, largura_foto, altura_foto));
                         fotoLabel.setIcon(foto_usuario.get());
 
                         for (ActionListener listener : genero.getActionListeners()) {
@@ -242,7 +245,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         quantidadeHospedagemLabel.setForeground(Color.WHITE);
         quantidadeHospedagemLabel.setHorizontalAlignment(SwingConstants.CENTER);
         quantidadeHospedagemLabel.setVerticalAlignment(SwingConstants.CENTER);
-        quantidadeHospedagemLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        quantidadeHospedagemLabel.setFont(new Font("Roboto", Font.BOLD, 20));
         quantidadeHospedagemPanel.add(quantidadeHospedagemLabel);
 
         fotoLabel.add(quantidadeHospedagemPanel);
@@ -480,22 +483,14 @@ public class IdentificacaoPessoaFrame extends JFrame {
             }
         });
 
-        JButton btnLimpar = new JButton("Limpar");
-        btnLimpar.setFont(font);
-        btnLimpar.setFocusPainted(false);
-        btnLimpar.setBackground(Color.WHITE);
-        btnLimpar.setForeground(Color.DARK_GRAY);
-        btnLimpar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setFont(font);
-        btnSalvar.setFocusPainted(false);
-        btnSalvar.setBackground(new Color(0, 153, 0));
-        btnSalvar.setForeground(Color.WHITE);
-        btnSalvar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JButton btnLimpar = btn_branco("Limpar Campos");
+        JButton btnSalvar = btn_verde("Salvar Dados");
+        JButton btnEditar = btn_cinza("Editar Dados");
 
         botaoPanel.add(btnSalvar);
         botaoPanel.add(btnLimpar);
+        botaoPanel.add(btnEditar);
+        btnEditar.setVisible(false);
 
         btnSalvar.addActionListener(a -> {
             try {
@@ -511,18 +506,28 @@ public class IdentificacaoPessoaFrame extends JFrame {
         setVisible(true);
 
         if (cpfExterno != null && !cpfExterno.isBlank()) {
-            btnSalvar.setVisible(false);
-            btnLimpar.setVisible(false);
+          
+            
             try {
                 campoCPF.setText("* CPF: " + cpfExterno);
                 if (verificarSituacao(cpfExterno)){
                     preencherCamposPessoa(cpfExterno);
-                    desabilitarCamposParaPesquisa();
+                    if (somenteLeitura){
+                        btnSalvar.setVisible(false);
+                        btnLimpar.setVisible(false);
+                        btnEditar.setVisible(true);
+                        desabilitarCamposParaPesquisa();
+                    }
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Erro ao buscar dados da pessoa: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
+
+        btnEditar.addActionListener(a -> {
+                dispose();
+                new IdentificacaoPessoaFrame(cpfExterno, false);
+        });
     }
 
     private void carregarEstados(long paisId) {
@@ -1108,7 +1113,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            IdentificacaoPessoaFrame identificacaoPessoaFrame = new IdentificacaoPessoaFrame(null);
+            IdentificacaoPessoaFrame identificacaoPessoaFrame = new IdentificacaoPessoaFrame(null, false);
             identificacaoPessoaFrame.setVisible(true);
         });
     }

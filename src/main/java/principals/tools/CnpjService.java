@@ -1,5 +1,9 @@
 package principals.tools;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import response.EmpresaResponse;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,10 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import response.EmpresaResponse;
 
 public class CnpjService {
 

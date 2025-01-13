@@ -35,6 +35,7 @@ public class Icones {
     public static ImageIcon cama_casal = new ImageIcon("src/main/resources/icons/cama_casal.png");
     public static ImageIcon cama_solteiro = new ImageIcon("src/main/resources/icons/cama_solteiro.png");
     public static ImageIcon beliche = new ImageIcon("src/main/resources/icons/beliche.png");
+    public static ImageIcon linked = new ImageIcon("src/main/resources/icons/chainn.png");
 
 
 

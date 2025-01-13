@@ -3,7 +3,6 @@ package principals.panels.reservasPanels;
 import com.toedter.calendar.JCalendar;
 import principals.tools.BotaoArredondado;
 import principals.tools.Cor;
-import principals.tools.CustomJCalendar;
 import principals.tools.Icones;
 import request.BuscaReservasResponse;
 

@@ -1,12 +1,8 @@
 package principals.tools;
 
+import javax.swing.*;
 import java.awt.*;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
-/**
- * WrapLayout estende FlowLayout e suporta quebra de linha para os componentes quando eles não cabem na largura da linha atual.
- */
 public class WrapLayout extends FlowLayout {
 
     public WrapLayout() {

@@ -87,7 +87,6 @@ public class EmpresaRepository {
 
             try (var rs = stmt.executeQuery()) {
                 if (rs.next()) return rs.getInt(1) > 0;
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -249,5 +248,87 @@ public class EmpresaRepository {
             throw new SQLException("Erro ao atualizar empresa: " + e.getMessage(), e);
         }
     }
+
+    public DadosEmpresaResponse buscarUltimaEmpresaCadastradaPorCpfPessoa(String cpf) {
+        DadosEmpresaResponse dadosEmpresa = null;
+        String sql = """
+        SELECT
+            e.id,
+            e.nome_empresa       AS nomeEmpresa,
+            e.cnpj,
+            e.telefone,
+            e.email,
+            e.endereco,
+            e.cep,
+            e.numero,
+            e.complemento,
+            e.bairro,
+            paises.id            AS paisId,
+            paises.descricao     AS paisDescricao,
+            estados.id           AS estadoId,
+            estados.descricao    AS estadoDescricao,
+            municipios.id        AS municipioId,
+            municipios.descricao AS municipioDescricao
+        FROM empresa e
+        INNER JOIN empresa_pessoa ep ON e.id = ep.fk_empresa
+        INNER JOIN pessoa p ON ep.fk_pessoa = p.id
+        LEFT JOIN paises ON e.fk_pais = paises.id
+        LEFT JOIN estados ON e.fk_estado = estados.id
+        LEFT JOIN municipios ON e.fk_municipio = municipios.id
+        WHERE p.cpf = ?
+    order by e.id desc limit 1
+    """;
+
+        try (PreparedStatement statement = conexao.prepareStatement(sql)) {
+            statement.setString(1, cpf);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+
+                    List<BuscaPessoaRequest> pessoasVinculadas = pessoaRepository.buscaPessoasPorEmpresaCNPJ(rs.getString("cnpj"));
+
+                    Objeto pais = null;
+                    Objeto estado = null;
+                    Objeto municipio = null;
+
+                    if (rs.getObject("paisId") != null) {
+                        pais = new Objeto(rs.getLong("paisId"), rs.getString("paisDescricao"));
+                    }
+
+                    if (rs.getObject("estadoId") != null) {
+                        estado = new Objeto(rs.getLong("estadoId"), rs.getString("estadoDescricao"));
+                    }
+
+                    if (rs.getObject("municipioId") != null) {
+                        municipio = new Objeto(rs.getLong("municipioId"), rs.getString("municipioDescricao"));
+                    }
+
+                    dadosEmpresa = new DadosEmpresaResponse(
+                            rs.getLong("id"),
+                            rs.getString("nomeEmpresa"),
+                            rs.getString("cnpj"),
+                            rs.getString("telefone"),
+                            rs.getString("email"),
+                            rs.getString("endereco"),
+                            rs.getString("bairro"),
+                            rs.getString("cep"),
+                            rs.getString("numero"),
+                            rs.getString("complemento"),
+                            pais,
+                            estado,
+                            municipio,
+                            pessoasVinculadas
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar empresa pelo CPF da pessoa: " + e.getMessage(), e);
+        }
+
+        return dadosEmpresa;
+    }
+
+
 }
 

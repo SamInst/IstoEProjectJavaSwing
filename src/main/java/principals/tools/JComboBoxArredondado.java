@@ -27,7 +27,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
                 if (isSelected) {
                     label.setBackground(new Color(184, 207, 229));
                     label.setForeground(Cor.CINZA_ESCURO);
-                    label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                    label.setFont(new Font("Roboto", Font.PLAIN, 12));
                 } else {
                     label.setBackground(Color.WHITE);
                     label.setForeground(Color.GRAY);

@@ -35,7 +35,7 @@ public class ListaDeQuartosJPanel {
             JLabel icone_qtd_pessoas = new JLabel(Resize.resizeIcon(Icones.usuarios, largura, altura));
 
             JTextFieldComTextoFixoArredondado categoria = new JTextFieldComTextoFixoArredondado("", 0);
-            categoria.setFont(new Font("Segoe UI", Font.BOLD, 15));
+            categoria.setFont(new Font("Roboto", Font.BOLD, 15));
             categoria.setBackground(Cor.CINZA_CLARO);
 
             JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox = new JComboBoxArredondado<>();
@@ -44,7 +44,7 @@ public class ListaDeQuartosJPanel {
 
             JTextFieldComTextoFixoArredondadoRelatorios tabelaPreco = new JTextFieldComTextoFixoArredondadoRelatorios("$",0);
             tabelaPreco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            tabelaPreco.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            tabelaPreco.setFont(new Font("Roboto", Font.BOLD, 20));
             tabelaPreco.setBackground(Cor.VERDE_ESCURO);
             tabelaPreco.setEnabled(false);
             tabelaPreco.setForeground(Color.white);
@@ -100,7 +100,7 @@ public class ListaDeQuartosJPanel {
 
             JLabel numeroQuarto = new JLabel(quarto.quarto_id() < 10 ? "0" + quarto.quarto_id() : quarto.quarto_id() + "");
             numeroQuarto.setForeground(Cor.CINZA_CLARO);
-            numeroQuarto.setFont(new Font("Segoe UI", Font.BOLD, 45));
+            numeroQuarto.setFont(new Font("Roboto", Font.BOLD, 45));
 
             panelVermelho.setPreferredSize(new Dimension(90, 0));
             panelVermelho.add(numeroQuarto);

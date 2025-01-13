@@ -13,7 +13,7 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 public class AdicionarQuartoFrame extends JFrame {
-    Font font = new Font("Segoe UI", Font.PLAIN, 16);
+    Font font = new Font("Roboto", Font.PLAIN, 16);
 
     private final JComboBoxArredondado<String> categoria = new JComboBoxArredondado<>();
     JTextFieldComTextoFixoArredondado numero = new JTextFieldComTextoFixoArredondado("* Numero: ", 3);
@@ -46,7 +46,7 @@ public class AdicionarQuartoFrame extends JFrame {
         tituloPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
 
         JLabel titulo = new JLabel("Identificacao Quarto");
-        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        titulo.setFont(new Font("Roboto", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         tituloPanel.add(titulo);
         add(tituloPanel, BorderLayout.NORTH);
@@ -95,7 +95,7 @@ public class AdicionarQuartoFrame extends JFrame {
         botoesPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnSalvar.setFont(new Font("Roboto", Font.BOLD, 16));
         btnSalvar.setBackground(new Color(0, 153, 0));
         btnSalvar.setForeground(Color.WHITE);
         botoesPanel.add(btnSalvar);

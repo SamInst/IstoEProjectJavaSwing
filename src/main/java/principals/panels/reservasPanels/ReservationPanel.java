@@ -1,6 +1,5 @@
 package principals.panels.reservasPanels;
 
-import principals.panels.pessoaPanel.IdentificacaoPessoaFrame;
 import principals.tools.Icones;
 import repository.ReservasRepository;
 import request.AdicionarReservasRequest;

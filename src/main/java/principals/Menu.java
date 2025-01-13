@@ -1,6 +1,10 @@
 package principals;
 
-import principals.panels.*;
+import lombok.SneakyThrows;
+import principals.panels.DashBoardPanel;
+import principals.panels.EntryPanel;
+import principals.panels.ItensPanel;
+import principals.panels.PricePanel;
 import principals.panels.pernoitePanels.PernoitePanel;
 import principals.panels.pessoaPanel.PessoaEmpresaPanel;
 import principals.panels.quartosPanel.RoomsPanel;
@@ -23,6 +27,7 @@ public class Menu extends JFrame {
     private final JPanel mainPanel;
     private final Color defaultColor = new Color(66, 75, 152);
 
+    @SneakyThrows
     public Menu() {
         setTitle("ISTO É POUSADA");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

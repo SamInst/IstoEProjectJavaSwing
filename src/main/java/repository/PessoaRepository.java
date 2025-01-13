@@ -7,8 +7,11 @@ import request.PessoaRequest;
 import response.Objeto;
 import response.PessoaResponse;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -247,6 +250,26 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         }
     }
 
+    public BufferedImage buscarFotoBufferedPessoaPorId(Long pessoaID) throws SQLException, IOException {
+        String sql = "SELECT path FROM foto_pessoa WHERE fk_pessoa = ?;";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, pessoaID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String path = rs.getString("path");
+                    File fotoArquivo = new File(path);
+
+                    if (fotoArquivo.exists()) {
+
+                        return ImageIO.read(fotoArquivo);
+                    }
+                }
+                return null;
+            }
+        }
+    }
+
     public Objeto buscarPathFotoPessoaPorId(Long pessoaID) throws SQLException {
         String sql = "SELECT id, path FROM foto_pessoa WHERE fk_pessoa = ?;";
 
@@ -280,7 +303,7 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
 
 
-    public boolean atualizarPessoa(Long pessoaID, PessoaRequest pessoaRequest) throws SQLException {
+    public void atualizarPessoa(Long pessoaID, PessoaRequest pessoaRequest) throws SQLException {
         String sql = """
         UPDATE public.pessoa
         SET nome = ?,
@@ -328,15 +351,19 @@ public class PessoaRepository extends PostgresDatabaseConnect {
             stmt.setLong(20, pessoaID);
 
             int rowsUpdated = stmt.executeUpdate();
-            return rowsUpdated > 0;
         }
     }
 
-    public List<PessoaResponse> buscarTodasAsPessoasComPaginacao(int page, int size) {
+    public List<PessoaResponse> buscarTodasAsPessoasComPaginacao(int page) {
         List<PessoaResponse> pessoas = new ArrayList<>();
-        int offset = (page - 1) * size;
+        int size = qutPessoasHospedadas() + 3;
+        int offset = page * size;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql + " ORDER BY p.nome" + " LIMIT ? OFFSET ?")) {
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql + """
+                 ORDER BY CASE WHEN p.hospedado = true THEN 0 ELSE 1 END,
+                 p.nome 
+                 LIMIT ? OFFSET ?""")) {
             statement.setInt(1, size);
             statement.setInt(2, offset);
 
@@ -377,4 +404,72 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                 rs.getInt("sexo")
         );
     }
+
+    public Integer qutPessoasHospedadas() {
+        String sql = "SELECT COUNT(*) FROM pessoa WHERE hospedado = true";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar quantidade de pessoas hospedadas: " + e.getMessage(), e);
+        }
+
+        return 0;
+    }
+
+    public List<PessoaResponse> buscarPessoaPorNome(String nome) {
+        List<PessoaResponse> pessoas = new ArrayList<>();
+        String sql = """
+        SELECT  p.id,
+                data_hora_cadastro,
+                nome,
+                data_nascimento,
+                idade,
+                cep,
+                numero,
+                bairro,
+                cpf,
+                rg,
+                email,
+                telefone,
+                pa.id pais_id,
+                pa.descricao pais,
+                e.id estado_id,
+                e.descricao estado,
+                m.id municipio_id,
+                m.descricao municipio,
+                endereco,
+                complemento,
+                hospedado,
+                cliente_novo,
+                vezes_hospedado,
+                sexo
+        FROM pessoa p
+        JOIN public.estados e ON e.id = p.fk_estado
+        JOIN public.municipios m ON m.id = p.fk_municipio
+        JOIN public.paises pa ON pa.id = p.fk_pais
+        WHERE p.nome ILIKE ?
+        ORDER BY p.nome;
+    """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, "%" + nome + "%");
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    pessoas.add(pessoaResponse(rs));
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return pessoas;
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package principals.panels.empresaPanels;
 
+import buttons.Botoes;
 import principals.panels.pessoaPanel.IdentificacaoPessoaFrame;
 import principals.tools.*;
 import repository.EmpresaRepository;
@@ -23,7 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static principals.tools.Icones.*;
 import static principals.tools.Mascaras.*;
+import static principals.tools.Tool.*;
 
 public class IdentificacaoEmpresaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
@@ -60,7 +63,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        Font font = new Font("Segoe UI", Font.PLAIN, 15);
+        Font font = new Font("Roboto", Font.PLAIN, 15);
 
         JPanel tituloPanel = new JPanel();
         tituloPanel.setBackground(new Color(0x424B98));
@@ -68,7 +71,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         tituloPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         tituloPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
         JLabel titulo = new JLabel("Identificação de Empresa");
-        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        titulo.setFont(new Font("Roboto", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         tituloPanel.add(titulo);
         add(tituloPanel, BorderLayout.NORTH);
@@ -79,7 +82,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         campoNomeEmpresa = criarCampo("* Nome/Razão Social: ");
         campoCNPJ = criarCampo("* CNPJ: ");
         campoEndereco = new JTextFieldComTextoFixoArredondado("Endereço: ", 35);
-        campoEndereco.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoEndereco.setFont(new Font("Roboto", Font.PLAIN, 15));
 
         adicionarMascaraCNPJ(campoCNPJ);
         campoTelefone = criarCampo("* Fone: ");
@@ -87,7 +90,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         campoEmail = criarCampo("Email: ");
 
         campoCEP = new JTextFieldComTextoFixoArredondado("* CEP: ", 5);
-        campoCEP.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoCEP.setFont(new Font("Roboto", Font.PLAIN, 15));
         adicionarMascaraCEP(campoCEP);
 
         campoCNPJ.addKeyListener(new KeyAdapter() {
@@ -104,17 +107,17 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         });
 
         campoNumero = new JTextFieldComTextoFixoArredondado("N*: ", 2);
-        campoNumero.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoNumero.setFont(new Font("Roboto", Font.PLAIN, 15));
         campoComplemento = new JTextFieldComTextoFixoArredondado("Complemento: ", 20);
-        campoComplemento.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoComplemento.setFont(new Font("Roboto", Font.PLAIN, 15));
 
         campoBairro = new JTextFieldComTextoFixoArredondado("Bairro: ", 10);
-        campoBairro.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campoBairro.setFont(new Font("Roboto", Font.PLAIN, 15));
 
         statusPanel = new JPanel();
         statusPanel.setPreferredSize(new Dimension(50, 25));
         statusLabel = new JLabel("Situação");
-        statusLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        statusLabel.setFont(new Font("Roboto", Font.BOLD, 14));
         statusPanel.add(statusLabel);
 
         paisComboBox.setPreferredSize(new Dimension(190, 30));
@@ -230,10 +233,8 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         add(camposPanel, BorderLayout.CENTER);
 
         JPanel botaoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        btnSalvar.setBackground(new Color(0, 153, 0));
-        btnSalvar.setForeground(Color.WHITE);
+        JButton btnSalvar = Botoes.btn_verde("Salvar Dados");
+
         botaoPanel.add(btnSalvar);
         add(botaoPanel, BorderLayout.SOUTH);
         btnSalvar.addActionListener(e -> {
@@ -275,7 +276,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             }
         });
 
-        JLabel iconeVinculo = new JLabel(Tool.resizeIcon(new ImageIcon("src/main/resources/icons/chainn.png"), 20, 20));
+        JLabel iconeVinculo = new JLabel(resizeIcon(linked, 20, 20));
         JLabel cpfLabel = new JLabel(" " + pessoa.cpf());
         cpfLabel.setForeground(new Color(0x990909));
         JLabel nomeLabel = new JLabel(pessoa.nome());
@@ -288,7 +289,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         contentPanel.add(cpfLabel);
         contentPanel.add(nomeLabel);
 
-        JLabel iconeRemover = new JLabel(Tool.resizeIcon(new ImageIcon("src/main/resources/icons/remove.png"), 20, 20));
+        JLabel iconeRemover = new JLabel(resizeIcon(new ImageIcon("src/main/resources/icons/remove.png"), 20, 20));
         iconeRemover.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         iconeRemover.addMouseListener(new MouseAdapter() {
             @Override
@@ -330,7 +331,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         pessoaPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new IdentificacaoPessoaFrame(pessoa.cpf());
+                new IdentificacaoPessoaFrame(pessoa.cpf(), true);
             }
         });
 
@@ -353,7 +354,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
     private JTextFieldComTextoFixoArredondado criarCampo(String texto) {
         JTextFieldComTextoFixoArredondado campo = new JTextFieldComTextoFixoArredondado(texto, 30);
         campo.setPreferredSize(new Dimension(200, 25));
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campo.setFont(new Font("Roboto", Font.PLAIN, 15));
         return campo;
     }
 
@@ -546,7 +547,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             }
 
             if (pessoasCadastradas.size() != listaPessoas) {
-                StringBuilder pessoasAdicionadas = new StringBuilder("Pessoas adicionadas: ");
+                StringBuilder pessoasAdicionadas = new StringBuilder("Pessoas adicionadas: \n");
 
                 pessoasVinculadasIds.forEach(novaPessoa -> {
                     try {

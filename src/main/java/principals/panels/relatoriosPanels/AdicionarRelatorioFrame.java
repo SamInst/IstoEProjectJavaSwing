@@ -39,7 +39,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         azulPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         azulPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
         JLabel titulo = new JLabel("Adicionar Relatório");
-        titulo.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        titulo.setFont(new Font("Roboto", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
         azulPanel.add(titulo);
         add(azulPanel, BorderLayout.NORTH);
@@ -50,7 +50,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         laranjaPanel.setPreferredSize(new Dimension(500, 200));
 
         valorField = new JTextFieldComTextoFixoArredondadoRelatorios("relatório: ", 35);
-        valorField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        valorField.setFont(new Font("Roboto", Font.PLAIN, 16));
 
         tipoPagamentoComboBox = new JComboBoxArredondado<>();
         tipoPagamentoComboBox.setEditable(true);
@@ -61,10 +61,10 @@ public class AdicionarRelatorioFrame extends JFrame {
         tipoPagamentoComboBox.setCorBorda(Cor.CINZA_ESCURO.brighter());
 
         campoQuarto = new JTextFieldComTextoFixoArredondadoRelatorios("quarto: ", 7);
-        campoQuarto.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        campoQuarto.setFont(new Font("Roboto", Font.PLAIN, 16));
 
         campoValor = new JTextFieldComTextoFixoArredondadoRelatorios("valor: ", 12);
-        campoValor.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        campoValor.setFont(new Font("Roboto", Font.PLAIN, 16));
 
         laranjaPanel.add(tipoPagamentoComboBox);
         laranjaPanel.add(campoQuarto);
@@ -77,7 +77,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         pretoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnAdicionar = new JButton("Adicionar");
-        btnAdicionar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnAdicionar.setFont(new Font("Roboto", Font.BOLD, 16));
         btnAdicionar.setBackground(new Color(0, 153, 0));
         btnAdicionar.setForeground(Color.WHITE);
         pretoPanel.add(btnAdicionar);
