@@ -5,12 +5,14 @@ import principals.panels.DashBoardPanel;
 import principals.panels.EntryPanel;
 import principals.panels.ItensPanel;
 import principals.panels.PricePanel;
+import principals.panels.pernoitePanels.NewPernoitesPanel;
 import principals.panels.pernoitePanels.PernoitePanel;
 import principals.panels.pessoaPanel.PessoaEmpresaPanel;
 import principals.panels.quartosPanel.RoomsPanel;
 import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.LabelArredondado;
+import repository.PernoitesRepository;
 import repository.QuartosRepository;
 import repository.RelatoriosRepository;
 
@@ -85,7 +87,7 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
 
-        showPanel(new PessoaEmpresaPanel());
+        showPanel(new NewPernoitesPanel(new PernoitesRepository()));
         setVisible(true);
     }
 
@@ -104,12 +106,12 @@ public class Menu extends JFrame {
 
         JLabel labelName = new JLabel("Sam Helson");
         labelName.setForeground(Color.WHITE);
-        labelName.setFont(new Font("Inter", Font.BOLD, 16));
+        labelName.setFont(new Font("Roboto", Font.BOLD, 16));
         labelName.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel labelRole = new JLabel("Funcionário");
         labelRole.setForeground(Color.WHITE);
-        labelRole.setFont(new Font("Inter", Font.PLAIN, 12));
+        labelRole.setFont(new Font("Roboto", Font.PLAIN, 12));
         labelRole.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         employeePanel.add(labelIcon);
@@ -130,7 +132,7 @@ public class Menu extends JFrame {
         button.setBorderPainted(false);
         button.setBackground(defaultColor);
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("Inter", Font.BOLD, 20));
+        button.setFont(new Font("Roboto", Font.BOLD, 20));
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setHorizontalTextPosition(SwingConstants.RIGHT);
         button.setIconTextGap(15);
@@ -146,13 +148,13 @@ public class Menu extends JFrame {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setFont(new Font("Inter", Font.BOLD, 25));
+                button.setFont(new Font("Roboto", Font.BOLD, 25));
                 button.setBackground(new Color(70, 130, 180));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setFont(new Font("Inter", Font.BOLD, 20));
+                button.setFont(new Font("Roboto", Font.BOLD, 20));
                 button.setBackground(defaultColor);
             }
 
@@ -195,7 +197,7 @@ public class Menu extends JFrame {
 
         LabelArredondado labelTitulo = new LabelArredondado(titulo);
         labelTitulo.setIcon(resizeIcon(icon, 40, 40));
-        labelTitulo.setFont(new Font("Inter", Font.BOLD, 25));
+        labelTitulo.setFont(new Font("Roboto", Font.BOLD, 25));
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setOpaque(true);
         labelTitulo.setBackground(new Color(66, 75, 152));

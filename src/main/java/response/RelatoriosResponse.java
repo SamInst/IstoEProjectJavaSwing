@@ -16,6 +16,7 @@ public record RelatoriosResponse(
     ){
         public record RelatorioDoDia(
                 Long relatorio_id,
+                Long quarto_id,
                 LocalTime horario,
                 String relatorio,
                 String tipo_pagamento,

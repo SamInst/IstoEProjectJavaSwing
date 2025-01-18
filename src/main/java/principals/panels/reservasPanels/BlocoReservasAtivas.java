@@ -2,8 +2,9 @@ package principals.panels.reservasPanels;
 
 import com.toedter.calendar.JCalendar;
 import principals.tools.BotaoArredondado;
-import principals.tools.Cor;
+import principals.tools.CorPersonalizada;
 import principals.tools.Icones;
+import principals.tools.Resize;
 import request.BuscaReservasResponse;
 
 import javax.swing.*;
@@ -12,7 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
 
-import static principals.tools.Tool.resizeIcon;
+import static principals.tools.Resize.*;
 
 public class BlocoReservasAtivas {
 
@@ -23,7 +24,7 @@ public class BlocoReservasAtivas {
 
         JLabel tituloStatus = new JLabel(response.data().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         tituloStatus.setForeground(Color.white);
-        tituloStatus.setFont(new Font("Inter", Font.BOLD, 20));
+        tituloStatus.setFont(new Font("Roboto", Font.BOLD, 20));
 
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(0xF5841B).darker());
@@ -63,7 +64,7 @@ public class BlocoReservasAtivas {
             botaoQuarto.setPreferredSize(new Dimension(60, 40));
             botaoQuarto.setBackground(new Color(0xF5841B).darker());
             botaoQuarto.setForeground(Color.WHITE);
-            botaoQuarto.setFont(new Font("Inter", Font.BOLD, 40));
+            botaoQuarto.setFont(new Font("Roboto", Font.BOLD, 40));
             botaoQuarto.setBounds(10, 10, 80, 75);
             reservaButton.add(botaoQuarto);
 
@@ -87,8 +88,8 @@ public class BlocoReservasAtivas {
             JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
             JLabel labelNome = new JLabel(reserva.pessoas().isEmpty() ? null : reserva.pessoas().get(0).nome());
-            labelNome.setForeground(Cor.CINZA_ESCURO);
-            labelNome.setFont(new Font("Inter", Font.BOLD, 20));
+            labelNome.setForeground(CorPersonalizada.CINZA_ESCURO);
+            labelNome.setFont(new Font("Roboto", Font.BOLD, 20));
             labelNome.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
             painelEsquerdo.add(iconePessoaLabel);
@@ -103,14 +104,14 @@ public class BlocoReservasAtivas {
 
             JLabel labelDataEntrada = new JLabel(reserva.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataEntrada.setToolTipText("Data de entrada");
-            labelDataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
-            labelDataEntrada.setForeground(Cor.CINZA_ESCURO);
+            labelDataEntrada.setFont(new Font("Roboto", Font.BOLD, 20));
+            labelDataEntrada.setForeground(CorPersonalizada.CINZA_ESCURO);
             labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
 
             JLabel labelDataSaida = new JLabel(reserva.data_saida().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             labelDataSaida.setToolTipText("Data de saida");
-            labelDataSaida.setForeground(Cor.CINZA_ESCURO);
-            labelDataSaida.setFont(new Font("Inter", Font.BOLD, 20));
+            labelDataSaida.setForeground(CorPersonalizada.CINZA_ESCURO);
+            labelDataSaida.setFont(new Font("Roboto", Font.BOLD, 20));
 
             leftPanel.add(labelCalendario);
             leftPanel.add(labelDataEntrada);
@@ -125,18 +126,18 @@ public class BlocoReservasAtivas {
             reservaButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    reservaButton.setBackground(Cor.CINZA_CLARO);
-                    blocoInfoPanelSuperior.setBackground(Cor.CINZA_CLARO);
-                    blocoInfoPanelInferior.setBackground(Cor.CINZA_CLARO);
-                    tituloStatus.setBackground(Cor.CINZA_CLARO);
+                    reservaButton.setBackground(CorPersonalizada.CINZA_CLARO);
+                    blocoInfoPanelSuperior.setBackground(CorPersonalizada.CINZA_CLARO);
+                    blocoInfoPanelInferior.setBackground(CorPersonalizada.CINZA_CLARO);
+                    tituloStatus.setBackground(CorPersonalizada.CINZA_CLARO);
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    reservaButton.setBackground(Cor.BRANCO);
-                    blocoInfoPanelInferior.setBackground(Cor.BRANCO);
-                    blocoInfoPanelSuperior.setBackground(Cor.BRANCO);
-                    tituloStatus.setForeground(Cor.BRANCO);
+                    reservaButton.setBackground(CorPersonalizada.BRANCO);
+                    blocoInfoPanelInferior.setBackground(CorPersonalizada.BRANCO);
+                    blocoInfoPanelSuperior.setBackground(CorPersonalizada.BRANCO);
+                    tituloStatus.setForeground(CorPersonalizada.BRANCO);
                 }
             });
 

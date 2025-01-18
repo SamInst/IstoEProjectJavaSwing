@@ -62,7 +62,7 @@ public class JTextFieldComTextoFixoArredondadoRelatorios extends JTextField {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-        g2.setColor(Cor.CINZA_ESCURO.brighter());
+        g2.setColor(CorPersonalizada.CINZA_ESCURO.brighter());
 
         float espessuraBorda = 1.0f;
         g2.setStroke(new BasicStroke(espessuraBorda));

@@ -36,6 +36,10 @@ public class Icones {
     public static ImageIcon cama_solteiro = new ImageIcon("src/main/resources/icons/cama_solteiro.png");
     public static ImageIcon beliche = new ImageIcon("src/main/resources/icons/beliche.png");
     public static ImageIcon linked = new ImageIcon("src/main/resources/icons/chainn.png");
+    public static ImageIcon plus = new ImageIcon("src/main/resources/icons/plus_icon.png");
+    public static ImageIcon search = new ImageIcon("src/main/resources/icons/search.png");
+    public static ImageIcon cash_out = new ImageIcon("src/main/resources/icons/cash out.png");
+    public static ImageIcon card = new ImageIcon("src/main/resources/icons/card.png");
 
 
 

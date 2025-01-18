@@ -2,17 +2,18 @@ package principals.tools;
 
 import javax.swing.*;
 
-import static principals.tools.Tool.resizeIcon;
+import static principals.tools.Resize.resizeIcon;
+
 
 public class Converter {
     public static String converterTipoPagamento(String tipoPagamento) {
        return switch (tipoPagamento) {
             case "0" -> "PIX";
             case "1" -> "DINHEIRO";
-            case "2" -> "CARTAO DE CREDITO";
-            case "3" -> "CARTAO DE DEBITO";
-            case "4" -> "TRANSFERENCIA BANCARIA";
-            case "5" -> "CARTAO VIRTUAL";
+            case "2" -> "CARTÃO DE CRÉDITO";
+            case "3" -> "CARTÃO DE DÉBITO";
+            case "4" -> "TRANSFERÊNCIA BANCÁRIA";
+            case "5" -> "CARTÃO VIRTUAL";
             default ->  "DESCONHECIDO";
         };
     }
@@ -38,8 +39,7 @@ public class Converter {
         return switch (tipoPagamento){
             case "PIX" -> resizeIcon(Icones.pix, 25, 25);
             case "DINHEIRO" -> resizeIcon(Icones.dinheiro, 25, 25);
-            case "CARTAO DE CREDITO" -> resizeIcon(Icones.cartao, 25, 25);
-            case "CARTAO DE DEBITO" -> resizeIcon(Icones.cartao, 25, 25);
+            case "CARTAO DE CREDITO", "CARTAO DE DEBITO" -> resizeIcon(Icones.cartao, 25, 25);
             case "TRANSFERENCIA BANCARIA" -> resizeIcon(Icones.bancario, 25, 25);
             case "CARTAO VIRTUAL" -> resizeIcon(Icones.preco, 25, 25);
             default -> new ImageIcon();

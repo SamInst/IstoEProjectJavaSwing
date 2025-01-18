@@ -9,5 +9,6 @@ public record RelatorioRowmapper(
         String relatorio,
         Long pernoite_id,
         Long entrada_id,
+        Long quarto_id,
         Float valor
 ){}

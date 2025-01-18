@@ -14,7 +14,7 @@ public class JTextFieldComTextoFixoArredondado extends JTextField {
         this.textoFixo = (textoFixo != null) ? textoFixo : "";
         setText(this.textoFixo);
         setCaretPosition(this.textoFixo.length());
-        setForeground(Cor.CINZA_ESCURO);
+        setForeground(CorPersonalizada.CINZA_ESCURO);
         setHorizontalAlignment(SwingConstants.LEFT);
         setMargin(new Insets(0, 10, 5, 10));
         setOpaque(false);

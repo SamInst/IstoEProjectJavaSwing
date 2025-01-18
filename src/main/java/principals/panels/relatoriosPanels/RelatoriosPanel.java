@@ -1,5 +1,6 @@
 package principals.panels.relatoriosPanels;
 
+import buttons.BotaoComSombra;
 import com.toedter.calendar.JCalendar;
 import principals.tools.*;
 import repository.RelatoriosRepository;
@@ -9,60 +10,37 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static principals.tools.Cor.*;
+import static buttons.Botoes.*;
+import static principals.tools.CorPersonalizada.CINZA_CLARO;
+import static principals.tools.CorPersonalizada.CINZA_ESCURO;
+import static principals.tools.Icones.*;
+import static principals.tools.Resize.resizeIcon;
 
-public class RelatoriosPanel extends JPanel implements Refreshable{
-
+public class RelatoriosPanel extends JPanel implements Refreshable {
     private final RelatoriosRepository relatoriosRepository;
-
-    JButton relatorioButton;
-    JButton btnPesquisar = new JButton("Pesquisar");
-    JButton btnAdicionar = new JButton("Adicionar");
 
     public RelatoriosPanel(RelatoriosRepository relatoriosRepository) {
         this.relatoriosRepository = relatoriosRepository;
         refreshPanel();
     }
 
-    public void sumarioPanel(JPanel sumarioPanel){
-        sumarioPanel.setLayout(new BoxLayout(sumarioPanel, BoxLayout.Y_AXIS));
+    public void sumarioPanel(JPanel sumarioPanel) {
+        BotaoComSombra cartao = btn_azul("Cartão/PIX");
+        cartao.setIcon(resizeIcon(card, 15, 15));
 
-        JButton btnSumarioAzul = new JButton();
-        btnSumarioAzul.setPreferredSize(new Dimension(20, 20));
-        btnSumarioAzul.setBackground(AZUL_ESCURO);
+        BotaoComSombra dinheiro = btn_verde("Dinheiro");
+        dinheiro.setIcon(resizeIcon(Icones.dinheiro, 15, 15));
 
-        JLabel sumario = new JLabel("Cartão/PIX/Transferências");
-        JPanel cartaoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        cartaoPanel.add(btnSumarioAzul);
-        cartaoPanel.add(sumario);
+        BotaoComSombra retirada = btn_vermelho("Retirada");
+        retirada.setIcon(resizeIcon(cash_out, 15, 15));
 
-        JButton btnSumarioVerde = new JButton();
-        btnSumarioVerde.setPreferredSize(new Dimension(20, 20));
-        btnSumarioVerde.setBackground(VERDE_ESCURO);
-
-        JLabel sumarioDinheiro = new JLabel("Dinheiro");
-        JPanel dinheiroPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        dinheiroPanel.add(btnSumarioVerde);
-        dinheiroPanel.add(sumarioDinheiro);
-
-        JButton btnSumarioVermelho = new JButton();
-        btnSumarioVermelho.setPreferredSize(new Dimension(20, 20));
-        btnSumarioVermelho.setBackground(VERMELHO);
-
-        JLabel sumarioRetirada = new JLabel("Retirada");
-        JPanel retiradaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        retiradaPanel.add(btnSumarioVermelho);
-        retiradaPanel.add(sumarioRetirada);
-
-        sumarioPanel.add(cartaoPanel);
-        sumarioPanel.add(dinheiroPanel);
-        sumarioPanel.add(retiradaPanel);
+        sumarioPanel.add(cartao);
+        sumarioPanel.add(dinheiro, FlowLayout.LEFT);
+        sumarioPanel.add(retirada);
     }
 
     public void buscarRelatorioPorData(RelatoriosRepository relatoriosRepository) {
@@ -109,7 +87,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
             dataLabel.setFont(new Font("Roboto", Font.BOLD, 19));
             JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
             totalDoDiaLabel.setForeground(Color.white);
-            totalDoDiaLabel.setFont(new Font("Inter", Font.BOLD, 20));
+            totalDoDiaLabel.setFont(new Font("Roboto", Font.BOLD, 20));
 
             JPanel headerPanel = new JPanel(new BorderLayout());
             headerPanel.setBackground(new Color(66, 75, 152));
@@ -141,8 +119,9 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
     }
 
 
-    public void relatoriosDoDia(List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatorioDoDiaList, JPanel relatoriosDoDiaPanel){
+    public void relatoriosDoDia(List<RelatoriosResponse.Relatorios.RelatorioDoDia> relatorioDoDiaList, JPanel relatoriosDoDiaPanel) {
         for (RelatoriosResponse.Relatorios.RelatorioDoDia relatorioDoDia : relatorioDoDiaList) {
+            JButton relatorioButton;
             relatorioButton = new JButton();
             relatorioButton.setBackground(Color.WHITE);
             relatorioButton.setBorderPainted(false);
@@ -153,34 +132,45 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
             JPanel buttonContent = new JPanel(new BorderLayout());
             buttonContent.setBackground(Color.WHITE);
 
-            JLabel idLabel = new JLabel("#" + relatorioDoDia.relatorio_id());
-            idLabel.setForeground(Color.RED);
+            var tipoPagamentoButton = new BotaoComSombra();
+            var valorPagamentoButton = new BotaoComSombra();
 
-            String tipoPagamento = Converter.converterTipoPagamento(relatorioDoDia.tipo_pagamento());
+            switch (relatorioDoDia.tipo_pagamento()) {
+                case "0" -> tipoPagamentoButton = btn_azul("PIX");
+                case "1" -> tipoPagamentoButton = relatorioDoDia.valor() < 0 ? btn_vermelho("DINHEIRO") : btn_verde("DINHEIRO");
+                case "2" -> tipoPagamentoButton = btn_azul("CARTÃO DE CRÉDITO");
+                case "3" -> tipoPagamentoButton = btn_azul("CARTÃO DE DÉBITO");
+                case "4" -> tipoPagamentoButton = btn_azul("CARTÃO VIRTUAL");
+                case "5" -> tipoPagamentoButton = btn_azul("TRANSFERÊNCIA BANCÁRIA");
+                default -> tipoPagamentoButton = btn_cinza("DESCONHECIDO");
+            }
 
-            JLabel horarioDescricaoLabel = new JLabel(relatorioDoDia.horario().format(DateTimeFormatter.ofPattern("HH:mm")) + "      " + relatorioDoDia.relatorio() + " (" + tipoPagamento + ")");
-            horarioDescricaoLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
-            horarioDescricaoLabel.setFont(new Font("Roboto", Font.BOLD, 15));
-            horarioDescricaoLabel.setForeground(CINZA_ESCURO);
+            var valor = "R$ " + FormatarFloat.format(relatorioDoDia.valor());
+            var btn_hora = btn_branco(relatorioDoDia.horario().format(DateTimeFormatter.ofPattern("HH:mm")));
+            var btn_quarto = relatorioDoDia.quarto_id() == 0 ? btn_branco(" 00 ") : btn_cinza(relatorioDoDia.quarto_id() < 10 ?
+                    " 0" + relatorioDoDia.quarto_id() + " " : " " + relatorioDoDia.quarto_id() + " ");
+            btn_quarto.setForeground(Color.WHITE);
 
-            JLabel valorLabel = new JLabel("R$ " + FormatarFloat.format(relatorioDoDia.valor()));
-            valorLabel.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
-            valorLabel.setFont(new Font("Roboto", Font.BOLD, 15));
+            if (relatorioDoDia.valor() < 0) valorPagamentoButton = btn_vermelho(valor);
+            else if (Integer.parseInt(relatorioDoDia.tipo_pagamento()) == 1) valorPagamentoButton = btn_verde(valor);
+            else valorPagamentoButton = btn_azul(valor);
 
-            if (relatorioDoDia.valor() < 0) valorLabel.setForeground(VERMELHO);
-            else if (Integer.parseInt(relatorioDoDia.tipo_pagamento()) == 1) valorLabel.setForeground(VERDE_ESCURO);
-            else valorLabel.setForeground(AZUL_ESCURO);
+            JLabel descricao = new JLabel(relatorioDoDia.relatorio());
+            descricao.setBorder(BorderFactory.createEmptyBorder(4, 20, 10, 10));
+            descricao.setForeground(CINZA_ESCURO);
 
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
             leftPanel.setBackground(Color.WHITE);
-            leftPanel.add(idLabel);
-            leftPanel.add(horarioDescricaoLabel);
+            leftPanel.add(btn_quarto);
+            leftPanel.add(btn_hora);
+            leftPanel.add(tipoPagamentoButton);
+            leftPanel.add(descricao);
 
             JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             rightPanel.setOpaque(false);
             rightPanel.setBackground(Color.WHITE);
-            rightPanel.add(valorLabel);
+            rightPanel.add(valorPagamentoButton);
 
             buttonContent.add(leftPanel, BorderLayout.WEST);
             buttonContent.add(rightPanel, BorderLayout.EAST);
@@ -188,27 +178,6 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
             relatorioButton.add(buttonContent, BorderLayout.CENTER);
 
             relatoriosDoDiaPanel.add(relatorioButton);
-
-            relatorioButton.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    relatorioButton.setFont(new Font("Roboto", Font.PLAIN, 25));
-                    relatorioButton.setBackground(CINZA_CLARO);
-                    relatorioButton.setForeground(CINZA_CLARO);
-                    leftPanel.setBackground(CINZA_CLARO);
-                    rightPanel.setBackground(CINZA_CLARO);
-                    buttonContent.setBackground(CINZA_CLARO);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    relatorioButton.setFont(new Font("Roboto", Font.PLAIN, 20));
-                    relatorioButton.setBackground(Color.white);
-                    leftPanel.setBackground(Color.white);
-                    rightPanel.setBackground(Color.white);
-                    buttonContent.setBackground(Color.white);
-                }
-            });
         }
     }
 
@@ -219,12 +188,14 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
         JPanel topPanel = new JPanel(new BorderLayout());
 
-        JPanel identificadorPanel = principals.Menu.createIdentificadorPanel("Relatórios", Icones.relatorios);
-        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
+        JPanel identificadorPanel = new JPanel();
+        identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        identificadorPanel.setBorder(BorderFactory.createEmptyBorder(7, 5, 5, 5));
 
         topPanel.add(identificadorPanel);
 
-        btnPesquisar.setPreferredSize(new Dimension(125, 40));
+        var btnPesquisar = btn_branco("Pesquisar");
+        btnPesquisar.setIcon(resizeIcon(search, 15, 15));
         btnPesquisar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -232,7 +203,8 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
             }
         });
 
-        btnAdicionar.setPreferredSize(new Dimension(125, 40));
+        var btnAdicionar = btn_verde("Adicionar Relatório");
+        btnAdicionar.setIcon(resizeIcon(plus, 15, 15));
         btnAdicionar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -241,18 +213,15 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
         });
 
         JPanel sumarioPanel = new JPanel();
-        sumarioPanel(sumarioPanel);
-
+//        sumarioPanel(sumarioPanel);
         identificadorPanel.add(btnPesquisar);
         identificadorPanel.add(btnAdicionar);
         identificadorPanel.add(sumarioPanel);
+        var total = btn_verde("Total: R$ " + FormatarFloat.format(response.total()));
+        total.setFont(new Font("Arial", Font.PLAIN, 18));
+        total.setPreferredSize(new Dimension(200, 50));
 
-        JLabel totalLabel = new JLabel("Total: R$ " + FormatarFloat.format(response.total()));
-        totalLabel.setFont(new Font("Roboto", Font.PLAIN, 30));
-        totalLabel.setForeground(VERDE_ESCURO);
-        totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
-
-        topPanel.add(totalLabel, BorderLayout.EAST);
+        topPanel.add(total, BorderLayout.EAST);
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         add(topPanel, BorderLayout.NORTH);
@@ -262,30 +231,29 @@ public class RelatoriosPanel extends JPanel implements Refreshable{
 
         for (RelatoriosResponse.Relatorios relatorio : response.relatorios()) {
             JPanel relatorioDiaPanel = new JPanel();
-            relatorioDiaPanel.setBackground(Color.white);
+            relatorioDiaPanel.setBackground(new Color(0xF2F2F2));
             relatorioDiaPanel.setLayout(new BorderLayout());
-            relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
+            var data = btn_branco(relatorio.data());
             JLabel dataLabel = new JLabel(relatorio.data());
             dataLabel.setForeground(Color.white);
             dataLabel.setFont(new Font("Roboto", Font.PLAIN, 20));
 
-            JLabel totalDoDiaLabel = new JLabel("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
-            totalDoDiaLabel.setForeground(Color.white);
-            totalDoDiaLabel.setFont(new Font("Roboto", Font.PLAIN, 20));
+            var totalDoDia = btn_branco("Total do dia: R$ " + FormatarFloat.format(relatorio.total_do_dia()));
 
             JPanel headerPanel = new JPanel(new BorderLayout());
-            headerPanel.setBackground(new Color(66, 75, 152));
-            headerPanel.add(dataLabel, BorderLayout.WEST);
-            headerPanel.add(totalDoDiaLabel, BorderLayout.EAST);
-            headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 45));
+            headerPanel.setBackground(new Color(0xD2D2D2));
+            headerPanel.add(data, BorderLayout.WEST);
+            headerPanel.add(totalDoDia, BorderLayout.EAST);
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 10));
 
             relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
 
             JPanel relatoriosDoDiaPanel = new JPanel();
             relatoriosDoDiaPanel.setLayout(new GridLayout(0, 1, 0, 1));
-            relatoriosDoDiaPanel.setBackground(Cor.CINZA_CLARO);
-            relatoriosDoDiaPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+            relatoriosDoDiaPanel.setBackground(CorPersonalizada.CINZA_CLARO);
+            relatoriosDoDiaPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             relatoriosDoDiaPanel.setPreferredSize(null);
             relatoriosDoDiaPanel.setMinimumSize(null);
             relatoriosDoDiaPanel.setMaximumSize(null);

@@ -6,12 +6,12 @@ import java.awt.*;
 public class PanelArredondado extends JPanel {
 
     public PanelArredondado() {
-        setOpaque(false);  // Torna o fundo transparente para que possamos desenhar o nosso próprio fundo
+        setOpaque(false);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // Chamando super.paintComponent() para garantir que qualquer desenho de fundo padrão seja feito corretamente
+        super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

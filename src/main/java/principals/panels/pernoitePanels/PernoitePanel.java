@@ -5,7 +5,7 @@ import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
 import lombok.Getter;
 import principals.tools.BotaoArredondado;
-import principals.tools.Cor;
+import principals.tools.CorPersonalizada;
 import principals.tools.CustomJCalendar;
 import principals.tools.Icones;
 import repository.PernoitesRepository;
@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static principals.tools.Cor.VERDE_ESCURO;
+import static principals.tools.CorPersonalizada.VERDE_ESCURO;
 
 public class PernoitePanel extends JPanel {
     Long quarto_id = null;
@@ -67,7 +67,7 @@ public class PernoitePanel extends JPanel {
         btnAdicionar.addActionListener(e -> abrirJanelaAdicionarPernoite());
 
         JLabel hopedados = new JLabel("Hospedados: " + pernoitesRepository.hospedados());
-        hopedados.setFont(new Font("Inter", Font.BOLD, 30));
+        hopedados.setFont(new Font("Roboto", Font.BOLD, 30));
         hopedados.setForeground(VERDE_ESCURO);
         hopedados.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
 
@@ -205,20 +205,20 @@ public class PernoitePanel extends JPanel {
         BotaoArredondado botaoQuarto = new BotaoArredondado("Buscar");
         botaoQuarto.setToolTipText("Selecione um quarto");
         botaoQuarto.setPreferredSize(new Dimension(100, 70));
-        botaoQuarto.setBackground(Cor.AZUL_ESCURO);
+        botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO);
         botaoQuarto.setForeground(Color.WHITE);
         botaoQuarto.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 18));
+        botaoQuarto.setFont(new Font("Roboto", Font.BOLD, 18));
 
         botaoQuarto.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                botaoQuarto.setBackground(Cor.AZUL_ESCURO.darker());
+                botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO.darker());
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                botaoQuarto.setBackground(Cor.AZUL_ESCURO);
+                botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO);
             }
         });
 
@@ -270,7 +270,7 @@ public class PernoitePanel extends JPanel {
         BotaoArredondado dataEntrada = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         dataEntrada.setToolTipText("Selecione uma data de Entrada");
         dataEntrada.setPreferredSize(new Dimension(180, 40));
-        dataEntrada.setFont(new Font("Inter", Font.BOLD, 20));
+        dataEntrada.setFont(new Font("Roboto", Font.BOLD, 20));
         dataEntrada.setBackground(Color.WHITE);
         dataEntrada.setForeground(Color.ORANGE);
 
@@ -278,7 +278,7 @@ public class PernoitePanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 dataEntrada.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                dataEntrada.setBackground(Cor.BRANCO.darker());
+                dataEntrada.setBackground(CorPersonalizada.BRANCO.darker());
             }
 
             @Override
@@ -298,7 +298,7 @@ public class PernoitePanel extends JPanel {
         BotaoArredondado dataSaida = new BotaoArredondado(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         dataSaida.setToolTipText("Selecione uma data de Saida");
         dataSaida.setPreferredSize(new Dimension(180, 40));
-        dataSaida.setFont(new Font("Inter", Font.BOLD, 20));
+        dataSaida.setFont(new Font("Roboto", Font.BOLD, 20));
         dataSaida.setBackground(Color.WHITE);
         dataSaida.setForeground(Color.ORANGE);
 
@@ -306,7 +306,7 @@ public class PernoitePanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 dataSaida.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                dataSaida.setBackground(Cor.BRANCO.darker());
+                dataSaida.setBackground(CorPersonalizada.BRANCO.darker());
             }
 
             @Override
@@ -367,12 +367,12 @@ public class PernoitePanel extends JPanel {
         gbc.insets = new Insets(5, 10, 5, 10);
 
         JLabel labelTotal = new JLabel("Total: ");
-        labelTotal.setFont(new Font("Inter", Font.BOLD, 18));
+        labelTotal.setFont(new Font("Roboto", Font.BOLD, 18));
         labelTotal.setForeground(Color.DARK_GRAY);
 
         JLabel valorTotal = new JLabel("R$ 0,00");
-        valorTotal.setFont(new Font("Inter", Font.BOLD, 20));
-        valorTotal.setForeground(Cor.VERDE_ESCURO);
+        valorTotal.setFont(new Font("Roboto", Font.BOLD, 20));
+        valorTotal.setForeground(CorPersonalizada.VERDE_ESCURO);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -387,7 +387,7 @@ public class PernoitePanel extends JPanel {
 
         JTextField quantidadePessoasField = new JTextField(5);
         quantidadePessoasField.setToolTipText("Insira a quantidade de Pessoas");
-        quantidadePessoasField.setFont(new Font("Inter", Font.BOLD, 18));
+        quantidadePessoasField.setFont(new Font("Roboto", Font.BOLD, 18));
         quantidadePessoasField.setBorder(BorderFactory.createLineBorder(Color.GRAY.brighter(), 1, true));
 
         quantidadePessoasField.getDocument().addDocumentListener(new DocumentListener() {
@@ -464,27 +464,27 @@ public class PernoitePanel extends JPanel {
         for (QuartoResponse quarto : quartosDisponiveis) {
             JPanel quartoPanel = new JPanel();
             quartoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-            quartoPanel.setBackground(Cor.BRANCO);
+            quartoPanel.setBackground(CorPersonalizada.BRANCO);
             quartoPanel.setPreferredSize(new Dimension(380, 40));
 
             JLabel quartoLabel = new JLabel("<html>Quarto " + (quarto.quarto_id() < 10L ? "0" + quarto.quarto_id() : quarto.quarto_id()) + "   | " + quarto.quantidade_pessoas() + " pessoas  |   "
-                    + "<span style='color:rgb(" + Cor.VERDE_ESCURO.getRed() + "," + Cor.VERDE_ESCURO.getGreen() + "," + Cor.VERDE_ESCURO.getBlue() + ")'>" + quarto.status_quarto_enum() + "</span></html>");
+                    + "<span style='color:rgb(" + CorPersonalizada.VERDE_ESCURO.getRed() + "," + CorPersonalizada.VERDE_ESCURO.getGreen() + "," + CorPersonalizada.VERDE_ESCURO.getBlue() + ")'>" + quarto.status_quarto_enum() + "</span></html>");
 
-            quartoLabel.setForeground(Cor.CINZA_ESCURO);
-            quartoLabel.setFont(new Font("Inter", Font.BOLD, 15));
+            quartoLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
+            quartoLabel.setFont(new Font("Roboto", Font.BOLD, 15));
 
             quartoPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    quartoPanel.setBackground(Cor.AZUL_ESCURO.brighter());
+                    quartoPanel.setBackground(CorPersonalizada.AZUL_ESCURO.brighter());
                     quartoLabel.setForeground(Color.WHITE);
                     quartoLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    quartoPanel.setBackground(Cor.BRANCO);
-                    quartoLabel.setForeground(Cor.CINZA_ESCURO);
+                    quartoPanel.setBackground(CorPersonalizada.BRANCO);
+                    quartoLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
                 }
 
                 @Override
@@ -496,7 +496,7 @@ public class PernoitePanel extends JPanel {
                     System.out.println(quarto.quarto_id());
                     if (!botaoQuarto.getText().equals(quartoNumero)) {
                         botaoQuarto.setText(quartoNumero);
-                        botaoQuarto.setFont(new Font("Inter", Font.BOLD, 50));
+                        botaoQuarto.setFont(new Font("Roboto", Font.BOLD, 50));
                         botaoQuarto.setHorizontalAlignment(SwingConstants.CENTER);
                         botaoQuarto.setVerticalAlignment(SwingConstants.CENTER);
                         botaoQuarto.repaint();
@@ -527,13 +527,13 @@ public class PernoitePanel extends JPanel {
         gbc.weightx = 0.1;
         gbc.anchor = GridBagConstraints.WEST;
         JLabel labelDiarias = new JLabel("Diárias: ");
-        labelDiarias.setFont(new Font("Inter", Font.BOLD, 16));
-        labelDiarias.setForeground(Cor.CINZA_ESCURO);
+        labelDiarias.setFont(new Font("Roboto", Font.BOLD, 16));
+        labelDiarias.setForeground(CorPersonalizada.CINZA_ESCURO);
         bloco.add(labelDiarias, gbc);
 
         JLabel valorDiarias = new JLabel(quantidadeDeDiarias.getValue().toString());
-        valorDiarias.setFont(new Font("Inter", Font.BOLD, 16));
-        valorDiarias.setForeground(Cor.CINZA_ESCURO);
+        valorDiarias.setFont(new Font("Roboto", Font.BOLD, 16));
+        valorDiarias.setForeground(CorPersonalizada.CINZA_ESCURO);
 
         quantidadeDeDiarias.addObserver(() -> {
             valorDiarias.setText(quantidadeDeDiarias.getValue().toString());
@@ -548,12 +548,12 @@ public class PernoitePanel extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
 
         JLabel labelValorDiaria = new JLabel("Valor diária: ");
-        labelValorDiaria.setFont(new Font("Inter", Font.BOLD, 16));
-        labelValorDiaria.setForeground(Cor.CINZA_ESCURO);
+        labelValorDiaria.setFont(new Font("Roboto", Font.BOLD, 16));
+        labelValorDiaria.setForeground(CorPersonalizada.CINZA_ESCURO);
         bloco.add(labelValorDiaria, gbc);
 
         JLabel valorDiaria = new JLabel(precosRepository.precoDiaria(quantidadeDePessoas.getValue()).toString());
-        valorDiaria.setFont(new Font("Inter", Font.BOLD, 16));
+        valorDiaria.setFont(new Font("Roboto", Font.BOLD, 16));
         valorDiaria.setForeground(Color.ORANGE);
 
 

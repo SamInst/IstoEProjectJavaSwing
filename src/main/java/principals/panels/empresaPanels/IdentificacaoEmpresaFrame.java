@@ -24,9 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static principals.tools.Icones.*;
+import static principals.tools.Icones.linked;
 import static principals.tools.Mascaras.*;
-import static principals.tools.Tool.*;
+import static principals.tools.Resize.resizeIcon;
 
 public class IdentificacaoEmpresaFrame extends JFrame {
     private final LocalizacaoRepository localizacaoRepository = new LocalizacaoRepository();
@@ -129,7 +129,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
 
         vincularPessoaComboBox.setPreferredSize(new Dimension(400, 25));
         vincularPessoaComboBox.setFont(font);
-        vincularPessoaComboBox.setForeground(Cor.CINZA_ESCURO);
+        vincularPessoaComboBox.setForeground(CorPersonalizada.CINZA_ESCURO);
         vincularPessoaComboBox.setEditable(true);
 
 
@@ -280,7 +280,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         JLabel cpfLabel = new JLabel(" " + pessoa.cpf());
         cpfLabel.setForeground(new Color(0x990909));
         JLabel nomeLabel = new JLabel(pessoa.nome());
-        nomeLabel.setForeground(Cor.CINZA_ESCURO);
+        nomeLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -312,7 +312,10 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                     if (resposta == JOptionPane.YES_OPTION) {
                         try {
                             empresaRepository.desvincularPessoaDaEmpresa(cnpj, pessoa.id());
-                        } catch (SQLException e) { e.printStackTrace(); throw new RuntimeException(e);}
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
 
@@ -336,9 +339,9 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         });
 
         pessoaRepository.buscaPessoasPorEmpresaCNPJ(campoCNPJ.getText() != null ? campoCNPJ.getText() : null)
-                .forEach(pessoaCadastrada->{
+                .forEach(pessoaCadastrada -> {
 
-        });
+                });
 
         listaPessoasVinculadasPanel.add(pessoaPanel);
         pessoasVinculadas.add(pessoa);
@@ -357,7 +360,6 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         campo.setFont(new Font("Roboto", Font.PLAIN, 15));
         return campo;
     }
-
 
 
     private void carregarPaises() {
@@ -470,37 +472,37 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             pessoasVinculadasIds.add(pessoa.id());
         }
 
-        if (nomeEmpresa.isEmpty()){
+        if (nomeEmpresa.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nome da Empresa obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (telefone.isEmpty()){
+        if (telefone.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Telefone para contato obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (cnpj.isEmpty()){
+        if (cnpj.isEmpty()) {
             JOptionPane.showMessageDialog(this, "CNPJ obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (cep.isEmpty()){
+        if (cep.isEmpty()) {
             JOptionPane.showMessageDialog(this, "CEP obrigatório", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (pais == null){
+        if (pais == null) {
             JOptionPane.showMessageDialog(this, "País obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (estado == null){
+        if (estado == null) {
             JOptionPane.showMessageDialog(this, "Estado obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (municipio == null){
+        if (municipio == null) {
             JOptionPane.showMessageDialog(this, "Município obrigatório.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -528,7 +530,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                 .stream()
                 .anyMatch(pessoaCadastrada -> pessoaCadastrada.id().equals(pessoasVinculadasID)));
 
-        if (!empresaRepository.empresaCadastrada(cnpj)){
+        if (!empresaRepository.empresaCadastrada(cnpj)) {
 
             empresaRepository.salvarEmpresa(dadosEmpresa);
             JOptionPane.showMessageDialog(this, "Empresa salva com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -537,7 +539,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         } else {
             var empresaCadastrada = empresaRepository.buscarEmpresaPorCnpj(cnpj);
 
-            if(verificaDadosAlterados(empresaCadastrada, dadosEmpresa, pais, estado, municipio)){
+            if (verificaDadosAlterados(empresaCadastrada, dadosEmpresa, pais, estado, municipio)) {
                 empresaRepository.atualizarDadosDaEmpresa(empresaCadastrada.id(), dadosEmpresa);
                 JOptionPane.showMessageDialog(
                         this,
@@ -557,11 +559,12 @@ public class IdentificacaoEmpresaFrame extends JFrame {
                         if (pessoa != null) {
                             pessoasAdicionadas.append(pessoa.nome()).append("\n");
                         }
-                    } catch (SQLException e) { throw new RuntimeException(e); }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
                 });
                 JOptionPane.showMessageDialog(null, pessoasAdicionadas.toString(), "Pessoas Adicionadas", JOptionPane.INFORMATION_MESSAGE);
-            }
-            else {
+            } else {
                 JOptionPane.showMessageDialog(this, "Empresa já cadastrada!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -629,7 +632,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             var empresa = cnpjService.buscarEmpresaPorCnpj(cnpj);
             var empresaCadastrada = empresaRepository.buscarEmpresaPorCnpj(cnpj);
 
-            if (verificarCadastro(cnpj)){
+            if (verificarCadastro(cnpj)) {
                 sobrescreverCamposEmpresa(
                         empresaCadastrada.nomeEmpresa(),
                         empresaCadastrada.telefone(),
@@ -692,11 +695,11 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         boolean cadastrado = empresaRepository.empresaCadastrada(cnpj);
         if (cadastrado) {
             statusLabel.setText("Cadastrado");
-            statusPanel.setBackground(Cor.VERDE_ESCURO);
+            statusPanel.setBackground(CorPersonalizada.VERDE_ESCURO);
             statusLabel.setForeground(Color.WHITE);
         } else {
             statusLabel.setText("Não cadastrado");
-            statusPanel.setBackground(Cor.VERMELHO);
+            statusPanel.setBackground(CorPersonalizada.VERMELHO);
             statusLabel.setForeground(Color.WHITE);
         }
         return cadastrado;
@@ -707,7 +710,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
             AdicionarEmpresaRequest adicionarEmpresaRequest,
             Long pais,
             Long estado,
-            Long municipio){
+            Long municipio) {
         boolean hasChanges = !empresaCadastrada.nomeEmpresa().equalsIgnoreCase(adicionarEmpresaRequest.nomeEmpresa());
         if (!empresaCadastrada.telefone().equals(adicionarEmpresaRequest.telefone())) hasChanges = true;
         if (!empresaCadastrada.email().equalsIgnoreCase(adicionarEmpresaRequest.email())) hasChanges = true;

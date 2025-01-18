@@ -48,7 +48,7 @@ public class CustomJCalendar {
         for (Component component : daysPanel.getComponents()) {
             if (component instanceof JButton) {
                 JButton dayButton = (JButton) component;
-                dayButton.setFont(new Font("Inter", Font.BOLD, 16));
+                dayButton.setFont(new Font("Roboto", Font.BOLD, 16));
                 dayButton.setForeground(CINZA_ESCURO);
                 dayButton.setBackground(Color.WHITE); // Inicialmente, todos os botões em branco
                 dayButton.setBorder(BorderFactory.createEmptyBorder()); // Remover bordas

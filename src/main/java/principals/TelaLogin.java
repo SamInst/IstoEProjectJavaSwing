@@ -37,7 +37,7 @@ public class TelaLogin extends JFrame {
         painelFundo.setLayout(null);
 
         JLabel labelNomePousada = new JLabel(nomePousada);
-        labelNomePousada.setFont(new Font("Inter", Font.BOLD, 48));
+        labelNomePousada.setFont(new Font("Roboto", Font.BOLD, 48));
         labelNomePousada.setForeground(Color.WHITE);
         labelNomePousada.setBounds(100, 50, 600, 60);
         painelFundo.add(labelNomePousada);

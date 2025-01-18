@@ -26,7 +26,7 @@ public class ReservaCalendarioCustomizado {
         JCalendar jCalendar = new JCalendar();
         jCalendar.setLocale(new Locale("pt", "BR"));
         jCalendar.setPreferredSize(new Dimension(900, 600));
-        jCalendar.setFont(new Font("Inter", Font.PLAIN, 20));
+        jCalendar.setFont(new Font("Roboto", Font.PLAIN, 20));
 
         List<LocalDate> datasOcupadas = new ArrayList<>();
         datasOcupadas.add(LocalDate.now().plusDays(2));

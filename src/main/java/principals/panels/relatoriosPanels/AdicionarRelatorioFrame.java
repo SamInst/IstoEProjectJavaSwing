@@ -1,9 +1,8 @@
 package principals.panels.relatoriosPanels;
 
+import buttons.Botoes;
 import enums.TipoPagamentoEnum;
-import principals.tools.Cor;
-import principals.tools.JComboBoxArredondado;
-import principals.tools.JTextFieldComTextoFixoArredondadoRelatorios;
+import principals.tools.*;
 import repository.RelatoriosRepository;
 import request.RelatorioRequest;
 
@@ -17,10 +16,10 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class AdicionarRelatorioFrame extends JFrame {
-    private JTextFieldComTextoFixoArredondadoRelatorios valorField;
-    private JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
-    private JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
-    private JTextFieldComTextoFixoArredondadoRelatorios campoValor;
+    private final JTextFieldComTextoFixoArredondadoRelatorios valorField;
+    private final JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
+    private final JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
+    private final JTextFieldComTextoFixoArredondadoRelatorios campoValor;
 
     public AdicionarRelatorioFrame(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         setTitle("Adicionar Relatorio");
@@ -58,7 +57,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         Arrays.stream(TipoPagamentoEnum.values()).forEach(tipoPagamentoComboBox::addItem);
 
         tipoPagamentoComboBox.setEspessuraBorda(1.0F);
-        tipoPagamentoComboBox.setCorBorda(Cor.CINZA_ESCURO.brighter());
+        tipoPagamentoComboBox.setCorBorda(CorPersonalizada.CINZA_ESCURO.brighter());
 
         campoQuarto = new JTextFieldComTextoFixoArredondadoRelatorios("quarto: ", 7);
         campoQuarto.setFont(new Font("Roboto", Font.PLAIN, 16));
@@ -76,10 +75,8 @@ public class AdicionarRelatorioFrame extends JFrame {
         pretoPanel.setPreferredSize(new Dimension(400, 50));
         pretoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        JButton btnAdicionar = new JButton("Adicionar");
-        btnAdicionar.setFont(new Font("Roboto", Font.BOLD, 16));
-        btnAdicionar.setBackground(new Color(0, 153, 0));
-        btnAdicionar.setForeground(Color.WHITE);
+        JButton btnAdicionar = Botoes.btn_verde("Adicionar Relatorio");
+        btnAdicionar.setIcon(Resize.resizeIcon(Icones.plus, 20,20));
         pretoPanel.add(btnAdicionar);
 
         btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel));
@@ -122,7 +119,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                     campoQuarto.setForeground(Color.BLACK);
                 } else {
                     campoQuarto.setText("quarto: ");
-                    campoQuarto.setForeground(Cor.CINZA_ESCURO.brighter());
+                    campoQuarto.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
                     campoQuarto.setCaretPosition(campoQuarto.getText().length());
                 }
             }
@@ -139,7 +136,7 @@ public class AdicionarRelatorioFrame extends JFrame {
 
                     if (valor == 0) {
                         campoValor.setText("valor: ");
-                        campoValor.setForeground(Cor.CINZA_ESCURO.brighter());
+                        campoValor.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
                         campoValor.setCaretPosition(campoValor.getText().length());
                     } else {
                         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
@@ -154,7 +151,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                         if (isNegative) {
                             campoValor.setForeground(Color.RED);
                         } else {
-                            campoValor.setForeground(Cor.VERDE_ESCURO);
+                            campoValor.setForeground(CorPersonalizada.VERDE_ESCURO);
                         }
                     }
                 } else if (texto.equals("-")) {
@@ -163,7 +160,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                     campoValor.setCaretPosition(campoValor.getText().length());
                 } else {
                     campoValor.setText("valor: ");
-                    campoValor.setForeground(Cor.CINZA_ESCURO.brighter());
+                    campoValor.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
                     campoValor.setCaretPosition(campoValor.getText().length());
                 }
             }
@@ -178,7 +175,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                 valorField.setCaretPosition(valorField.getText().length());
 
                 if (texto.isEmpty()) {
-                    valorField.setForeground(Cor.CINZA_ESCURO.brighter());
+                    valorField.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
                 } else {
                     valorField.setForeground(Color.BLACK);
                 }

@@ -15,7 +15,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
         setOpaque(false);
         setUI(new ComboBoxUIArredondada());
         setBackground(Color.WHITE);
-        setForeground(Cor.CINZA_ESCURO.darker());
+        setForeground(CorPersonalizada.CINZA_ESCURO.darker());
         setPreferredSize(new Dimension(200, 40));
         setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 5));
 
@@ -26,7 +26,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
                 label.setOpaque(true);
                 if (isSelected) {
                     label.setBackground(new Color(184, 207, 229));
-                    label.setForeground(Cor.CINZA_ESCURO);
+                    label.setForeground(CorPersonalizada.CINZA_ESCURO);
                     label.setFont(new Font("Roboto", Font.PLAIN, 12));
                 } else {
                     label.setBackground(Color.WHITE);
@@ -63,7 +63,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
                     super.paintComponent(g);
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(Cor.CINZA_ESCURO.brighter());
+                    g2.setColor(CorPersonalizada.CINZA_ESCURO.brighter());
 
                     int w = getWidth();
                     int h = getHeight();
@@ -90,7 +90,7 @@ public class JComboBoxArredondado<E> extends JComboBox<E> {
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                  button.setBackground(Cor.CINZA_ESCURO.brighter());
+                  button.setBackground(CorPersonalizada.CINZA_ESCURO.brighter());
                 }
             });
             return button;

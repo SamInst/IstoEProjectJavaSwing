@@ -140,11 +140,13 @@ public class RelatoriosRepository {
                             rs.getString("relatorio"),
                             rs.getObject("pernoite_id") != null ? rs.getLong("pernoite_id") : null,
                             rs.getObject("entrada_id") != null ? rs.getLong("entrada_id") : null,
+                            rs.getLong("quarto_id"),
                             rs.getFloat("valor")
                     );
 
                     RelatoriosResponse.Relatorios.RelatorioDoDia relatorioDoDia = new RelatoriosResponse.Relatorios.RelatorioDoDia(
                             relatorioRowmapper.id(),
+                            relatorioRowmapper.quarto_id(),
                             relatorioRowmapper.data_hora().toLocalTime(),
                             relatorioRowmapper.relatorio(),
                             relatorioRowmapper.tipo_pagamento_enum(),

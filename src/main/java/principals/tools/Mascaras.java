@@ -1,5 +1,7 @@
 package principals.tools;
 
+import textField.TextFieldComSobra;
+
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.event.KeyAdapter;
@@ -146,6 +148,40 @@ public class Mascaras {
                 }
 
                 StringBuilder formatado = new StringBuilder("* CPF: ");
+                if (texto.length() > 3) {
+                    formatado.append(texto, 0, 3).append(".");
+                } else {
+                    formatado.append(texto);
+                }
+                if (texto.length() > 6) {
+                    formatado.append(texto, 3, 6).append(".");
+                } else if (texto.length() > 3) {
+                    formatado.append(texto.substring(3));
+                }
+                if (texto.length() > 9) {
+                    formatado.append(texto, 6, 9).append("-");
+                } else if (texto.length() > 6) {
+                    formatado.append(texto.substring(6));
+                }
+                if (texto.length() > 9) {
+                    formatado.append(texto.substring(9));
+                }
+
+                campo.setText(formatado.toString());
+            }
+        });
+    }
+
+    public static void adicionarMascaraCPF(TextFieldComSobra campo) {
+        campo.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String texto = campo.getText().replaceAll("[^0-9]", "");
+                if (texto.length() > 11) {
+                    texto = texto.substring(0, 11);
+                }
+
+                StringBuilder formatado = new StringBuilder();
                 if (texto.length() > 3) {
                     formatado.append(texto, 0, 3).append(".");
                 } else {

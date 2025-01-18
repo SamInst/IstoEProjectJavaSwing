@@ -83,7 +83,6 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
 
     public List<BuscaPessoaRequest> buscarPessoaPorIdNomeOuCpf(String input) {
-
         List<BuscaPessoaRequest> pessoas = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM pessoa WHERE 1=1");
 
@@ -423,41 +422,28 @@ public class PessoaRepository extends PostgresDatabaseConnect {
 
     public List<PessoaResponse> buscarPessoaPorNome(String nome) {
         List<PessoaResponse> pessoas = new ArrayList<>();
-        String sql = """
-        SELECT  p.id,
-                data_hora_cadastro,
-                nome,
-                data_nascimento,
-                idade,
-                cep,
-                numero,
-                bairro,
-                cpf,
-                rg,
-                email,
-                telefone,
-                pa.id pais_id,
-                pa.descricao pais,
-                e.id estado_id,
-                e.descricao estado,
-                m.id municipio_id,
-                m.descricao municipio,
-                endereco,
-                complemento,
-                hospedado,
-                cliente_novo,
-                vezes_hospedado,
-                sexo
-        FROM pessoa p
-        JOIN public.estados e ON e.id = p.fk_estado
-        JOIN public.municipios m ON m.id = p.fk_municipio
-        JOIN public.paises pa ON pa.id = p.fk_pais
-        WHERE p.nome ILIKE ?
-        ORDER BY p.nome;
-    """;
+        String sql_busca_nome = sql + " WHERE p.nome ILIKE ? ORDER BY p.nome";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql_busca_nome);) {
             statement.setString(1, "%" + nome + "%");
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    pessoas.add(pessoaResponse(rs));
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return pessoas;
+    }
+
+    public List<PessoaResponse> buscarPessoasHospedadas() {
+        List<PessoaResponse> pessoas = new ArrayList<>();
+        String sql_busca_hospedados = sql + " WHERE p.hospedado = true ORDER BY p.nome";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql_busca_hospedados);) {
 
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {

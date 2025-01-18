@@ -16,7 +16,7 @@ public class ListaDeQuartosJPanel {
     int largura = 25;
     int altura = 25;
     Font font = new Font("Roboto", Font.BOLD, 18);
-    Color cor = Cor.AZUL_ESCURO;
+    Color cor = CorPersonalizada.AZUL_ESCURO;
 
     public JPanel mainPanel(QuartosRepository quartosRepository, RoomsPanel roomsPanel) {
         var quartos = quartosRepository.buscaTodosOsQuartos();
@@ -24,7 +24,7 @@ public class ListaDeQuartosJPanel {
 
         JPanel quartoPanel = new JPanel();
         quartoPanel.setLayout(new WrapLayout(FlowLayout.LEFT, 10, 10));
-        quartoPanel.setBackground(Cor.CINZA_CLARO);
+        quartoPanel.setBackground(CorPersonalizada.CINZA_CLARO);
         quartoPanel.setBorder(BorderFactory.createEmptyBorder(10,10,0,0));
 
         for (QuartoResponse quarto : quartos) {
@@ -36,7 +36,7 @@ public class ListaDeQuartosJPanel {
 
             JTextFieldComTextoFixoArredondado categoria = new JTextFieldComTextoFixoArredondado("", 0);
             categoria.setFont(new Font("Roboto", Font.BOLD, 15));
-            categoria.setBackground(Cor.CINZA_CLARO);
+            categoria.setBackground(CorPersonalizada.CINZA_CLARO);
 
             JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox = new JComboBoxArredondado<>();
             statusQuartoComboBox.setEditable(false);
@@ -45,19 +45,19 @@ public class ListaDeQuartosJPanel {
             JTextFieldComTextoFixoArredondadoRelatorios tabelaPreco = new JTextFieldComTextoFixoArredondadoRelatorios("$",0);
             tabelaPreco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             tabelaPreco.setFont(new Font("Roboto", Font.BOLD, 20));
-            tabelaPreco.setBackground(Cor.VERDE_ESCURO);
+            tabelaPreco.setBackground(CorPersonalizada.VERDE_ESCURO);
             tabelaPreco.setEnabled(false);
             tabelaPreco.setForeground(Color.white);
 
             tabelaPreco.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    tabelaPreco.setBackground(Cor.VERDE_ESCURO.brighter());
+                    tabelaPreco.setBackground(CorPersonalizada.VERDE_ESCURO.brighter());
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    tabelaPreco.setBackground(Cor.VERDE_ESCURO);
+                    tabelaPreco.setBackground(CorPersonalizada.VERDE_ESCURO);
                 }
 
                 @Override
@@ -99,7 +99,7 @@ public class ListaDeQuartosJPanel {
             panelVermelho.setForeground(Color.DARK_GRAY);
 
             JLabel numeroQuarto = new JLabel(quarto.quarto_id() < 10 ? "0" + quarto.quarto_id() : quarto.quarto_id() + "");
-            numeroQuarto.setForeground(Cor.CINZA_CLARO);
+            numeroQuarto.setForeground(CorPersonalizada.CINZA_CLARO);
             numeroQuarto.setFont(new Font("Roboto", Font.BOLD, 45));
 
             panelVermelho.setPreferredSize(new Dimension(90, 0));
@@ -161,7 +161,7 @@ public class ListaDeQuartosJPanel {
 
 
             JLabel qtdPessoasLabel = new JLabel(quarto.quantidade_pessoas().toString());
-            qtdPessoasLabel.setForeground(Cor.VERDE_ESCURO);
+            qtdPessoasLabel.setForeground(CorPersonalizada.VERDE_ESCURO);
             qtdPessoasLabel.setFont(font);
 
             panelAzulEsquerda.add(icone_qtd_pessoas);
@@ -170,7 +170,7 @@ public class ListaDeQuartosJPanel {
             if (quarto.qtd_cama_casal() > 0) {
                 panelAzulDireita.add(icone_cama_casal);
                 JLabel numero = new JLabel(quarto.qtd_cama_casal() + " ");
-                numero.setForeground(Cor.VERDE_ESCURO);
+                numero.setForeground(CorPersonalizada.VERDE_ESCURO);
                 numero.setFont(font);
                 panelAzulDireita.add(numero);
             }
@@ -178,7 +178,7 @@ public class ListaDeQuartosJPanel {
             if (quarto.qtd_cama_solteiro() > 0) {
                 panelAzulDireita.add(icone_cama_solteiro);
                 JLabel numero = new JLabel(quarto.qtd_cama_solteiro() + " ");
-                numero.setForeground(Cor.VERDE_ESCURO);
+                numero.setForeground(CorPersonalizada.VERDE_ESCURO);
                 numero.setFont(font);
                 panelAzulDireita.add(numero);
             }
@@ -186,7 +186,7 @@ public class ListaDeQuartosJPanel {
             if (quarto.qtd_rede() > 0) {
                 panelAzulDireita.add(icone_rede);
                 JLabel numero = new JLabel(quarto.qtd_rede()+ " ");
-                numero.setForeground(Cor.VERDE_ESCURO);
+                numero.setForeground(CorPersonalizada.VERDE_ESCURO);
                 numero.setFont(font);
                 panelAzulDireita.add(numero);
             }
@@ -194,7 +194,7 @@ public class ListaDeQuartosJPanel {
             if (quarto.qtd_cama_beliche() > 0) {
                 panelAzulDireita.add(icone_beliche);
                 JLabel numero = new JLabel(quarto.qtd_cama_beliche()+ " ");
-                numero.setForeground(Cor.VERDE_ESCURO);
+                numero.setForeground(CorPersonalizada.VERDE_ESCURO);
                 numero.setFont(font);
                 panelAzulDireita.add(numero);
             }

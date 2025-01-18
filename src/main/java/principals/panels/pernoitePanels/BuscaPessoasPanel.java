@@ -1,6 +1,6 @@
 package principals.panels.pernoitePanels;
 
-import principals.tools.Cor;
+import principals.tools.CorPersonalizada;
 import repository.PessoaRepository;
 import request.BuscaPessoaRequest;
 
@@ -27,8 +27,8 @@ public class BuscaPessoasPanel extends JPanel {
         painelBusca.setLayout(new BorderLayout());
 
         campoBusca = new JTextField("Buscar pessoas por nome, cpf ou ID");
-        campoBusca.setForeground(Cor.CINZA_ESCURO);
-        campoBusca.setFont(new Font("Inter", Font.BOLD, 12));
+        campoBusca.setForeground(CorPersonalizada.CINZA_ESCURO);
+        campoBusca.setFont(new Font("Roboto", Font.BOLD, 12));
         campoBusca.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
         campoBusca.setPreferredSize(new Dimension(400, 30));
         campoBusca.addFocusListener(new FocusListener() {
@@ -115,8 +115,8 @@ public class BuscaPessoasPanel extends JPanel {
         pessoas.add(pessoaId);
 
         JLabel labelPessoa = new JLabel(pessoaSelecionada);
-        labelPessoa.setForeground(Cor.CINZA_ESCURO);
-        labelPessoa.setFont(new Font("Inter", Font.BOLD, 13));
+        labelPessoa.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelPessoa.setFont(new Font("Roboto", Font.BOLD, 13));
 
         JButton botaoRemover = new JButton(new ImageIcon(new ImageIcon("src/main/resources/icons/remove.png")
                 .getImage()
@@ -154,7 +154,7 @@ public class BuscaPessoasPanel extends JPanel {
         pessoasSelecionadas.remove(pessoaId);
         pessoas.remove(pessoaId);
 
-        // Remove o painel da interface
+        // Remove o painel da Robotoface
         blocoPessoasAdicionadas.remove(painelPessoa);
         blocoPessoasAdicionadas.revalidate();
         blocoPessoasAdicionadas.repaint();
