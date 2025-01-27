@@ -129,7 +129,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
 
         vincularPessoaComboBox.setPreferredSize(new Dimension(400, 25));
         vincularPessoaComboBox.setFont(font);
-        vincularPessoaComboBox.setForeground(CorPersonalizada.CINZA_ESCURO);
+        vincularPessoaComboBox.setForeground(CorPersonalizada.DARK_GRAY);
         vincularPessoaComboBox.setEditable(true);
 
 
@@ -280,7 +280,7 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         JLabel cpfLabel = new JLabel(" " + pessoa.cpf());
         cpfLabel.setForeground(new Color(0x990909));
         JLabel nomeLabel = new JLabel(pessoa.nome());
-        nomeLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
+        nomeLabel.setForeground(CorPersonalizada.DARK_GRAY);
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -695,11 +695,11 @@ public class IdentificacaoEmpresaFrame extends JFrame {
         boolean cadastrado = empresaRepository.empresaCadastrada(cnpj);
         if (cadastrado) {
             statusLabel.setText("Cadastrado");
-            statusPanel.setBackground(CorPersonalizada.VERDE_ESCURO);
+            statusPanel.setBackground(CorPersonalizada.DARK_GREEN);
             statusLabel.setForeground(Color.WHITE);
         } else {
             statusLabel.setText("Não cadastrado");
-            statusPanel.setBackground(CorPersonalizada.VERMELHO);
+            statusPanel.setBackground(CorPersonalizada.RED_2);
             statusLabel.setForeground(Color.WHITE);
         }
         return cadastrado;

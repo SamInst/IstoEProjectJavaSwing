@@ -22,12 +22,11 @@ public class BuscaPessoasPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.RED);
 
-        // Campo de busca de pessoas
         JPanel painelBusca = new JPanel();
         painelBusca.setLayout(new BorderLayout());
 
         campoBusca = new JTextField("Buscar pessoas por nome, cpf ou ID");
-        campoBusca.setForeground(CorPersonalizada.CINZA_ESCURO);
+        campoBusca.setForeground(CorPersonalizada.DARK_GRAY);
         campoBusca.setFont(new Font("Roboto", Font.BOLD, 12));
         campoBusca.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
         campoBusca.setPreferredSize(new Dimension(400, 30));
@@ -35,14 +34,14 @@ public class BuscaPessoasPanel extends JPanel {
             @Override
             public void focusGained(FocusEvent e) {
                 if (campoBusca.getText().equals("Buscar pessoas por nome, cpf ou ID")) {
-                    campoBusca.setText("");  // Limpar o campo quando ganhar foco
+                    campoBusca.setText("");
                 }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 if (campoBusca.getText().isEmpty()) {
-                    campoBusca.setText("Buscar pessoas por nome, cpf ou ID");  // Restaurar o placeholder se estiver vazio
+                    campoBusca.setText("Buscar pessoas por nome, cpf ou ID");
                 }
             }
         });
@@ -115,7 +114,7 @@ public class BuscaPessoasPanel extends JPanel {
         pessoas.add(pessoaId);
 
         JLabel labelPessoa = new JLabel(pessoaSelecionada);
-        labelPessoa.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelPessoa.setForeground(CorPersonalizada.DARK_GRAY);
         labelPessoa.setFont(new Font("Roboto", Font.BOLD, 13));
 
         JButton botaoRemover = new JButton(new ImageIcon(new ImageIcon("src/main/resources/icons/remove.png")

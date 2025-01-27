@@ -20,6 +20,7 @@ public record BuscaPernoiteResponse(
     public record Representante(
             Long id,
             String nome,
+            String cpf,
             String telefone
     ){}
 }

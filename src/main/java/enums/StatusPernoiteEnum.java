@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum StatusPernoiteEnum {
     ATIVO(0),
     DIARIA_ENCERRADA(1),
-    FINALIZADO(2);
+    FINALIZADOS(2),
+    CANCELADOS(3);
 
     private final int value;
 

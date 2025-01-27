@@ -25,7 +25,7 @@ public class BuscaPernoiteIndividual {
         labelEsquerdaIcone = new JButton(iconeEsquerda);
         labelEsquerdaIcone.setOpaque(true);
         labelEsquerdaIcone.setBorderPainted(false);
-        labelEsquerdaIcone.setBackground(CorPersonalizada.CINZA_CLARO);
+        labelEsquerdaIcone.setBackground(CorPersonalizada.LIGHT_GRAY);
         labelEsquerdaIcone.setFocusPainted(false);
         labelEsquerdaIcone.setPreferredSize(new Dimension(30, 30));
         labelEsquerdaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -34,7 +34,7 @@ public class BuscaPernoiteIndividual {
         labelDireitaIcone = new JButton(iconeDireita);
         labelDireitaIcone.setOpaque(true);
         labelDireitaIcone.setBorderPainted(false);
-        labelDireitaIcone.setBackground(CorPersonalizada.CINZA_CLARO);
+        labelDireitaIcone.setBackground(CorPersonalizada.LIGHT_GRAY);
         labelDireitaIcone.setFocusPainted(false);
         labelDireitaIcone.setPreferredSize(new Dimension(30, 30));
         labelDireitaIcone.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -252,7 +252,7 @@ public class BuscaPernoiteIndividual {
 
         JLabel totalPago = new JLabel("R$ " + FormatarFloat.format(pernoite.valor_total()));
         totalPago.setFont(new Font("Arial", Font.BOLD, 15));
-        totalPago.setForeground(CorPersonalizada.VERDE_ESCURO);
+        totalPago.setForeground(CorPersonalizada.DARK_GREEN);
 
         JLabel total = new JLabel("Total: " + totalPago.getText());
         total.setFont(new Font("Arial", Font.BOLD, 15));
@@ -280,7 +280,7 @@ public class BuscaPernoiteIndividual {
 
         JLabel numeroDiaria = new JLabel(diaria.numero().toString());
         numeroDiaria.setFont(new Font("Arial", Font.BOLD, 20));
-        numeroDiaria.setForeground(CorPersonalizada.CINZA_ESCURO);
+        numeroDiaria.setForeground(CorPersonalizada.DARK_GRAY);
 
 
         labelDiariaIcone.setBorder(BorderFactory.createEmptyBorder(0,0,0,10));
@@ -288,7 +288,7 @@ public class BuscaPernoiteIndividual {
         LabelArredondado labelDataEntrada = new LabelArredondado(diaria.data_entrada().format(DateTimeFormatter.ofPattern("dd/MM")));
         labelDataEntrada.setToolTipText("Data de entrada");
         labelDataEntrada.setFont(new Font("Roboto", Font.BOLD, 20));
-        labelDataEntrada.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelDataEntrada.setForeground(CorPersonalizada.DARK_GRAY);
         labelDataEntrada.setBackground(Color.white);
         labelDataEntrada.setOpaque(false);
         labelDataEntrada.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
@@ -296,14 +296,14 @@ public class BuscaPernoiteIndividual {
         LabelArredondado labelDataSaida = new LabelArredondado(diaria.data_saida().format(DateTimeFormatter.ofPattern("dd/MM")));
         labelDataSaida.setToolTipText("Data de saida");
         labelDataSaida.setFont(new Font("Roboto", Font.BOLD, 20));
-        labelDataSaida.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelDataSaida.setForeground(CorPersonalizada.DARK_GRAY);
         labelDataSaida.setBackground(Color.white);
         labelDataSaida.setOpaque(false);
         labelDataSaida.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
 
         LabelArredondado isDiariaAtualLabel = new LabelArredondado("Diária atual");
-        isDiariaAtualLabel.setBackground(CorPersonalizada.VERDE_ESCURO);
-        isDiariaAtualLabel.setForeground(CorPersonalizada.CINZA_CLARO.brighter());
+        isDiariaAtualLabel.setBackground(CorPersonalizada.DARK_GREEN);
+        isDiariaAtualLabel.setForeground(CorPersonalizada.LIGHT_GRAY.brighter());
 
         blocoVisualizaDiarias.add(labelDiariaIcone);
         blocoVisualizaDiarias.add(labelEsquerdaIcone);
@@ -342,13 +342,13 @@ public class BuscaPernoiteIndividual {
         cancelar.setPreferredSize(new Dimension(100, 30));
         cancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         cancelar.setBackground(Color.RED);
-        cancelar.setForeground(CorPersonalizada.BRANCO.brighter());
+        cancelar.setForeground(CorPersonalizada.WHITE.brighter());
         blocoOpcoes.add(cancelar, BorderLayout.EAST);
 
         JButton finalizar = new JButton("Finalizar");
         finalizar.setFocusPainted(false);
         finalizar.setPreferredSize(new Dimension(100, 30));
-        finalizar.setForeground(CorPersonalizada.CINZA_ESCURO);
+        finalizar.setForeground(CorPersonalizada.DARK_GRAY);
         finalizar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         blocoOpcoes.add(cancelar, BorderLayout.WEST);
@@ -359,7 +359,7 @@ public class BuscaPernoiteIndividual {
     public JPanel blocoPessoas(JPanel blocoPessoas){
         blocoPessoas.setPreferredSize(new Dimension(500, 45));
         blocoPessoas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        blocoPessoas.setBackground(CorPersonalizada.AZUL_ESCURO);
+        blocoPessoas.setBackground(CorPersonalizada.DARK_BLUE);
         blocoPessoas.setLayout(new BorderLayout());
         blocoPessoas.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
 
@@ -372,14 +372,14 @@ public class BuscaPernoiteIndividual {
 
         JPanel panelPessoas = new JPanel();
         panelPessoas.add(labelPessoasIcone);
-        panelPessoas.setBackground(CorPersonalizada.AZUL_ESCURO);
+        panelPessoas.setBackground(CorPersonalizada.DARK_BLUE);
         panelPessoas.add(labelPessoas);
 
         blocoPessoas.add(panelPessoas, BorderLayout.WEST);
 
         JButton adicionarPessoas = new JButton("Adicionar");
         adicionarPessoas.setFocusPainted(false);
-        adicionarPessoas.setForeground(CorPersonalizada.CINZA_ESCURO);
+        adicionarPessoas.setForeground(CorPersonalizada.DARK_GRAY);
         adicionarPessoas.setPreferredSize(new Dimension(100, 30));
         adicionarPessoas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         blocoPessoas.add(adicionarPessoas, BorderLayout.EAST);
@@ -409,7 +409,7 @@ public class BuscaPernoiteIndividual {
 
             JLabel nome = new JLabel(pessoa.nome() + "  ");
             nome.setFont(new Font("Roboto", Font.BOLD, 15));
-            nome.setForeground(CorPersonalizada.CINZA_ESCURO);
+            nome.setForeground(CorPersonalizada.DARK_GRAY);
 
             pessoaInfoPanel.add(pessoaIcone);
 
@@ -417,7 +417,7 @@ public class BuscaPernoiteIndividual {
 
             JLabel telefone = new JLabel(pessoa.telefone());
             telefone.setFont(new Font("Roboto", Font.BOLD, 15));
-            telefone.setForeground(CorPersonalizada.CINZA_ESCURO);
+            telefone.setForeground(CorPersonalizada.DARK_GRAY);
             telefone.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
             pessoaPanel.add(pessoaInfoPanel, BorderLayout.WEST);
@@ -461,14 +461,14 @@ public class BuscaPernoiteIndividual {
 
             JLabel tipoPagamento = new JLabel(pagamento.tipo_pagamento() + "  ");
             tipoPagamento.setFont(new Font("Roboto", Font.BOLD, 15));
-            tipoPagamento.setForeground(CorPersonalizada.CINZA_ESCURO);
+            tipoPagamento.setForeground(CorPersonalizada.DARK_GRAY);
 
             pagamentoInfoPanel.add(pagamentoIcone);
             pagamentoInfoPanel.add(tipoPagamento);
 
             JLabel valor = new JLabel("R$ " + FormatarFloat.format(pagamento.valor_pagamento()));
             valor.setFont(new Font("Roboto", Font.BOLD, 15));
-            valor.setForeground(CorPersonalizada.CINZA_ESCURO);
+            valor.setForeground(CorPersonalizada.DARK_GRAY);
             valor.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
 
             pagamentoPanel.add(pagamentoInfoPanel, BorderLayout.WEST);
@@ -490,7 +490,7 @@ public class BuscaPernoiteIndividual {
     public JPanel blocoPagamentos(JPanel blocoPagamento){
         blocoPagamento.setPreferredSize(new Dimension(500, 45));
         blocoPagamento.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        blocoPagamento.setBackground(CorPersonalizada.AZUL_ESCURO);
+        blocoPagamento.setBackground(CorPersonalizada.DARK_BLUE);
         blocoPagamento.setLayout(new BorderLayout());
         blocoPagamento.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
 
@@ -503,7 +503,7 @@ public class BuscaPernoiteIndividual {
 
         PanelArredondado panelPessoas = new PanelArredondado();
         panelPessoas.add(labelPessoasIcone);
-        panelPessoas.setBackground(CorPersonalizada.AZUL_ESCURO);
+        panelPessoas.setBackground(CorPersonalizada.DARK_BLUE);
         panelPessoas.add(labelPessoas);
 
         blocoPagamento.add(panelPessoas, BorderLayout.WEST);
@@ -511,7 +511,7 @@ public class BuscaPernoiteIndividual {
         JButton adicionarPagamento = new JButton("Adicionar");
         adicionarPagamento.setFocusPainted(false);
         adicionarPagamento.setPreferredSize(new Dimension(100, 30));
-        adicionarPagamento.setForeground(CorPersonalizada.CINZA_ESCURO);
+        adicionarPagamento.setForeground(CorPersonalizada.DARK_GRAY);
         adicionarPagamento.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         blocoPagamento.add(adicionarPagamento, BorderLayout.EAST);
 
@@ -522,7 +522,7 @@ public class BuscaPernoiteIndividual {
     public JPanel blocoConsumo(JPanel blocoConsumo, DiariaResponse.Consumo consumo) {
         blocoConsumo.setPreferredSize(new Dimension(500, 45));
         blocoConsumo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        blocoConsumo.setBackground(CorPersonalizada.AZUL_ESCURO);
+        blocoConsumo.setBackground(CorPersonalizada.DARK_BLUE);
         blocoConsumo.setLayout(new BorderLayout());
         blocoConsumo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
@@ -535,13 +535,13 @@ public class BuscaPernoiteIndividual {
 
         JPanel panelConsumo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelConsumo.add(consumoIcone);
-        panelConsumo.setBackground(CorPersonalizada.AZUL_ESCURO);
+        panelConsumo.setBackground(CorPersonalizada.DARK_BLUE);
         panelConsumo.add(labelConsumo);
 
         blocoConsumo.add(panelConsumo, BorderLayout.WEST);
 
         JPanel valorEBotaoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        valorEBotaoPanel.setBackground(CorPersonalizada.AZUL_ESCURO);
+        valorEBotaoPanel.setBackground(CorPersonalizada.DARK_BLUE);
 
         JLabel labelTotalConsumo = new JLabel("R$ " + FormatarFloat.format(consumo.total_consumo()));
         labelTotalConsumo.setFont(new Font("Roboto", Font.BOLD, 20));
@@ -549,7 +549,7 @@ public class BuscaPernoiteIndividual {
 
         JButton adicionarConsumo = new JButton("Adicionar");
         adicionarConsumo.setFocusPainted(false);
-        adicionarConsumo.setForeground(CorPersonalizada.CINZA_ESCURO);
+        adicionarConsumo.setForeground(CorPersonalizada.DARK_GRAY);
         adicionarConsumo.setPreferredSize(new Dimension(100, 30));
         adicionarConsumo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -582,7 +582,7 @@ public class BuscaPernoiteIndividual {
 
             JLabel itemLabel = new JLabel(item.item());
             itemLabel.setFont(new Font("Roboto", Font.BOLD, 15));
-            itemLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
+            itemLabel.setForeground(CorPersonalizada.DARK_GRAY);
 
             itemInfoPanel.add(itemIcone);
             itemInfoPanel.add(itemLabel);
@@ -593,17 +593,17 @@ public class BuscaPernoiteIndividual {
 
             JLabel valor = new JLabel("R$ " + FormatarFloat.format(item.valor_item()));
             valor.setFont(new Font("Roboto", Font.BOLD, 15));
-            valor.setForeground(CorPersonalizada.CINZA_ESCURO);
+            valor.setForeground(CorPersonalizada.DARK_GRAY);
 
             JLabel quantidade = new JLabel("x" + item.quantidade());
             quantidade.setFont(new Font("Roboto", Font.BOLD, 15));
-            quantidade.setForeground(CorPersonalizada.CINZA_ESCURO);
+            quantidade.setForeground(CorPersonalizada.DARK_GRAY);
 
             float subtotalsom = item.quantidade() * item.valor_item();
 
             JLabel subtotal = new JLabel(FormatarFloat.format(subtotalsom));
             subtotal.setFont(new Font("Roboto", Font.BOLD, 15));
-            subtotal.setForeground(CorPersonalizada.CINZA_ESCURO);
+            subtotal.setForeground(CorPersonalizada.DARK_GRAY);
 
             valorQuantidadePanel.add(quantidade);
             valorQuantidadePanel.add(valor);
@@ -624,7 +624,7 @@ public class BuscaPernoiteIndividual {
     public JPanel linhaCinza(JPanel linhaCinza){
         linhaCinza.setPreferredSize(new Dimension(500, 3));
         linhaCinza.setMaximumSize(new Dimension(Integer.MAX_VALUE, 3));
-        linhaCinza.setBackground(CorPersonalizada.CINZA_CLARO);
+        linhaCinza.setBackground(CorPersonalizada.LIGHT_GRAY);
         return linhaCinza;
     }
 }

@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static principals.tools.CorPersonalizada.VERDE_ESCURO;
+import static principals.tools.CorPersonalizada.DARK_GREEN;
 
 public class PernoitePanel extends JPanel {
     Long quarto_id = null;
@@ -68,7 +68,7 @@ public class PernoitePanel extends JPanel {
 
         JLabel hopedados = new JLabel("Hospedados: " + pernoitesRepository.hospedados());
         hopedados.setFont(new Font("Roboto", Font.BOLD, 30));
-        hopedados.setForeground(VERDE_ESCURO);
+        hopedados.setForeground(DARK_GREEN);
         hopedados.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 30));
 
         topPanel.add(hopedados, BorderLayout.EAST);
@@ -205,7 +205,7 @@ public class PernoitePanel extends JPanel {
         BotaoArredondado botaoQuarto = new BotaoArredondado("Buscar");
         botaoQuarto.setToolTipText("Selecione um quarto");
         botaoQuarto.setPreferredSize(new Dimension(100, 70));
-        botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO);
+        botaoQuarto.setBackground(CorPersonalizada.DARK_BLUE);
         botaoQuarto.setForeground(Color.WHITE);
         botaoQuarto.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         botaoQuarto.setFont(new Font("Roboto", Font.BOLD, 18));
@@ -213,12 +213,12 @@ public class PernoitePanel extends JPanel {
         botaoQuarto.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO.darker());
+                botaoQuarto.setBackground(CorPersonalizada.DARK_BLUE.darker());
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                botaoQuarto.setBackground(CorPersonalizada.AZUL_ESCURO);
+                botaoQuarto.setBackground(CorPersonalizada.DARK_BLUE);
             }
         });
 
@@ -278,7 +278,7 @@ public class PernoitePanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 dataEntrada.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                dataEntrada.setBackground(CorPersonalizada.BRANCO.darker());
+                dataEntrada.setBackground(CorPersonalizada.WHITE.darker());
             }
 
             @Override
@@ -306,7 +306,7 @@ public class PernoitePanel extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 dataSaida.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                dataSaida.setBackground(CorPersonalizada.BRANCO.darker());
+                dataSaida.setBackground(CorPersonalizada.WHITE.darker());
             }
 
             @Override
@@ -372,7 +372,7 @@ public class PernoitePanel extends JPanel {
 
         JLabel valorTotal = new JLabel("R$ 0,00");
         valorTotal.setFont(new Font("Roboto", Font.BOLD, 20));
-        valorTotal.setForeground(CorPersonalizada.VERDE_ESCURO);
+        valorTotal.setForeground(CorPersonalizada.DARK_GREEN);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -464,27 +464,27 @@ public class PernoitePanel extends JPanel {
         for (QuartoResponse quarto : quartosDisponiveis) {
             JPanel quartoPanel = new JPanel();
             quartoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-            quartoPanel.setBackground(CorPersonalizada.BRANCO);
+            quartoPanel.setBackground(CorPersonalizada.WHITE);
             quartoPanel.setPreferredSize(new Dimension(380, 40));
 
             JLabel quartoLabel = new JLabel("<html>Quarto " + (quarto.quarto_id() < 10L ? "0" + quarto.quarto_id() : quarto.quarto_id()) + "   | " + quarto.quantidade_pessoas() + " pessoas  |   "
-                    + "<span style='color:rgb(" + CorPersonalizada.VERDE_ESCURO.getRed() + "," + CorPersonalizada.VERDE_ESCURO.getGreen() + "," + CorPersonalizada.VERDE_ESCURO.getBlue() + ")'>" + quarto.status_quarto_enum() + "</span></html>");
+                    + "<span style='color:rgb(" + CorPersonalizada.DARK_GREEN.getRed() + "," + CorPersonalizada.DARK_GREEN.getGreen() + "," + CorPersonalizada.DARK_GREEN.getBlue() + ")'>" + quarto.status_quarto_enum() + "</span></html>");
 
-            quartoLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
+            quartoLabel.setForeground(CorPersonalizada.DARK_GRAY);
             quartoLabel.setFont(new Font("Roboto", Font.BOLD, 15));
 
             quartoPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
-                    quartoPanel.setBackground(CorPersonalizada.AZUL_ESCURO.brighter());
+                    quartoPanel.setBackground(CorPersonalizada.DARK_BLUE.brighter());
                     quartoLabel.setForeground(Color.WHITE);
                     quartoLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
-                    quartoPanel.setBackground(CorPersonalizada.BRANCO);
-                    quartoLabel.setForeground(CorPersonalizada.CINZA_ESCURO);
+                    quartoPanel.setBackground(CorPersonalizada.WHITE);
+                    quartoLabel.setForeground(CorPersonalizada.DARK_GRAY);
                 }
 
                 @Override
@@ -528,12 +528,12 @@ public class PernoitePanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         JLabel labelDiarias = new JLabel("Diárias: ");
         labelDiarias.setFont(new Font("Roboto", Font.BOLD, 16));
-        labelDiarias.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelDiarias.setForeground(CorPersonalizada.DARK_GRAY);
         bloco.add(labelDiarias, gbc);
 
         JLabel valorDiarias = new JLabel(quantidadeDeDiarias.getValue().toString());
         valorDiarias.setFont(new Font("Roboto", Font.BOLD, 16));
-        valorDiarias.setForeground(CorPersonalizada.CINZA_ESCURO);
+        valorDiarias.setForeground(CorPersonalizada.DARK_GRAY);
 
         quantidadeDeDiarias.addObserver(() -> {
             valorDiarias.setText(quantidadeDeDiarias.getValue().toString());
@@ -549,7 +549,7 @@ public class PernoitePanel extends JPanel {
 
         JLabel labelValorDiaria = new JLabel("Valor diária: ");
         labelValorDiaria.setFont(new Font("Roboto", Font.BOLD, 16));
-        labelValorDiaria.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelValorDiaria.setForeground(CorPersonalizada.DARK_GRAY);
         bloco.add(labelValorDiaria, gbc);
 
         JLabel valorDiaria = new JLabel(precosRepository.precoDiaria(quantidadeDePessoas.getValue()).toString());

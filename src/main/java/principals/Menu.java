@@ -86,8 +86,7 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnReservas, ReservationPanel::new);
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
-
-        showPanel(new NewPernoitesPanel(new PernoitesRepository()));
+        showPanel(new RelatoriosPanel(new RelatoriosRepository()));
         setVisible(true);
     }
 
@@ -185,9 +184,6 @@ public class Menu extends JFrame {
         mainPanel.revalidate();
         mainPanel.repaint();
     }
-
-
-
 
 
     public static JPanel createIdentificadorPanel(String titulo, ImageIcon icon) {

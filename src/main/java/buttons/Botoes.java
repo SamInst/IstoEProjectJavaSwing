@@ -2,14 +2,9 @@ package buttons;
 
 import java.awt.*;
 
-public class Botoes {
-    private static final Color GREEN = new java.awt.Color(30, 180, 114);
-    private static final Color RED = new java.awt.Color(253, 83, 83);
-    private static final Color WHITE = new java.awt.Color(255, 255, 255);
-    private static final Color BLUE = new java.awt.Color(30, 100, 200);
-    private static final Color GRAY = new java.awt.Color(130, 130, 130);
-    private static final Color ORANGE = new java.awt.Color(246, 159, 50);
+import static principals.tools.CorPersonalizada.*;
 
+public class Botoes {
     private static BotaoComSombra botaoComSombra(Color color, String text){
         BotaoComSombra botao = new BotaoComSombra();
         botao.setBackground(color);
@@ -24,7 +19,7 @@ public class Botoes {
     }
 
     public static BotaoComSombra btn_vermelho(String text){
-        return botaoComSombra( RED, text);
+        return botaoComSombra(RED, text);
     }
 
     public static BotaoComSombra btn_verde(String text){

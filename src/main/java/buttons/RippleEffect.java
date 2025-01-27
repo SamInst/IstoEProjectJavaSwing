@@ -24,7 +24,6 @@ import javax.swing.SwingUtilities;
 
 
 public class RippleEffect {
-
     private final Component component;
     @Setter
     @Getter
@@ -55,8 +54,7 @@ public class RippleEffect {
     public void reder(Graphics g, Shape contain) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        for (int i = 0; i < effects.size(); i++) {
-            Effect effect = effects.get(i);
+        for (Effect effect : effects) {
             if (effect != null) {
                 effect.render(g2, contain);
             }
@@ -67,7 +65,6 @@ public class RippleEffect {
 
         private final Component component;
         private final Point location;
-        private Animator animator;
         private float animate;
 
         public Effect(Component component, Point location) {
@@ -77,7 +74,7 @@ public class RippleEffect {
         }
 
         private void init() {
-            animator = new Animator(500, new TimingTargetAdapter() {
+            Animator animator = new Animator(500, new TimingTargetAdapter() {
                 @Override
                 public void timingEvent(float fraction) {
                     animate = fraction;
@@ -111,8 +108,7 @@ public class RippleEffect {
             double s = size * animate;
             double x = location.getX();
             double y = location.getY();
-            Shape shape = new Ellipse2D.Double(x - s, y - s, s * 2, s * 2);
-            return shape;
+            return new Ellipse2D.Double(x - s, y - s, s * 2, s * 2);
         }
 
         private double getSize(Rectangle2D rec) {

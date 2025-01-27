@@ -40,9 +40,7 @@ public class Icones {
     public static ImageIcon search = new ImageIcon("src/main/resources/icons/search.png");
     public static ImageIcon cash_out = new ImageIcon("src/main/resources/icons/cash out.png");
     public static ImageIcon card = new ImageIcon("src/main/resources/icons/card.png");
-
-
-
-
-
+    public static ImageIcon checkmark = new ImageIcon("src/main/resources/icons/checkmark-transparent-ezgif.com-resize.gif");
+    public static ImageIcon error = new ImageIcon("src/main/resources/icons/camp-dayz-no-ezgif.com-resize.gif");
+    public static ImageIcon saved = new ImageIcon("src/main/resources/icons/check.gif");
 }

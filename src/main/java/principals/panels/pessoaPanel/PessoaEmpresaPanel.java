@@ -52,18 +52,18 @@ public class PessoaEmpresaPanel extends JPanel implements Refreshable {
         gbc.weighty = 1.0;
 
         PanelArredondado leftPanel = new PanelArredondado();
-        leftPanel.setBackground(CorPersonalizada.CINZA_CLARO);
+        leftPanel.setBackground(CorPersonalizada.LIGHT_GRAY);
         leftPanel.setLayout(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder());
 
         JPanel topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension(leftPanel.getWidth(), 150));
-        topPanel.setBackground(CorPersonalizada.CINZA_CLARO);
+        topPanel.setBackground(CorPersonalizada.LIGHT_GRAY);
         topPanel.setLayout(new GridBagLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder());
 
         bottomPanel.setLayout(new GridBagLayout());
-        bottomPanel.setBackground(CorPersonalizada.CINZA_CLARO);
+        bottomPanel.setBackground(CorPersonalizada.LIGHT_GRAY);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder());
 
         JScrollPane leftScrollPane = new JScrollPane(leftPanel);

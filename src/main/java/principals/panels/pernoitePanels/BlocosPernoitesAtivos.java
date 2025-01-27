@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
 
 import static buttons.Botoes.*;
+import static principals.tools.CorPersonalizada.*;
 import static principals.tools.Resize.*;
 
 public class BlocosPernoitesAtivos {
@@ -22,11 +23,11 @@ public class BlocosPernoitesAtivos {
         statusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         String statusTitulo = "";
-        Color cor = CorPersonalizada.AZUL_ESCURO;
+        Color cor = DARK_BLUE;
         switch (statusPernoiteEnum) {
         case ATIVO -> statusTitulo = "Ativos";
         case DIARIA_ENCERRADA -> { statusTitulo = "Diária Encerrada"; cor = new Color(0xA83131);}
-            default -> { statusTitulo = "Finalizados"; cor = CorPersonalizada.CINZA_ESCURO;
+            default -> { statusTitulo = "Finalizados"; cor = DARK_GRAY;
             }
         }
 
@@ -85,7 +86,7 @@ public class BlocosPernoitesAtivos {
 
             JPanel quadranteAzul = new JPanel();
             quadranteAzul.setLayout(new BorderLayout());
-            quadranteAzul.setBackground(CorPersonalizada.AZUL_ESCURO);
+            quadranteAzul.setBackground(WHITE);
             quadranteAzul.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
             painelSuperiorInferior.add(quadranteAzul);
 
@@ -141,7 +142,7 @@ public class BlocosPernoitesAtivos {
         JLabel iconePessoaLabel = new JLabel(iconePessoa);
 
         JLabel labelNome = new JLabel(" " + (pernoite.representante() == null ? null : pernoite.representante().nome()));
-        labelNome.setForeground(CorPersonalizada.VERMELHO.darker());
+        labelNome.setForeground(RED_2.darker());
         labelNome.setFont(new Font("Roboto", Font.BOLD, 18));
 
         JPanel panelEsquerdo = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -157,7 +158,7 @@ public class BlocosPernoitesAtivos {
 
         JLabel labelQuantidadeDiarias = new JLabel(pernoite.quantidade_diarias().toString());
         labelQuantidadeDiarias.setFont(new Font("Roboto", Font.BOLD, 20));
-        labelQuantidadeDiarias.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelQuantidadeDiarias.setForeground(DARK_GRAY);
         labelQuantidadeDiarias.setToolTipText("quantidade de diarias");
 
         ImageIcon iconeConsumo = resizeIcon(Icones.sacola, 20, 20);
@@ -166,7 +167,7 @@ public class BlocosPernoitesAtivos {
 
         JLabel labelQuantidadeConsumo = new JLabel(pernoite.quantidade_consumo().toString());
         labelQuantidadeConsumo.setFont(new Font("Roboto", Font.BOLD, 20));
-        labelQuantidadeConsumo.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelQuantidadeConsumo.setForeground(DARK_GRAY);
         labelQuantidadeConsumo.setToolTipText("quantidade de itens consumidos");
 
         ImageIcon iconePessoas = resizeIcon(Icones.usuarios, 20, 20);
@@ -175,7 +176,7 @@ public class BlocosPernoitesAtivos {
 
         JLabel labelQuantidadePessoas = new JLabel(pernoite.quantidade_pessoas().toString());
         labelQuantidadePessoas.setFont(new Font("Roboto", Font.BOLD, 20));
-        labelQuantidadePessoas.setForeground(CorPersonalizada.CINZA_ESCURO);
+        labelQuantidadePessoas.setForeground(DARK_GRAY);
         labelQuantidadePessoas.setToolTipText("quantidade de pessoas");
 
         panelDireito.add(labelDiarias);

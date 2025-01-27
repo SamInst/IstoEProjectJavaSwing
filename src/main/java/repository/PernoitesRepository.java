@@ -182,7 +182,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         """;
 
         String sqlRepresentante = """
-        SELECT p.id, p.nome, p.telefone
+        SELECT p.id, p.nome, p.telefone, p.cpf
         FROM pessoa p
         JOIN diaria_hospedes dh ON p.id = dh.hospedes_id
         JOIN diaria d ON dh.diaria_id = d.id
@@ -233,6 +233,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                             representante = new BuscaPernoiteResponse.Representante(
                                     rsRepresentante.getLong("id"),
                                     rsRepresentante.getString("nome"),
+                                    rsRepresentante.getString("cpf"),
                                     rsRepresentante.getString("telefone")
                             );
                         }

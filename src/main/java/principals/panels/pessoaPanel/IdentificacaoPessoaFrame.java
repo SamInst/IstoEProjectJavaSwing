@@ -84,7 +84,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
     AtomicReference<ImageIcon> foto_usuario = new AtomicReference<>(user_sem_foto_masculino);
 
 
-    public IdentificacaoPessoaFrame(String cpf, boolean somenteLeitura) {
+    public IdentificacaoPessoaFrame(String cpf, boolean viewOnly) {
         cpfExterno = cpf;
         setTitle("Identificação de Pessoa");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -353,7 +353,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         clienteNovoPanel.setMaximumSize(new Dimension(250, 30));
         clienteNovoPanel.add(new JLabel("Cliente Novo?"));
         clienteNovoPanel.setBackground(Color.WHITE);
-        clienteNovoPanel.setForeground(CorPersonalizada.CINZA_CLARO);
+        clienteNovoPanel.setForeground(CorPersonalizada.LIGHT_GRAY);
         clienteNovoPanel.setFont(font);
         clienteNovoPanel.add(clienteNovoSim);
         clienteNovoPanel.add(clienteNovoNao);
@@ -365,7 +365,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
         hospedadoPanel.setMaximumSize(new Dimension(250, 30));
         hospedadoPanel.add(new JLabel("Está Hospedado?"));
         hospedadoPanel.setBackground(Color.WHITE);
-        hospedadoPanel.setForeground(CorPersonalizada.CINZA_CLARO);
+        hospedadoPanel.setForeground(CorPersonalizada.LIGHT_GRAY);
         hospedadoPanel.setFont(font);
         hospedadoPanel.add(hospedadoSim);
         hospedadoPanel.add(hospedadoNao);
@@ -512,7 +512,7 @@ public class IdentificacaoPessoaFrame extends JFrame {
                 campoCPF.setText("* CPF: " + cpfExterno);
                 if (verificarSituacao(cpfExterno)){
                     preencherCamposPessoa(cpfExterno);
-                    if (somenteLeitura){
+                    if (viewOnly){
                         btnSalvar.setVisible(false);
                         btnLimpar.setVisible(false);
                         btnEditar.setVisible(true);
@@ -813,11 +813,11 @@ public class IdentificacaoPessoaFrame extends JFrame {
         boolean cadastrado = pessoaRepository.cpfExists(cpf);
         if (cadastrado) {
             statusLabel.setText("Cadastrado");
-            statusPanel.setBackground(CorPersonalizada.VERDE_ESCURO);
+            statusPanel.setBackground(CorPersonalizada.DARK_GREEN);
             statusLabel.setForeground(Color.WHITE);
         } else {
             statusLabel.setText("Não cadastrado");
-            statusPanel.setBackground(CorPersonalizada.VERMELHO);
+            statusPanel.setBackground(CorPersonalizada.RED_2);
             statusLabel.setForeground(Color.WHITE);
         }
         return cadastrado;

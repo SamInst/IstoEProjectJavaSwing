@@ -15,6 +15,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Locale;
 
+import static principals.tools.CorPersonalizada.*;
+import static principals.tools.Icones.*;
+
 public class AdicionarRelatorioFrame extends JFrame {
     private final JTextFieldComTextoFixoArredondadoRelatorios valorField;
     private final JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
@@ -23,11 +26,7 @@ public class AdicionarRelatorioFrame extends JFrame {
 
     public AdicionarRelatorioFrame(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         setTitle("Adicionar Relatorio");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(600, 200);
-        setPreferredSize(new Dimension(600, 250));
-        setMinimumSize(new Dimension(600, 250));
-        setMaximumSize(new Dimension(600, 250));
+        setSize(600, 250);
         setResizable(false);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
@@ -37,6 +36,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         azulPanel.setPreferredSize(new Dimension(400, 50));
         azulPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         azulPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 0));
+
         JLabel titulo = new JLabel("Adicionar Relatório");
         titulo.setFont(new Font("Roboto", Font.PLAIN, 20));
         titulo.setForeground(Color.WHITE);
@@ -57,7 +57,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         Arrays.stream(TipoPagamentoEnum.values()).forEach(tipoPagamentoComboBox::addItem);
 
         tipoPagamentoComboBox.setEspessuraBorda(1.0F);
-        tipoPagamentoComboBox.setCorBorda(CorPersonalizada.CINZA_ESCURO.brighter());
+        tipoPagamentoComboBox.setCorBorda(DARK_GRAY.brighter());
 
         campoQuarto = new JTextFieldComTextoFixoArredondadoRelatorios("quarto: ", 7);
         campoQuarto.setFont(new Font("Roboto", Font.PLAIN, 16));
@@ -76,7 +76,7 @@ public class AdicionarRelatorioFrame extends JFrame {
         pretoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnAdicionar = Botoes.btn_verde("Adicionar Relatorio");
-        btnAdicionar.setIcon(Resize.resizeIcon(Icones.plus, 20,20));
+        btnAdicionar.setIcon(Resize.resizeIcon(plus, 20,20));
         pretoPanel.add(btnAdicionar);
 
         btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel));
@@ -119,7 +119,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                     campoQuarto.setForeground(Color.BLACK);
                 } else {
                     campoQuarto.setText("quarto: ");
-                    campoQuarto.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
+                    campoQuarto.setForeground(DARK_GRAY.brighter());
                     campoQuarto.setCaretPosition(campoQuarto.getText().length());
                 }
             }
@@ -136,7 +136,7 @@ public class AdicionarRelatorioFrame extends JFrame {
 
                     if (valor == 0) {
                         campoValor.setText("valor: ");
-                        campoValor.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
+                        campoValor.setForeground(DARK_GRAY.brighter());
                         campoValor.setCaretPosition(campoValor.getText().length());
                     } else {
                         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
@@ -151,7 +151,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                         if (isNegative) {
                             campoValor.setForeground(Color.RED);
                         } else {
-                            campoValor.setForeground(CorPersonalizada.VERDE_ESCURO);
+                            campoValor.setForeground(DARK_GREEN);
                         }
                     }
                 } else if (texto.equals("-")) {
@@ -160,7 +160,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                     campoValor.setCaretPosition(campoValor.getText().length());
                 } else {
                     campoValor.setText("valor: ");
-                    campoValor.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
+                    campoValor.setForeground(DARK_GRAY.brighter());
                     campoValor.setCaretPosition(campoValor.getText().length());
                 }
             }
@@ -175,7 +175,7 @@ public class AdicionarRelatorioFrame extends JFrame {
                 valorField.setCaretPosition(valorField.getText().length());
 
                 if (texto.isEmpty()) {
-                    valorField.setForeground(CorPersonalizada.CINZA_ESCURO.brighter());
+                    valorField.setForeground(DARK_GRAY.brighter());
                 } else {
                     valorField.setForeground(Color.BLACK);
                 }
@@ -191,6 +191,7 @@ public class AdicionarRelatorioFrame extends JFrame {
             Long quartoId = null;
 
             String quartoTexto = campoQuarto.getText().replace("quarto: ", "").trim();
+
             if (!quartoTexto.isEmpty()) {
                 quartoId = Long.parseLong(quartoTexto);
                 if (quartoId == 0) quartoId = null;
@@ -201,14 +202,29 @@ public class AdicionarRelatorioFrame extends JFrame {
 
             RelatorioRequest relatorioRequest = new RelatorioRequest(relatorio, tipoPagamento, quartoId, valor);
 
-            relatoriosRepository.adicionarRelatorio(relatorioRequest);
+            if (valorField.getText().isEmpty()) {
+                new Toast(this, "Relatório não pode es ", RED_2, error);
+                return;
+            }
 
-            JOptionPane.showMessageDialog(this, "Relatório adicionado com sucesso!");
-            dispose();
+            if (campoValor.getText().isEmpty()) {
+                new Toast(this, "Valor inválido ", RED_2, error);
+                return;
+            }
+
+            relatoriosRepository.adicionarRelatorio(relatorioRequest);
+            new Toast(this, "Relatório Adicionado!", DARK_GREEN, saved);
+            resetFields();
             relatoriosPanel.refreshPanel();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao adicionar o relatório: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            new Toast(this, "Relatório ou valor inválido ", RED_4, error);
         }
+    }
+
+    private void resetFields(){
+        campoQuarto.setText("quarto: ");
+        campoValor.setText("valor: ");
+        valorField.setText("relatório: ");
     }
 }
