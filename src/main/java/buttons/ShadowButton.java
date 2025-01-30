@@ -29,10 +29,6 @@ public class ShadowButton extends JButton {
         rippleEffect.setRippleColor(color);
     }
 
-    public Color getRippleColor() {
-        return rippleEffect.getRippleColor();
-    }
-
     @Getter
     private int round = 10;
     @Getter
@@ -114,4 +110,33 @@ public class ShadowButton extends JButton {
             return null;
         }
     }
+
+    public void showPopupWithButtons(ShadowButton... buttons) {
+        JPopupMenu popup = new JPopupMenu() {
+            @Override
+            public void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                super.paintComponent(g2d);
+                g2d.dispose();
+            }
+            @Override
+            protected void paintBorder(Graphics g) {
+            }
+        };
+        popup.setLayout(new GridLayout(0, 1));
+        for (ShadowButton button : buttons) {
+            popup.add(button);
+        }
+        popup.pack();
+
+        int x = this.getLocationOnScreen().x;
+        int y = this.getLocationOnScreen().y;
+        Dimension size = this.getSize();
+
+        popup.show(this, 0, 0);
+        popup.setLocation(x, y + size.height);
+    }
+
+
 }
