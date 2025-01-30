@@ -2,6 +2,7 @@ package principals.panels.relatoriosPanels;
 
 import buttons.Botoes;
 import enums.TipoPagamentoEnum;
+import org.jetbrains.annotations.NotNull;
 import principals.tools.*;
 import repository.RelatoriosRepository;
 import request.RelatorioRequest;
@@ -17,6 +18,7 @@ import java.util.Locale;
 
 import static principals.tools.CorPersonalizada.*;
 import static principals.tools.Icones.*;
+import static principals.tools.Resize.*;
 
 public class AdicionarRelatorioFrame extends JFrame {
     private final JTextFieldComTextoFixoArredondadoRelatorios valorField;
@@ -24,7 +26,7 @@ public class AdicionarRelatorioFrame extends JFrame {
     private final JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
     private final JTextFieldComTextoFixoArredondadoRelatorios campoValor;
 
-    public AdicionarRelatorioFrame(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
+    public AdicionarRelatorioFrame(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel, JFrame menu) {
         setTitle("Adicionar Relatorio");
         setSize(600, 250);
         setResizable(false);
@@ -76,10 +78,10 @@ public class AdicionarRelatorioFrame extends JFrame {
         pretoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         JButton btnAdicionar = Botoes.btn_verde("Adicionar Relatorio");
-        btnAdicionar.setIcon(Resize.resizeIcon(plus, 20,20));
+        btnAdicionar.setIcon(resizeIcon(plus, 20,20));
         pretoPanel.add(btnAdicionar);
 
-        btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel));
+        btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel, menu));
 
         add(pretoPanel, BorderLayout.SOUTH);
 
@@ -183,43 +185,51 @@ public class AdicionarRelatorioFrame extends JFrame {
         });
     }
 
-    private void adicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
+    private void adicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel, JFrame menu) {
         try {
             String relatorio = valorField.getText().replace("relatório: ", "").trim().toUpperCase();
-            TipoPagamentoEnum tipoPagamento = (TipoPagamentoEnum) tipoPagamentoComboBox.getSelectedItem();
-
-            Long quartoId = null;
-
-            String quartoTexto = campoQuarto.getText().replace("quarto: ", "").trim();
-
-            if (!quartoTexto.isEmpty()) {
-                quartoId = Long.parseLong(quartoTexto);
-                if (quartoId == 0) quartoId = null;
-            }
-
-            String valorTexto = campoValor.getText().replace("valor: ", "").replace("R$ ", "").replace(".", "").replace(",", ".").trim();
-            Float valor = Float.parseFloat(valorTexto);
-
-            RelatorioRequest relatorioRequest = new RelatorioRequest(relatorio, tipoPagamento, quartoId, valor);
+            RelatorioRequest relatorioRequest = getRelatorioRequest(relatorio);
 
             if (valorField.getText().isEmpty()) {
-                new Toast(this, "Relatório não pode es ", RED_2, error);
+                new Toast(menu, "Relatório não pode estar vazio!", ORANGE, resizeIcon(warning, 30,30));
                 return;
             }
 
             if (campoValor.getText().isEmpty()) {
-                new Toast(this, "Valor inválido ", RED_2, error);
+                new Toast(menu, "Valor inválido ", RED_2, error);
                 return;
             }
 
             relatoriosRepository.adicionarRelatorio(relatorioRequest);
-            new Toast(this, "Relatório Adicionado!", DARK_GREEN, saved);
+            new Toast(menu, "Relatório Adicionado!", GREEN, resizeIcon(check, 30,30));
             resetFields();
             relatoriosPanel.refreshPanel();
 
         } catch (Exception ex) {
-            new Toast(this, "Relatório ou valor inválido ", RED_4, error);
+            new Toast(menu, "Relatório ou valor inválido ", RED_4, resizeIcon(error, 30,30));
         }
+    }
+
+    private @NotNull RelatorioRequest getRelatorioRequest(String relatorio) {
+        TipoPagamentoEnum tipoPagamento = (TipoPagamentoEnum) tipoPagamentoComboBox.getSelectedItem();
+
+        Long quartoId = null;
+
+        String quartoTexto = campoQuarto.getText().replace("quarto: ", "").trim();
+
+        if (!quartoTexto.isEmpty()) {
+            quartoId = Long.parseLong(quartoTexto);
+            if (quartoId == 0) quartoId = null;
+        }
+
+        String valorTexto = campoValor.getText()
+                .replace("valor: ", "")
+                .replace("R$ ", "")
+                .replace(".", "")
+                .replace(",", ".").trim();
+        Float valor = Float.parseFloat(valorTexto);
+
+        return new RelatorioRequest(relatorio, tipoPagamento, quartoId, valor);
     }
 
     private void resetFields(){

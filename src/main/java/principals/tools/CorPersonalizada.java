@@ -23,5 +23,6 @@ public class CorPersonalizada {
     public static final Color RED_4 = new Color(0xA04C4C);
 
 
-    public static final Color ORANGE = new Color(0xf69f32);
+    public static final Color ORANGE = new Color(0xf69f90);
+    public static final Color YELLOW = new Color(0xF4E67D);
 }

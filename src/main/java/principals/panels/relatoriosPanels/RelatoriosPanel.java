@@ -1,55 +1,51 @@
 package principals.panels.relatoriosPanels;
 
-import buttons.BotaoComSombra;
-import com.toedter.calendar.JCalendar;
+import buttons.ShadowButton;
+import calendar.DateChooser;
+import calendar.EventDateChooser;
+import calendar.SelectedAction;
+import calendar.SelectedDate;
 import enums.TipoPagamentoEnum;
-import principals.tools.CustomJCalendar;
-import principals.tools.Icones;
 import principals.tools.Refreshable;
+import principals.tools.Resize;
 import repository.RelatoriosRepository;
 import response.RelatoriosResponse;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
 import static buttons.Botoes.*;
+import static enums.TipoPagamentoEnum.*;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static javax.swing.BorderFactory.createEmptyBorder;
 import static principals.tools.CorPersonalizada.*;
 import static principals.tools.FormatarFloat.format;
 import static principals.tools.Icones.*;
+import static principals.tools.OptionPane.warning;
 import static principals.tools.Resize.resizeIcon;
 
 public class RelatoriosPanel extends JPanel implements Refreshable {
-
+    private final JFrame menu;
     private final RelatoriosRepository relatoriosRepository;
+
     private JPanel relatoriosPanel;
     private JScrollPane scrollPane;
-    private JCalendar jCalendar;
-    private JButton btnPesquisar;
     private JButton btnAdicionar;
     private JButton btnFiltros;
     private JPanel filterButtonsPanel;
     private LocalDate selectedDate;
-    private BotaoComSombra saldoBtn;
+    private ShadowButton saldoBtn;
 
-    public RelatoriosPanel(RelatoriosRepository relatoriosRepository) {
+    private final DateChooser dateChooser = new DateChooser();
+    private final ShadowButton searchDateField = new ShadowButton();
+
+    public RelatoriosPanel(RelatoriosRepository relatoriosRepository, JFrame menu) {
         this.relatoriosRepository = relatoriosRepository;
+        this.menu = menu;
         refreshPanel();
     }
-
-    private final PropertyChangeListener calendarioListener = evt -> {
-        if (!"day".equals(evt.getPropertyName())) return;
-        if (jCalendar.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione uma data válida.");
-            return;
-        }
-        selectedDate = new Date(jCalendar.getDate().getTime()).toLocalDate();
-        mostrarPorData(selectedDate);
-    };
 
     private void mostrarPorData(LocalDate data) {
         relatoriosPanel.removeAll();
@@ -93,7 +89,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         for (LocalDate d : datas) {
             List<RelatoriosResponse.Relatorios.RelatorioDoDia> rows = relatoriosRepository.buscaRetiradaPorData(d);
             if (!rows.isEmpty()) {
-                JPanel p = montarPainelDiaETipo(d, TipoPagamentoEnum.DINHEIRO, rows);
+                JPanel p = montarPainelDiaETipo(d, DINHEIRO, rows);
                 relatoriosPanel.add(p);
             }
         }
@@ -104,19 +100,23 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     private JPanel montarPainelDia(RelatoriosResponse.Relatorios relatorio) {
         JPanel relatorioDiaPanel = new JPanel(new BorderLayout());
         relatorioDiaPanel.setBackground(BACKGROUND_GRAY);
-        relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 10));
+        relatorioDiaPanel.setBorder(createEmptyBorder(5, 20, 5, 10));
+
         var dataBtn = btn_branco(relatorio.data());
         var totalBtn = btn_branco("Total do dia: R$ " + format(relatorio.total_do_dia()));
+
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(BACKGROUND_GRAY);
         headerPanel.add(dataBtn, BorderLayout.WEST);
         headerPanel.add(totalBtn, BorderLayout.EAST);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 10));
+        headerPanel.setBorder(createEmptyBorder(5, 5, 0, 10));
         relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
+
         JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
         relatoriosDoDiaPanel.setBackground(LIGHT_GRAY);
         relatoriosDoDia(relatorio.relatorioDoDia(), relatoriosDoDiaPanel);
         relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+
         dataBtn.addActionListener(e -> relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible()));
         return relatorioDiaPanel;
     }
@@ -125,40 +125,27 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                                         List<RelatoriosResponse.Relatorios.RelatorioDoDia> lista) {
         JPanel relatorioDiaPanel = new JPanel(new BorderLayout());
         relatorioDiaPanel.setBackground(BACKGROUND_GRAY);
-        relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 10));
+        relatorioDiaPanel.setBorder(createEmptyBorder(5, 20, 5, 10));
+
         var dataStr = data.format(ofPattern("dd/MM/yyyy"));
         var dataBtn = btn_branco(dataStr);
         var filtroBtn = btn_branco("Filtro: " + tipo.name());
+
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(BACKGROUND_GRAY);
         headerPanel.add(dataBtn, BorderLayout.WEST);
         headerPanel.add(filtroBtn, BorderLayout.EAST);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 10));
+        headerPanel.setBorder(createEmptyBorder(5, 5, 0, 10));
+
         relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
+
         JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
         relatoriosDoDiaPanel.setBackground(LIGHT_GRAY);
         relatoriosDoDia(lista, relatoriosDoDiaPanel);
         relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+
         dataBtn.addActionListener(e -> relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible()));
         return relatorioDiaPanel;
-    }
-
-    private JPanel montarPainelTipo(TipoPagamentoEnum tipo,
-                                    List<RelatoriosResponse.Relatorios.RelatorioDoDia> lista) {
-        JPanel painel = new JPanel(new BorderLayout());
-        painel.setBackground(BACKGROUND_GRAY);
-        painel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 10));
-        var filtroBtn = btn_branco("Filtro: " + tipo.name());
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(BACKGROUND_GRAY);
-        headerPanel.add(filtroBtn, BorderLayout.WEST);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 10));
-        painel.add(headerPanel, BorderLayout.NORTH);
-        JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
-        relatoriosDoDiaPanel.setBackground(LIGHT_GRAY);
-        relatoriosDoDia(lista, relatoriosDoDiaPanel);
-        painel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
-        return painel;
     }
 
     public void relatoriosDoDia(List<RelatoriosResponse.Relatorios.RelatorioDoDia> lista,
@@ -167,6 +154,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
             JButton relatorioButton = new JButton();
             var tipoPagamentoButton = btn_branco("DESCONHECIDO");
             JLabel tipoPagamentoText = new JLabel("DESCONHECIDO");
+
             switch (relatorioDoDia.tipo_pagamento()) {
                 case "0" -> {
                     tipoPagamentoText.setText("PAGAMENTO VIA PIX");
@@ -200,14 +188,24 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                     tipoPagamentoButton.setForeground(BLUE);
                 }
             }
+
             relatorioButton.setBackground(tipoPagamentoButton.getForeground());
-            relatorioButton.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+            relatorioButton.setBorder(createEmptyBorder(0, 5, 0, 0));
             relatorioButton.setBorderPainted(false);
             relatorioButton.setFocusPainted(false);
             relatorioButton.setContentAreaFilled(true);
             relatorioButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
             JPanel buttonContent = new JPanel(new BorderLayout());
             buttonContent.setBackground(Color.WHITE);
+
+            ShadowButton valorSomaButton =
+                    btn_verde(format(relatoriosRepository.somaValorRelatorioMaisAnteriores(relatorioDoDia.relatorio_id())));
+            JPanel rightButtonContent = new JPanel();
+            rightButtonContent.setBackground(Color.LIGHT_GRAY);
+            rightButtonContent.setPreferredSize(new Dimension(80, buttonContent.getPreferredSize().height));
+            rightButtonContent.add(valorSomaButton);
+
             var valor = "R$ " + format(relatorioDoDia.valor());
             var btn_hora = btn_branco(relatorioDoDia.horario().format(ofPattern("HH:mm")));
             var btn_quarto =
@@ -219,12 +217,14 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                                     : " " + relatorioDoDia.quarto_id() + " "
                     );
             btn_quarto.setForeground(Color.WHITE);
+
             JPanel descricaoPanel = new JPanel();
             descricaoPanel.setLayout(new BoxLayout(descricaoPanel, BoxLayout.Y_AXIS));
             descricaoPanel.setBackground(Color.WHITE);
-            descricaoPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
+            descricaoPanel.setBorder(createEmptyBorder(3, 0, 0, 0));
             descricaoPanel.setPreferredSize(new Dimension(900, 40));
-            var valorPagamentoButton = new BotaoComSombra();
+
+            ShadowButton valorPagamentoButton;
             if (relatorioDoDia.valor() < 0) {
                 valorPagamentoButton = btn_vermelho(valor);
             } else if ("1".equals(relatorioDoDia.tipo_pagamento())) {
@@ -232,24 +232,37 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
             } else {
                 valorPagamentoButton = btn_azul(valor);
             }
+
             JLabel descricao = new JLabel(relatorioDoDia.relatorio());
             descricao.setBorder(null);
             descricao.setForeground(DARK_GRAY);
+
             JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             leftPanel.setOpaque(false);
             leftPanel.setBackground(Color.WHITE);
             leftPanel.add(btn_quarto);
             leftPanel.add(btn_hora);
+
             descricaoPanel.add(descricao);
             descricaoPanel.add(tipoPagamentoText);
+
             leftPanel.add(descricaoPanel);
+
             JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             rightPanel.setOpaque(false);
-            rightPanel.setBackground(Color.WHITE);
+            rightPanel.setBackground(BACKGROUND_GRAY);
             rightPanel.add(valorPagamentoButton);
+
             buttonContent.add(leftPanel, BorderLayout.WEST);
             buttonContent.add(rightPanel, BorderLayout.EAST);
-            relatorioButton.add(buttonContent, BorderLayout.CENTER);
+
+            JPanel contentPanel = new JPanel(new BorderLayout());
+            contentPanel.add(buttonContent, BorderLayout.CENTER);
+            contentPanel.add(rightButtonContent, BorderLayout.EAST);
+
+            relatorioButton.setLayout(new BorderLayout());
+            relatorioButton.add(contentPanel);
+
             relatoriosDoDiaPanel.add(relatorioButton);
         }
     }
@@ -259,152 +272,198 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         RelatoriosResponse response = relatoriosRepository.relatoriosResponse();
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel identificadorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-//        identificadorPanel.setBorder(BorderFactory.createEmptyBorder(7, 5, 5, 5));
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightPanel.setPreferredSize(new Dimension(300, 50));
+        rightPanel.setBorder(createEmptyBorder());
+
+        JPanel identificadorPanel = new JPanel(new BorderLayout());
+        identificadorPanel.setOpaque(false);
+
         topPanel.add(identificadorPanel, BorderLayout.CENTER);
 
-        btnPesquisar = btn_branco("Pesquisar");
-        btnPesquisar.setIcon(resizeIcon(search, 15, 15));
-        btnPesquisar.addActionListener(e -> {
-            jCalendar.setVisible(!jCalendar.isVisible());
-            btnPesquisar.setVisible(false);
-            btnAdicionar.setVisible(false);
-            filterButtonsPanel.setVisible(true);
-            revalidate();
-            repaint();
+        searchDateField.setIcon(Resize.resizeIcon(search, 15,15));
+        searchDateField.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        dateChooser.setTextReference(searchDateField);
+
+        dateChooser.addEventDateChooser(new EventDateChooser() {
+            @Override
+            public void dateSelected(SelectedAction action, SelectedDate date) {
+                if (action.getAction() == SelectedAction.DAY_SELECTED) {
+                    dateChooser.hidePopup();
+                    LocalDate localDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
+                    if (localDate != null) {
+                        selectedDate = localDate;
+                        mostrarPorData(localDate);
+                    } else {
+                        warning(menu, "Selecione uma data válida");
+                    }
+                }
+            }
         });
 
-        btnAdicionar = btn_verde("Adicionar Relatório");
-        btnAdicionar.setIcon(resizeIcon(plus, 15, 15));
-        btnAdicionar.addActionListener(e -> new AdicionarRelatorioFrame(relatoriosRepository, RelatoriosPanel.this));
+        searchDateField.addActionListener(e -> dateChooser.showPopup());
 
-        btnFiltros = btn_branco("Filtros");
+        btnAdicionar = btn_verde(" Adicionar Relatório");
+        btnAdicionar.setIcon(resizeIcon(plus, 15, 15));
+        // Exemplo: btnAdicionar.addActionListener(e -> toggleFormPanel());
+
+        btnFiltros = btn_branco(" Filtros");
+        btnFiltros.setIcon(resizeIcon(filter_gray, 15, 15));
         btnFiltros.addActionListener(e -> {
             filterButtonsPanel.setVisible(!filterButtonsPanel.isVisible());
             revalidate();
             repaint();
         });
 
-        identificadorPanel.add(btnPesquisar);
-        identificadorPanel.add(btnAdicionar);
-        identificadorPanel.add(btnFiltros);
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        buttonsPanel.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
+        buttonsPanel.setOpaque(false);
+        buttonsPanel.add(searchDateField);
+        buttonsPanel.add(btnAdicionar);
+        buttonsPanel.add(btnFiltros);
+        identificadorPanel.add(buttonsPanel, BorderLayout.NORTH);
 
-        saldoBtn = btn_verde("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.DINHEIRO)));
+        saldoBtn = btn_verde("Saldo R$ " + format(relatoriosRepository.totalPorTipo(DINHEIRO)));
         saldoBtn.setPreferredSize(new Dimension(300, 50));
         saldoBtn.setMaximumSize(new Dimension(300, 50));
         saldoBtn.setMinimumSize(new Dimension(300, 50));
+        rightPanel.add(saldoBtn, BorderLayout.NORTH);
 
-        topPanel.add(saldoBtn, BorderLayout.EAST);
+        topPanel.add(rightPanel, BorderLayout.EAST);
 
-        CustomJCalendar customJCalendar = new CustomJCalendar();
-        jCalendar = customJCalendar.createCustomCalendar();
-        jCalendar.setVisible(false);
-        jCalendar.getDayChooser().addPropertyChangeListener(calendarioListener);
-        identificadorPanel.add(jCalendar);
+        add(topPanel, BorderLayout.NORTH);
 
         filterButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterButtonsPanel.setVisible(false);
 
-        BotaoComSombra pixButton = btn_azul("PIX");
+        ShadowButton pixButton = btn_azul(" PIX");
+        pixButton.setIcon(resizeIcon(pix, 15,15));
         pixButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.PIX)));
             if (selectedDate != null) {
-                mostrarPorDataETipo(selectedDate, TipoPagamentoEnum.PIX);
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, PIX)
+                ));
+                mostrarPorDataETipo(selectedDate, PIX);
             } else {
-                mostrarTodasDatasPorTipo(TipoPagamentoEnum.PIX);
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(PIX)));
+                mostrarTodasDatasPorTipo(PIX);
             }
         });
 
-        BotaoComSombra dinheiroButton = btn_verde("CÉDULAS");
+        ShadowButton dinheiroButton = btn_verde(" CÉDULAS");
+        dinheiroButton.setIcon(resizeIcon(cash, 15,15));
         dinheiroButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.DINHEIRO)));
             if (selectedDate != null) {
-                relatoriosPanel.removeAll();
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, DINHEIRO)
+                ));
                 List<RelatoriosResponse.Relatorios.RelatorioDoDia> dia =
-                        relatoriosRepository.buscaPorDataETipo(selectedDate, TipoPagamentoEnum.DINHEIRO)
+                        relatoriosRepository.buscaPorDataETipo(selectedDate, DINHEIRO)
                                 .stream()
                                 .filter(r -> r.valor() > 0)
                                 .toList();
-                JPanel p = montarPainelDiaETipo(selectedDate, TipoPagamentoEnum.DINHEIRO, dia);
+                relatoriosPanel.removeAll();
+                JPanel p = montarPainelDiaETipo(selectedDate, DINHEIRO, dia);
                 relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
                 relatoriosPanel.add(p);
-                relatoriosPanel.revalidate();
-                relatoriosPanel.repaint();
             } else {
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(DINHEIRO)));
                 relatoriosPanel.removeAll();
-                List<LocalDate> datas = relatoriosRepository.datasPorTipo(TipoPagamentoEnum.DINHEIRO);
+                List<LocalDate> datas = relatoriosRepository.datasPorTipo(DINHEIRO);
                 relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
                 for (LocalDate d : datas) {
                     List<RelatoriosResponse.Relatorios.RelatorioDoDia> rows =
-                            relatoriosRepository.buscaPorDataETipo(d, TipoPagamentoEnum.DINHEIRO)
+                            relatoriosRepository.buscaPorDataETipo(d, DINHEIRO)
                                     .stream()
                                     .filter(r -> r.valor() > 0)
                                     .toList();
                     if (!rows.isEmpty()) {
-                        JPanel p = montarPainelDiaETipo(d, TipoPagamentoEnum.DINHEIRO, rows);
+                        JPanel p = montarPainelDiaETipo(d, DINHEIRO, rows);
                         relatoriosPanel.add(p);
                     }
                 }
-                relatoriosPanel.revalidate();
-                relatoriosPanel.repaint();
             }
+            relatoriosPanel.revalidate();
+            relatoriosPanel.repaint();
         });
 
-        BotaoComSombra creditoButton = btn_azul("CARTÃO DE CRÉDITO:");
+        ShadowButton creditoButton = btn_azul(" CARTÃO DE CRÉDITO");
+        creditoButton.setIcon(resizeIcon(card, 15,15));
         creditoButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.CARTAO_CREDITO)));
             if (selectedDate != null) {
-                mostrarPorDataETipo(selectedDate, TipoPagamentoEnum.CARTAO_CREDITO);
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, CARTAO_CREDITO)
+                ));
+                mostrarPorDataETipo(selectedDate, CARTAO_CREDITO);
             } else {
-                mostrarTodasDatasPorTipo(TipoPagamentoEnum.CARTAO_CREDITO);
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(CARTAO_CREDITO)));
+                mostrarTodasDatasPorTipo(CARTAO_CREDITO);
             }
         });
 
-        BotaoComSombra debitoButton = btn_azul("CARTÃO DE DÉBITO");
+        ShadowButton debitoButton = btn_azul(" CARTÃO DE DÉBITO");
+        debitoButton.setIcon(resizeIcon(card, 15,15));
         debitoButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo: R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.CARTAO_DEBITO)));
             if (selectedDate != null) {
-                mostrarPorDataETipo(selectedDate, TipoPagamentoEnum.CARTAO_DEBITO);
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, CARTAO_DEBITO)
+                ));
+                mostrarPorDataETipo(selectedDate, CARTAO_DEBITO);
             } else {
-                mostrarTodasDatasPorTipo(TipoPagamentoEnum.CARTAO_DEBITO);
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(CARTAO_DEBITO)));
+                mostrarTodasDatasPorTipo(CARTAO_DEBITO);
             }
         });
 
-        BotaoComSombra virtualButton = btn_azul("CARTÃO VIRTUAL");
+        ShadowButton virtualButton = btn_azul(" CARTÃO VIRTUAL");
+        virtualButton.setIcon(resizeIcon(card, 15,15));
         virtualButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.CARTAO_VIRTUAL)));
             if (selectedDate != null) {
-                mostrarPorDataETipo(selectedDate, TipoPagamentoEnum.CARTAO_VIRTUAL);
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, CARTAO_VIRTUAL)
+                ));
+                mostrarPorDataETipo(selectedDate, CARTAO_VIRTUAL);
             } else {
-                mostrarTodasDatasPorTipo(TipoPagamentoEnum.CARTAO_VIRTUAL);
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(CARTAO_VIRTUAL)));
+                mostrarTodasDatasPorTipo(CARTAO_VIRTUAL);
             }
         });
 
-        BotaoComSombra transfButton = btn_azul("TRANSFERÊNCIA BANCÁRIA");
+        ShadowButton transfButton = btn_azul(" TRANSFERÊNCIA BANCÁRIA");
+        transfButton.setIcon(resizeIcon(bank, 15,15));
         transfButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TipoPagamentoEnum.TRANSFERENCIA_BANCARIA)));
             if (selectedDate != null) {
-                mostrarPorDataETipo(selectedDate, TipoPagamentoEnum.TRANSFERENCIA_BANCARIA);
+                saldoBtn.setText("Saldo R$ " + format(
+                        relatoriosRepository.totalPorTipoEData(selectedDate, TRANSFERENCIA_BANCARIA)
+                ));
+                mostrarPorDataETipo(selectedDate, TRANSFERENCIA_BANCARIA);
             } else {
-                mostrarTodasDatasPorTipo(TipoPagamentoEnum.TRANSFERENCIA_BANCARIA);
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalPorTipo(TRANSFERENCIA_BANCARIA)));
+                mostrarTodasDatasPorTipo(TRANSFERENCIA_BANCARIA);
             }
         });
 
-        BotaoComSombra retiradaButton = btn_vermelho("RETIRADA");
+        ShadowButton retiradaButton = btn_vermelho(" RETIRADA");
+        retiradaButton.setIcon(resizeIcon(cash_out, 15,15));
         retiradaButton.addActionListener(e -> {
-            saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalNegativo()));
             if (selectedDate != null) {
+                float totalNegativoNoDia = relatoriosRepository.buscaRetiradaPorData(selectedDate)
+                        .stream()
+                        .map(RelatoriosResponse.Relatorios.RelatorioDoDia::valor)
+                        .reduce(0f, Float::sum);
+
+                saldoBtn.setText("Saldo R$ " + format(totalNegativoNoDia));
                 List<RelatoriosResponse.Relatorios.RelatorioDoDia> dia =
-                        relatoriosRepository.buscaPorDataETipo(selectedDate, TipoPagamentoEnum.DINHEIRO);
-                List<RelatoriosResponse.Relatorios.RelatorioDoDia> retiradas =
-                        dia.stream().filter(r -> r.valor() < 0).toList();
+                        relatoriosRepository.buscaRetiradaPorData(selectedDate);
                 relatoriosPanel.removeAll();
-                JPanel p = montarPainelDiaETipo(selectedDate, TipoPagamentoEnum.DINHEIRO, retiradas);
+                JPanel p = montarPainelDiaETipo(selectedDate, DINHEIRO, dia);
                 relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
                 relatoriosPanel.add(p);
                 relatoriosPanel.revalidate();
                 relatoriosPanel.repaint();
             } else {
+                saldoBtn.setText("Saldo R$ " + format(relatoriosRepository.totalNegativo()));
                 mostrarTodasDatasRetirada();
             }
         });
@@ -416,43 +475,49 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         filterButtonsPanel.add(virtualButton);
         filterButtonsPanel.add(transfButton);
         filterButtonsPanel.add(retiradaButton);
-        identificadorPanel.add(filterButtonsPanel);
 
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        identificadorPanel.add(filterButtonsPanel, BorderLayout.SOUTH);
+
+        topPanel.setBorder(createEmptyBorder(10, 10, 10, 10));
         add(topPanel, BorderLayout.NORTH);
 
         relatoriosPanel = new JPanel();
         relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
+
         var responseData = response.relatorios();
         for (RelatoriosResponse.Relatorios r : responseData) {
             JPanel relatorioDiaPanel = new JPanel(new BorderLayout());
             relatorioDiaPanel.setBackground(BACKGROUND_GRAY);
-            relatorioDiaPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 10));
+            relatorioDiaPanel.setBorder(createEmptyBorder(5, 20, 5, 10));
 
             var dataBtn = btn_branco(r.data());
             var totalDoDia = btn_branco("Total do dia: R$ " + format(r.total_do_dia()));
+
             JPanel headerPanel = new JPanel(new BorderLayout());
             headerPanel.setBackground(BACKGROUND_GRAY);
             headerPanel.add(dataBtn, BorderLayout.WEST);
             headerPanel.add(totalDoDia, BorderLayout.EAST);
-            headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 10));
+            headerPanel.setBorder(createEmptyBorder(5, 5, 0, 10));
 
-            JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
-            relatoriosDoDiaPanel.setBackground(LIGHT_GRAY);
-            relatoriosDoDia(r.relatorioDoDia(), relatoriosDoDiaPanel);
+            JPanel relatoriosDoDiaPanelInner = new JPanel(new GridLayout(0, 1, 0, 5));
+            relatoriosDoDiaPanelInner.setBackground(LIGHT_GRAY);
+            relatoriosDoDia(r.relatorioDoDia(), relatoriosDoDiaPanelInner);
 
-            dataBtn.addActionListener(e -> relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible()));
+            dataBtn.addActionListener(e -> relatoriosDoDiaPanelInner.setVisible(!relatoriosDoDiaPanelInner.isVisible()));
 
             relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
-            relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+            relatorioDiaPanel.add(relatoriosDoDiaPanelInner, BorderLayout.CENTER);
+
             relatoriosPanel.add(relatorioDiaPanel);
         }
+
         scrollPane = new JScrollPane(
                 relatoriosPanel,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         );
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
         add(scrollPane, BorderLayout.CENTER);
     }
 

@@ -5,14 +5,12 @@ import principals.panels.DashBoardPanel;
 import principals.panels.EntryPanel;
 import principals.panels.ItensPanel;
 import principals.panels.PricePanel;
-import principals.panels.pernoitePanels.NewPernoitesPanel;
 import principals.panels.pernoitePanels.PernoitePanel;
 import principals.panels.pessoaPanel.PessoaEmpresaPanel;
 import principals.panels.quartosPanel.RoomsPanel;
 import principals.panels.relatoriosPanels.RelatoriosPanel;
 import principals.panels.reservasPanels.ReservationPanel;
 import principals.tools.LabelArredondado;
-import repository.PernoitesRepository;
 import repository.QuartosRepository;
 import repository.RelatoriosRepository;
 
@@ -80,13 +78,13 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnQuartos, () -> new RoomsPanel(new QuartosRepository()));
         addHoverAndSelectionEffect(btnEntradas, EntryPanel::new);
         addHoverAndSelectionEffect(btnPernoites, PernoitePanel::new);
-        addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository()));
+        addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository(), this));
         addHoverAndSelectionEffect(btnClientes, PessoaEmpresaPanel::new);
         addHoverAndSelectionEffect(btnItens, ItensPanel::new);
         addHoverAndSelectionEffect(btnReservas, ReservationPanel::new);
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
-        showPanel(new RelatoriosPanel(new RelatoriosRepository()));
+        showPanel(new RelatoriosPanel(new RelatoriosRepository(), this));
         setVisible(true);
     }
 

@@ -333,5 +333,65 @@ public class RelatoriosRepository {
         return total;
     }
 
+    public float totalPorTipoEData(LocalDate data, TipoPagamentoEnum tipo) {
+        float total = 0f;
+        String sql = """
+        SELECT COALESCE(SUM(valor), 0)
+        FROM relatorio
+        WHERE tipo_pagamento_enum = ?
+          AND CAST(data_hora AS date) = ?
+    """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, tipo.getCodigo());
+            statement.setDate(2, java.sql.Date.valueOf(data));
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getFloat(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
+    public Float somaValorRelatorioMaisAnteriores(long id) {
+        String sql = """
+        SELECT id, valor, tipo_pagamento_enum,
+            SUM(CASE WHEN tipo_pagamento_enum = '1' THEN valor ELSE 0 END) OVER (ORDER BY id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS somaTotal
+        FROM relatorio
+        WHERE id <= ?
+        ORDER BY id
+    """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            try (ResultSet rs = statement.executeQuery()) {
+                float previousSomaTotal = 0;
+
+                while (rs.next()) {
+                    float valor = rs.getFloat("valor");
+                    String tipoPagamento = rs.getString("tipo_pagamento_enum");
+                    float somaTotal = rs.getFloat("somaTotal");
+
+                    if (rs.getLong("id") == id) {
+                        return "1".equals(tipoPagamento) ? somaTotal : previousSomaTotal;
+                    }
+
+                    previousSomaTotal = somaTotal;
+                }
+                return 0f;
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+            return 0f;
+        }
+    }
+
+
+
+
+
+
 
 }

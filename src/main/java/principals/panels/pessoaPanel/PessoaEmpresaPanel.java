@@ -1,6 +1,6 @@
 package principals.panels.pessoaPanel;
 
-import buttons.BotaoComSombra;
+import buttons.ShadowButton;
 import principals.panels.empresaPanels.IdentificacaoEmpresaFrame;
 import principals.tools.*;
 import repository.EmpresaRepository;
@@ -90,16 +90,16 @@ public class PessoaEmpresaPanel extends JPanel implements Refreshable {
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
 
-        BotaoComSombra btnAdicionarPessoa = btn_verde(" Identificação de Pessoa ");
+        ShadowButton btnAdicionarPessoa = btn_verde(" Identificação de Pessoa ");
         btnAdicionarPessoa.setPreferredSize(new Dimension(170, 40));
 
-        BotaoComSombra btnAdicionarEmpresa = btn_azul("Identificação de Empresa");
+        ShadowButton btnAdicionarEmpresa = btn_azul("Identificação de Empresa");
         btnAdicionarEmpresa.setPreferredSize(new Dimension(170, 40));
 
-        BotaoComSombra btnHospedados = btn_cinza(" Hospedados:  " + pessoaRepository.qutPessoasHospedadas());
+        ShadowButton btnHospedados = btn_cinza(" Hospedados:  " + pessoaRepository.qutPessoasHospedadas());
         btnHospedados.setPreferredSize(new Dimension(130, 40));
 
-        BotaoComSombra btnReset = btn_branco("Resetar");
+        ShadowButton btnReset = btn_branco("Resetar");
         btnHospedados.setPreferredSize(new Dimension(120, 40));
 
         btnAdicionarPessoa.addActionListener(evt -> {
@@ -312,13 +312,13 @@ public class PessoaEmpresaPanel extends JPanel implements Refreshable {
         blocoVerde.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         if (empresa != null) {
-            BotaoComSombra botaoEmpresa = btn_branco(empresa.nomeEmpresa());
+            ShadowButton botaoEmpresa = btn_branco(empresa.nomeEmpresa());
             botaoEmpresa.setIcon(iconeVinculoEmpresa);
             blocoVerde.add(botaoEmpresa, BorderLayout.WEST);
         }
 
         if (pessoa.hospedado()) {
-            BotaoComSombra botaoHospedado = btn_cinza("Hospedado");
+            ShadowButton botaoHospedado = btn_cinza("Hospedado");
             blocoVerde.add(botaoHospedado, BorderLayout.EAST);
         }
 

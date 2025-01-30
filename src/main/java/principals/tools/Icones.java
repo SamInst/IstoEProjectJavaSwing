@@ -40,7 +40,13 @@ public class Icones {
     public static ImageIcon search = new ImageIcon("src/main/resources/icons/search.png");
     public static ImageIcon cash_out = new ImageIcon("src/main/resources/icons/cash out.png");
     public static ImageIcon card = new ImageIcon("src/main/resources/icons/card.png");
-    public static ImageIcon checkmark = new ImageIcon("src/main/resources/icons/checkmark-transparent-ezgif.com-resize.gif");
-    public static ImageIcon error = new ImageIcon("src/main/resources/icons/camp-dayz-no-ezgif.com-resize.gif");
     public static ImageIcon saved = new ImageIcon("src/main/resources/icons/check.gif");
+    public static ImageIcon cash = new ImageIcon("src/main/resources/icons/cash.png");
+    public static ImageIcon bank = new ImageIcon("src/main/resources/icons/bank.png");
+    public static ImageIcon check = new ImageIcon("src/main/resources/icons/check.png");
+    public static ImageIcon warning = new ImageIcon("src/main/resources/icons/warning.png");
+    public static ImageIcon error = new ImageIcon("src/main/resources/icons/error.png");
+    public static ImageIcon previous = new ImageIcon("src/main/resources/icons/previous.png");
+    public static ImageIcon forward = new ImageIcon("src/main/resources/icons/forward.png");
+    public static ImageIcon filter_gray = new ImageIcon("src/main/resources/icons/filter_gray.png");
 }

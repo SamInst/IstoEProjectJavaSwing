@@ -11,7 +11,7 @@ import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-public class BotaoComSombra extends JButton {
+public class ShadowButton extends JButton {
 
     public void setRound(int round) {
         this.round = round;
@@ -41,7 +41,7 @@ public class BotaoComSombra extends JButton {
     private final Insets shadowSize = new Insets(2, 5, 8, 5);
     private final RippleEffect rippleEffect = new RippleEffect(this);
 
-    public BotaoComSombra() {
+    public ShadowButton() {
         setBorder(new EmptyBorder(10, 12, 15, 12));
         setContentAreaFilled(false);
         setBackground(new Color(255, 255, 255));
