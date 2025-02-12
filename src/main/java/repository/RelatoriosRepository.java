@@ -10,7 +10,9 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RelatoriosRepository {
@@ -340,6 +342,7 @@ public class RelatoriosRepository {
         FROM relatorio
         WHERE tipo_pagamento_enum = ?
           AND CAST(data_hora AS date) = ?
+          AND (tipo_pagamento_enum != 1 OR valor > 0)
     """;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, tipo.getCodigo());
@@ -370,7 +373,6 @@ public class RelatoriosRepository {
                 float previousSomaTotal = 0;
 
                 while (rs.next()) {
-                    float valor = rs.getFloat("valor");
                     String tipoPagamento = rs.getString("tipo_pagamento_enum");
                     float somaTotal = rs.getFloat("somaTotal");
 
@@ -388,9 +390,51 @@ public class RelatoriosRepository {
         }
     }
 
+    public int compararRelatorioAnterior(long id, int tipo) {
+        if (tipo != 1) {
+            return 0;
+        }
+        
+        
 
 
+        String soma_relatorio = "SELECT sum(valor) as valor FROM relatorio WHERE id <= ? and tipo_pagamento_enum = 1";
+        String soma_relatorio_anterior = "SELECT sum(valor) as valor FROM relatorio WHERE id < ? AND tipo_pagamento_enum = 1";
 
+        try (PreparedStatement psCurrent = connection.prepareStatement(soma_relatorio)) {
+            psCurrent.setLong(1, id);
+            try (ResultSet rsCurrent = psCurrent.executeQuery()) {
+                if (rsCurrent.next()) {
+                    
+                    float somaAtual = rsCurrent.getFloat("valor");
+                    try (PreparedStatement psPrevious = connection.prepareStatement(soma_relatorio_anterior)) {
+                        psPrevious.setLong(1, id);
+                        try (ResultSet rsPrevious = psPrevious.executeQuery()) {
+
+                            if (rsPrevious.next()) {
+                                float somaAnterior = rsPrevious.getFloat("valor");
+
+                                if (somaAnterior > somaAtual) {
+                                    return 1;
+                                } else if (somaAnterior < somaAtual) {
+                                    return 2;
+                                } else {
+                                    return 0;
+                                }
+                            } else {
+                                return 0;
+                            }
+                        }
+                    }
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
 
 

@@ -1,17 +1,17 @@
 package calendar;
 
 import lombok.Getter;
-import principals.tools.CorPersonalizada;
+import tools.CorPersonalizada;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import static principals.tools.CorPersonalizada.*;
-import static principals.tools.CorPersonalizada.RED;
-import static principals.tools.CorPersonalizada.RED_2;
+import static tools.CorPersonalizada.*;
 
 public final class Dates extends JPanel {
     @Getter
@@ -126,16 +126,16 @@ public final class Dates extends JPanel {
         button.setBackground(Color.WHITE);
         button.setForeground(CorPersonalizada.GRAY);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
+        button.addMouseListener(new MouseAdapter() {
             final Color originalBackground = button.getBackground();
 
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
+            public void mouseEntered(MouseEvent evt) {
                 if (!button.getText().isEmpty() && Integer.parseInt(button.getText()) != DAY) {
                     button.setBackground(BACKGROUND_GRAY);
                 }
             }
 
-            public void mouseExited(java.awt.event.MouseEvent evt) {
+            public void mouseExited(MouseEvent evt) {
                 if (!button.getText().isEmpty() && Integer.parseInt(button.getText()) != DAY) {
                     button.setBackground(originalBackground);
                 }

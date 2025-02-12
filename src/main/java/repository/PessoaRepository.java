@@ -1,7 +1,7 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
-import principals.tools.Resize;
+import tools.Resize;
 import request.BuscaPessoaRequest;
 import request.PessoaRequest;
 import response.Objeto;

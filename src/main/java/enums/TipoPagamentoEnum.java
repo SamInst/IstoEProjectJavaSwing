@@ -16,5 +16,4 @@ public enum TipoPagamentoEnum {
     TipoPagamentoEnum(int codigo) {
         this.codigo = codigo;
     }
-
 }

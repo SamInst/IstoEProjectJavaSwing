@@ -2,7 +2,7 @@ package buttons;
 
 import java.awt.*;
 
-import static principals.tools.CorPersonalizada.*;
+import static tools.CorPersonalizada.*;
 
 public class Botoes {
     private static ShadowButton botaoComSombra(Color color, String text){

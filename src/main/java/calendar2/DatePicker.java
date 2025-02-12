@@ -16,6 +16,7 @@ import calendar2.util.InputValidationListener;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -500,7 +501,7 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
     private void installEditor(JFormattedTextField editor) {
         if (editor != null) {
             JToolBar toolBar = new JToolBar();
-            editorButton = new JButton(editorIcon != null ? editorIcon : new FlatSVGIcon("raven/datetime/icon/calendar.svg", 0.8f));
+            editorButton = new JButton(editorIcon != null ? editorIcon : new FlatSVGIcon("login/datetime/icon/calendar.svg", 0.8f));
             toolBar.add(editorButton);
             editorButton.addActionListener(e -> {
                 if (editor.isEnabled()) {

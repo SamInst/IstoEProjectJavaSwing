@@ -1,7 +1,6 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
-import org.springframework.transaction.annotation.Transactional;
 import request.AdicionarReservasRequest;
 import request.BuscaReservasResponse;
 
@@ -13,7 +12,6 @@ import java.util.List;
 public class ReservasRepository {
     Connection connection = PostgresDatabaseConnect.connect();
 
-    @Transactional
     public void adicionarReserva(AdicionarReservasRequest request) {
         String sql_reserva = """
             insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa) VALUES (?,?,?,?, true) returning reserva_id;

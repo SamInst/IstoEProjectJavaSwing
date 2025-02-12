@@ -1,8 +1,0 @@
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: ${SIISP_DB_DEV}?ApplicationName=ms-eventos
-    username: ${SIISP_USER_DB}
-    password: ${SIISP_PASS_DB}

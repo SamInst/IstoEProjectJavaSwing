@@ -3,7 +3,6 @@ package repository;
 import config.PostgresDatabaseConnect;
 import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
-import org.springframework.transaction.annotation.Transactional;
 import request.PernoiteRequest;
 import response.BuscaPernoiteResponse;
 import response.DiariaResponse;
@@ -17,15 +16,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static principals.tools.Converter.converterStatusPagamento;
-import static principals.tools.Converter.converterTipoPagamento;
+import static tools.Converter.converterStatusPagamento;
+import static tools.Converter.converterTipoPagamento;
 
 public class PernoitesRepository extends PostgresDatabaseConnect {
     PrecosRepository precosRepository = new PrecosRepository();
     QuartosRepository quartosRepository = new QuartosRepository();
     Connection connection = connect();
 
-    @Transactional
     public Boolean adicionarPernoite(PernoiteRequest request) {
         boolean adicionado = true;
         String pernoite_sql = """

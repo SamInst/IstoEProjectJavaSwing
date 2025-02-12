@@ -4,7 +4,6 @@ import calendar2.DatePicker;
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.text.DateFormatSymbols;

@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static principals.tools.Icones.forward;
-import static principals.tools.Icones.previous;
+import static tools.Icones.forward;
+import static tools.Icones.previous;
 
 public final class DateChooser extends javax.swing.JPanel {
 

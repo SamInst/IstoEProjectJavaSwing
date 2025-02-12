@@ -7,6 +7,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.UIScale;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
