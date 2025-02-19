@@ -4,10 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record BuscaReservasResponse(
-        LocalDate data,
-        List<Reservas> reservas
-) {
-    public record Reservas(
             Long reserva_id,
             Long quarto,
             LocalDate data_entrada,
@@ -25,5 +21,4 @@ public record BuscaReservasResponse(
                 Float valor_pagamento,
                 String data_hora_pagamento
         ){}
-    }
 }

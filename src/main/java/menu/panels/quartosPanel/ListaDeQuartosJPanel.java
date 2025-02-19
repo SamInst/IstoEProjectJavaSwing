@@ -1,269 +1,179 @@
 package menu.panels.quartosPanel;
 
-import enums.StatusQuartoEnum;
+import buttons.ShadowButton;
 import repository.QuartosRepository;
 import response.QuartoResponse;
-import tools.*;
+import tools.WrapLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
-import java.util.Objects;
+
+import static buttons.Botoes.btn_backgroung;
+import static buttons.Botoes.btn_branco;
+import static java.lang.String.valueOf;
+import static tools.CorPersonalizada.BACKGROUND_GRAY;
+import static tools.CorPersonalizada.WHITE;
+import static tools.Icones.*;
+import static tools.Resize.resizeIcon;
 
 public class ListaDeQuartosJPanel {
-    int largura = 25;
-    int altura = 25;
-    Font font = new Font("Roboto", Font.BOLD, 18);
-    Color cor = CorPersonalizada.DARK_BLUE;
+    int largura = 15;
+    int altura = 15;
+    ShadowButton ocupado = btn_branco("OCUPADO");
+    ShadowButton disponivel = btn_branco("DISPONIVEL");
+    ShadowButton reservado = btn_branco("RESERVADO");
+    ShadowButton manutencao = btn_branco("MANUTENCAO");
+    ShadowButton diaria_encerrada = btn_branco("DIARIA ENCERRADA");
+    ShadowButton limpeza = btn_branco("LIMPEZA");
 
     public JPanel mainPanel(QuartosRepository quartosRepository, RoomsPanel roomsPanel) {
         var quartos = quartosRepository.buscaTodosOsQuartos();
         quartos.sort(Comparator.comparingLong(QuartoResponse::quarto_id));
 
-        JPanel quartoPanel = new JPanel();
-        quartoPanel.setLayout(new WrapLayout(FlowLayout.LEFT, 10, 10));
-        quartoPanel.setBackground(CorPersonalizada.LIGHT_GRAY);
-        quartoPanel.setBorder(BorderFactory.createEmptyBorder(10,10,0,0));
+        JPanel quartoBackgroundPanel = new JPanel();
+        quartoBackgroundPanel.setLayout(new WrapLayout(FlowLayout.LEFT, 10, 10));
+        quartoBackgroundPanel.setBackground(BACKGROUND_GRAY);
+        quartoBackgroundPanel.setBorder(BorderFactory.createEmptyBorder(10,10,0,0));
 
         for (QuartoResponse quarto : quartos) {
-            JLabel icone_rede = new JLabel(Resize.resizeIcon(Icones.rede, largura, altura));
-            JLabel icone_cama_casal = new JLabel(Resize.resizeIcon(Icones.cama_casal, largura, altura));
-            JLabel icone_cama_solteiro = new JLabel(Resize.resizeIcon(Icones.cama_solteiro, largura, altura));
-            JLabel icone_beliche = new JLabel(Resize.resizeIcon(Icones.beliche, largura, altura));
-            JLabel icone_qtd_pessoas = new JLabel(Resize.resizeIcon(Icones.usuarios, largura, altura));
+            var numero = quarto.quarto_id();
+            var status_quarto = quarto.status_quarto_enum();
+            var checkin = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            var checkout = LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            var nome_pessoa = "Pessoa Teste";
+            var categoria = quarto.categoria();
 
-            JTextFieldComTextoFixoArredondado categoria = new JTextFieldComTextoFixoArredondado("", 0);
-            categoria.setFont(new Font("Roboto", Font.BOLD, 15));
-            categoria.setBackground(CorPersonalizada.LIGHT_GRAY);
-
-            JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox = new JComboBoxArredondado<>();
-            statusQuartoComboBox.setEditable(false);
-            statusQuartoComboBox.setPreferredSize(new Dimension(200, 30));
-
-            JTextFieldComTextoFixoArredondadoRelatorios tabelaPreco = new JTextFieldComTextoFixoArredondadoRelatorios("$",0);
-            tabelaPreco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            tabelaPreco.setFont(new Font("Roboto", Font.BOLD, 20));
-            tabelaPreco.setBackground(CorPersonalizada.DARK_GREEN);
-            tabelaPreco.setEnabled(false);
-            tabelaPreco.setForeground(Color.white);
-
-            tabelaPreco.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    tabelaPreco.setBackground(CorPersonalizada.DARK_GREEN.brighter());
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    tabelaPreco.setBackground(CorPersonalizada.DARK_GREEN);
-                }
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    new TabelaPrecoPorQuartoFrame(quarto.categoria().valorPessoaList());
-                }
-            });
-
-            BotaoArredondado quartoButton = new BotaoArredondado("");
-            quartoButton.setPreferredSize(new Dimension(405, 150));
-            quartoButton.setBackground(Color.WHITE);
+            ShadowButton quartoButton = new ShadowButton();
+            quartoButton.setPreferredSize(new Dimension(400, 150));
             quartoButton.setBorderPainted(false);
             quartoButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             quartoButton.setLayout(new BorderLayout());
-            quartoButton.setBorder(BorderFactory.createEmptyBorder(15,15,0,15));
 
-            quartoButton.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    ((BotaoArredondado) e.getSource()).setShowBorder(true, cor);
-                }
+            JPanel topPanel = new JPanel(new BorderLayout());
+            topPanel.setPreferredSize(new Dimension(405, 40));
+            topPanel.setOpaque(true);
+            topPanel.setBorder(BorderFactory.createEmptyBorder(5, 15, 0, 10));
 
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    ((BotaoArredondado) e.getSource()).setShowBorder(false, Color.WHITE);
-                }
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    new AdicionarQuartoFrame(quartosRepository, quarto.quarto_id(), roomsPanel);
-                }
-            });
-
-            JPanel panelInterno = new JPanel(new BorderLayout());
-            panelInterno.setBackground(Color.WHITE);
-
-            PanelArredondado panelVermelho = new PanelArredondado();
-            panelVermelho.setBackground(Color.WHITE);
-            panelVermelho.setForeground(Color.DARK_GRAY);
-
-            JLabel numeroQuarto = new JLabel(quarto.quarto_id() < 10 ? "0" + quarto.quarto_id() : quarto.quarto_id() + "");
-            numeroQuarto.setForeground(CorPersonalizada.LIGHT_GRAY);
-            numeroQuarto.setFont(new Font("Roboto", Font.BOLD, 45));
-
-            panelVermelho.setPreferredSize(new Dimension(90, 0));
-            panelVermelho.add(numeroQuarto);
-            panelInterno.add(panelVermelho, BorderLayout.WEST);
-
-            JPanel panelBranco = new JPanel(new BorderLayout());
-            panelBranco.setBackground(Color.WHITE);
-
-            JPanel panelVerde = new JPanel(new BorderLayout());
-            panelVerde.setBackground(Color.WHITE);
-            panelVerde.setPreferredSize(new Dimension(0, 40));
-            panelVerde.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
-            panelBranco.add(panelVerde, BorderLayout.NORTH);
-
-            panelVerde.add(statusQuartoComboBox,  BorderLayout.WEST);
-            panelVerde.add(tabelaPreco, BorderLayout.EAST);
-
-            JPanel panelLaranja = new JPanel(new BorderLayout());
-            panelLaranja.setBackground(Color.WHITE);
-            panelLaranja.setPreferredSize(new Dimension(0, 140));
-            panelLaranja.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));
-
-           if (quarto.categoria() != null){
-
-               int categoriaLength = quarto.categoria().categoria().length();
-               int columnSize = (int) (categoriaLength * 0.75);
-               categoria.setColumns(columnSize);
-
-               categoria.setHorizontalAlignment(JTextField.CENTER);
-               categoria.setText(quarto.categoria().categoria());
-               categoria.setColumns(columnSize);
-               categoria.setForeground(Color.WHITE);
-           }
-            panelLaranja.add(categoria, BorderLayout.WEST);
-
-            panelBranco.add(panelLaranja, BorderLayout.CENTER);
-
-
-            panelInterno.add(panelBranco, BorderLayout.CENTER);
-
-            JPanel panelAzul = new JPanel(new BorderLayout());
-            panelAzul.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
-            panelAzul.setBackground(Color.WHITE);
-            panelAzul.setPreferredSize(new Dimension(0, 55));
-            quartoButton.add(panelInterno, BorderLayout.CENTER);
-            quartoButton.add(panelAzul, BorderLayout.SOUTH);
-
-            JPanel panelAzulSuperior = new JPanel(new BorderLayout());
-            panelAzulSuperior.setPreferredSize(new Dimension(0, 2));
-
-            panelAzul.add(panelAzulSuperior, BorderLayout.NORTH);
-
-            JPanel panelAzulEsquerda = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-            panelAzulEsquerda.setBackground(Color.WHITE);
-
-            JPanel panelAzulDireita = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-            panelAzulDireita.setBackground(Color.WHITE);
-
-
-            JLabel qtdPessoasLabel = new JLabel(quarto.quantidade_pessoas().toString());
-            qtdPessoasLabel.setForeground(CorPersonalizada.DARK_GREEN);
-            qtdPessoasLabel.setFont(font);
-
-            panelAzulEsquerda.add(icone_qtd_pessoas);
-            panelAzulEsquerda.add(qtdPessoasLabel);
-
-            if (quarto.qtd_cama_casal() > 0) {
-                panelAzulDireita.add(icone_cama_casal);
-                JLabel numero = new JLabel(quarto.qtd_cama_casal() + " ");
-                numero.setForeground(CorPersonalizada.DARK_GREEN);
-                numero.setFont(font);
-                panelAzulDireita.add(numero);
+            switch (status_quarto) {
+                case OCUPADO: topPanel.setBackground(new Color(0xC9625A));
+                    break;
+                case DISPONIVEL: topPanel.setBackground(new Color(0x18A68C));
+                    break;
+                case RESERVADO: topPanel.setBackground(new Color(0xFEE189));
+                    break;
+                case LIMPEZA: topPanel.setBackground(Color.ORANGE);
+                    break;
+                case DIARIA_ENCERRADA: topPanel.setBackground(Color.BLUE);
+                    break;
+                case MANUTENCAO: topPanel.setBackground(Color.GRAY);
+                    break;
+                default: topPanel.setBackground(Color.WHITE);
             }
 
-            if (quarto.qtd_cama_solteiro() > 0) {
-                panelAzulDireita.add(icone_cama_solteiro);
-                JLabel numero = new JLabel(quarto.qtd_cama_solteiro() + " ");
-                numero.setForeground(CorPersonalizada.DARK_GREEN);
-                numero.setFont(font);
-                panelAzulDireita.add(numero);
+            JLabel numeroLabel = new JLabel("Quarto " + (numero < 10 ? "0" + numero : numero));
+            numeroLabel.setForeground(Color.WHITE);
+            numeroLabel.setFont(new Font("Inter", Font.PLAIN, 16));
+            numeroLabel.setVerticalAlignment(SwingConstants.CENTER);
+            numeroLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JPanel numeroPanel = new JPanel();
+            numeroPanel.setPreferredSize(new Dimension(70,45));
+            numeroPanel.setBackground(topPanel.getBackground());
+            numeroPanel.add(numeroLabel, BorderLayout.WEST);
+
+            topPanel.add(numeroPanel, BorderLayout.WEST);
+
+            ShadowButton statusButton = btn_branco(status_quarto.toString());
+            statusButton.setHoverEffect(true);
+            statusButton.setIcon(resizeIcon(select, largura, altura));
+
+            topPanel.add(statusButton, BorderLayout.EAST);
+
+            quartoButton.add(topPanel, BorderLayout.NORTH);
+
+            JPanel contentPanel = new JPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.setOpaque(false);
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 5));
+
+            var nomeLabel = btn_branco(" " + nome_pessoa);
+            nomeLabel.setIcon(resizeIcon(usuarios, largura, altura));
+            nomeLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+            nomeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            var datasLabel = btn_branco(" " + checkin + " - " + checkout);
+            datasLabel.setIcon(resizeIcon(calendario, largura, altura));
+            datasLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+            datasLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            switch (status_quarto) {
+                case OCUPADO:
+                    contentPanel.add(nomeLabel);
+                    contentPanel.add(datasLabel);
+                    break;
+
+                case DISPONIVEL:
+                    JPanel panelUp = new JPanel();
+                    panelUp.setLayout(new BoxLayout(panelUp, BoxLayout.X_AXIS));
+                    panelUp.add(cama_casal(quarto.qtd_cama_casal()));
+                    panelUp.add(cama_solteiro(quarto.qtd_cama_solteiro()));
+                    panelUp.add(beliche(quarto.qtd_cama_beliche()));
+                    panelUp.add(rede(quarto.qtd_rede()));
+                    panelUp.setBackground(WHITE);
+
+                    JPanel panelDown = new JPanel();
+                    panelDown.setBackground(WHITE);
+                    panelDown.setLayout(new BoxLayout(panelDown, BoxLayout.X_AXIS));
+
+                    JLabel categoriaLabel = new JLabel("Categoria: ");
+                    panelDown.add(categoriaLabel);
+                    panelDown.add(btn_backgroung(categoria.categoria()));
+
+                    contentPanel.add(panelUp, BorderLayout.WEST);
+                    contentPanel.add(panelDown, BorderLayout.EAST);
+                    statusButton.addActionListener(e-> {
+                        statusButton.showPopupWithButtons(ocupado, disponivel, reservado);
+
+                    });
+                    break;
+
+                case RESERVADO:
+                    contentPanel.add(nomeLabel);
+                    contentPanel.add(datasLabel);
+                    break;
             }
 
-            if (quarto.qtd_rede() > 0) {
-                panelAzulDireita.add(icone_rede);
-                JLabel numero = new JLabel(quarto.qtd_rede()+ " ");
-                numero.setForeground(CorPersonalizada.DARK_GREEN);
-                numero.setFont(font);
-                panelAzulDireita.add(numero);
-            }
-
-            if (quarto.qtd_cama_beliche() > 0) {
-                panelAzulDireita.add(icone_beliche);
-                JLabel numero = new JLabel(quarto.qtd_cama_beliche()+ " ");
-                numero.setForeground(CorPersonalizada.DARK_GREEN);
-                numero.setFont(font);
-                panelAzulDireita.add(numero);
-            }
-
-            panelAzul.add(panelAzulEsquerda, BorderLayout.WEST);
-            panelAzul.add(panelAzulDireita, BorderLayout.EAST);
-
-            quartoPanel.add(quartoButton);
-
-            atualizarStatusQuarto(quarto.status_quarto_enum(), statusQuartoComboBox, panelVermelho);
-
-            statusQuartoComboBox.addActionListener(e -> {
-                String selectedItem = Objects.requireNonNull(statusQuartoComboBox.getSelectedItem()).toString();
-                StatusQuartoEnum novoStatus = StatusQuartoEnum.valueOf(selectedItem);
-
-                quartosRepository.alterarStatusQuarto(quarto.quarto_id(), novoStatus);
-
-                atualizarStatusQuarto(novoStatus, statusQuartoComboBox, panelVermelho);
-            });
+            quartoButton.add(contentPanel, BorderLayout.CENTER);
+            quartoBackgroundPanel.add(quartoButton);
         }
-
-        return quartoPanel;
+        return quartoBackgroundPanel;
     }
 
-    private void atualizarStatusQuarto(StatusQuartoEnum status, JComboBoxArredondado<StatusQuartoEnum> statusQuartoComboBox, JPanel panelVermelho) {
-        statusQuartoComboBox.removeAllItems();
+    public ShadowButton rede(int quantidade){
+        var btn = btn_branco(valueOf(quantidade));
+        btn.setIcon(resizeIcon(rede, largura, altura));
+        return btn;
+    }
 
-        switch (status) {
-            case OCUPADO -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.OCUPADO);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.OCUPADO);
-                statusQuartoComboBox.setEnabled(false);
-                panelVermelho.setBackground(new Color(0xF88E8E));
-            }
-            case RESERVADO -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.RESERVADO);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.RESERVADO);
-                panelVermelho.setBackground(new Color(0xE7CE8A));
-            }
-            case DISPONIVEL -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.LIMPEZA);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.RESERVADO);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DISPONIVEL);
-                panelVermelho.setBackground(new Color(0x9EDFA5));
-            }
-            case DIARIA_ENCERRADA -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DIARIA_ENCERRADA);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.DIARIA_ENCERRADA);
-                panelVermelho.setBackground(new Color(0xB65D5D));
-            }
-            case LIMPEZA -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.LIMPEZA);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.LIMPEZA);
-                panelVermelho.setBackground(Color.ORANGE);
-            }
-            case MANUTENCAO -> {
-                statusQuartoComboBox.addItem(StatusQuartoEnum.MANUTENCAO);
-                statusQuartoComboBox.addItem(StatusQuartoEnum.DISPONIVEL);
-                statusQuartoComboBox.setSelectedItem(StatusQuartoEnum.MANUTENCAO);
-                panelVermelho.setBackground(new Color(0xA19D9D));
-            }
-            default -> panelVermelho.setBackground(Color.BLACK);
-        }
+    public ShadowButton cama_casal(int quantidade){
+        var btn = btn_branco(valueOf(quantidade));
+        btn.setIcon(resizeIcon(cama_casal, largura, altura));
+        return btn;
+    }
+
+    public ShadowButton cama_solteiro(int quantidade){
+        var btn = btn_branco(valueOf(quantidade));
+        btn.setIcon(resizeIcon(cama_solteiro, largura, altura));
+        return btn;
+    }
+
+    public ShadowButton beliche(int quantidade){
+        var btn = btn_branco(valueOf(quantidade));
+        btn.setIcon(resizeIcon(beliche, largura, altura));
+        return btn;
     }
 }
 

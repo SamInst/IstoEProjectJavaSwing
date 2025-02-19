@@ -9,6 +9,7 @@ import menu.panels.pernoitePanels.NewPernoitesPanel;
 import menu.panels.pessoaPanel.PessoaEmpresaPanel;
 import menu.panels.quartosPanel.RoomsPanel;
 import menu.panels.relatoriosPanels.RelatoriosPanel;
+import menu.panels.reservasPanel.ReservasPanel;
 import tools.LabelArredondado;
 import repository.PernoitesRepository;
 import repository.QuartosRepository;
@@ -81,10 +82,10 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository(), this));
         addHoverAndSelectionEffect(btnClientes, PessoaEmpresaPanel::new);
         addHoverAndSelectionEffect(btnItens, ItensPanel::new);
-        addHoverAndSelectionEffect(btnReservas, DashBoardPanel::new);
+        addHoverAndSelectionEffect(btnReservas, ()-> new ReservasPanel(this));
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
-        showPanel(new RelatoriosPanel(new RelatoriosRepository(), this));
+        showPanel(new ReservasPanel(this));
         setVisible(true);
     }
 

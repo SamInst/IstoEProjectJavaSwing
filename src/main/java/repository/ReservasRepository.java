@@ -85,26 +85,12 @@ public class ReservasRepository {
 
 
 
-    public List<BuscaReservasResponse> todasReservas(){
-        List<BuscaReservasResponse> listaBuscaReservas = new ArrayList<>();
-
-        datasReservadas().forEach(dataReservada -> {
-            listaBuscaReservas.add(buscaReservasPorData(dataReservada));
-        });
-        return listaBuscaReservas;
-    }
-
-
-
-
-    public BuscaReservasResponse buscaReservasPorData(LocalDate data){
-
-        List<BuscaReservasResponse.Reservas> listaReservas = new ArrayList<>();
+    public List<BuscaReservasResponse> buscaReservasAtivas(){
+        List<BuscaReservasResponse> listaReservas = new ArrayList<>();
 
         String sql_reservas = """
-            select *
-            from reservas r where ? between r.data_entrada and r.data_saida
-            and r.ativa = true
+            select distinct *
+            from reservas r where r.ativa = true
             order by r.data_entrada;
             """;
 
@@ -127,19 +113,18 @@ public class ReservasRepository {
             """;
 
         try (PreparedStatement reservaStmt = connection.prepareStatement(sql_reservas)) {
-            reservaStmt.setDate(1, Date.valueOf(data));
             ResultSet rsReserva = reservaStmt.executeQuery();
 
             while (rsReserva.next()) {
                 long reservaId = rsReserva.getLong("reserva_id");
 
-                List<BuscaReservasResponse.Reservas.Pessoas> listaPessoas = new ArrayList<>();
+                List<BuscaReservasResponse.Pessoas> listaPessoas = new ArrayList<>();
                 try (PreparedStatement pessoasStmt = connection.prepareStatement(sql_pessoas)) {
                     pessoasStmt.setLong(1, reservaId);
                     ResultSet rsPessoas = pessoasStmt.executeQuery();
 
                     while (rsPessoas.next()) {
-                        listaPessoas.add(new BuscaReservasResponse.Reservas.Pessoas(
+                        listaPessoas.add(new BuscaReservasResponse.Pessoas(
                                 rsPessoas.getLong("pessoa_id"),
                                 rsPessoas.getString("nome"),
                                 rsPessoas.getString("telefone")
@@ -147,13 +132,13 @@ public class ReservasRepository {
                     }
                 }
 
-                List<BuscaReservasResponse.Reservas.Pagamentos> pagamentos = new ArrayList<>();
+                List<BuscaReservasResponse.Pagamentos> pagamentos = new ArrayList<>();
                 try (PreparedStatement pagamentoStmt = connection.prepareStatement(sql_pagamentos)) {
                     pagamentoStmt.setLong(1, reservaId);
                     ResultSet rsPagamentos = pagamentoStmt.executeQuery();
 
                     if (rsPagamentos.next()) {
-                        pagamentos.add(new BuscaReservasResponse.Reservas.Pagamentos(
+                        pagamentos.add(new BuscaReservasResponse.Pagamentos(
                                 rsPagamentos.getString("tipo_pagamento"),
                                 rsPagamentos.getFloat("valor"),
                                 rsPagamentos.getString("data_hora_pagamento")
@@ -161,7 +146,7 @@ public class ReservasRepository {
                     }
                 }
 
-                listaReservas.add(new BuscaReservasResponse.Reservas(
+                listaReservas.add(new BuscaReservasResponse(
                         reservaId,
                         rsReserva.getLong("quarto_id"),
                         rsReserva.getDate("data_entrada").toLocalDate(),
@@ -174,7 +159,7 @@ public class ReservasRepository {
             e.printStackTrace();
         }
 
-        return new BuscaReservasResponse(data, listaReservas);
+        return listaReservas;
     }
 
 

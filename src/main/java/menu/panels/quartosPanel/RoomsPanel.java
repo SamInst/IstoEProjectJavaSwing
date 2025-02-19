@@ -1,18 +1,20 @@
 package menu.panels.quartosPanel;
 
-import tools.Icones;
-import tools.Refreshable;
+import buttons.ShadowButton;
 import repository.QuartosRepository;
+import tools.Refreshable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
+import static buttons.Botoes.btn_verde;
 
 public class RoomsPanel extends JPanel implements Refreshable {
     private final QuartosRepository quartosRepository;
+    ShadowButton btnAdicionar = new ShadowButton();
+
     public RoomsPanel(QuartosRepository quartosRepository1) {
         this.quartosRepository = quartosRepository1;
         initializePanel();
@@ -22,23 +24,13 @@ public class RoomsPanel extends JPanel implements Refreshable {
         setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel identificadorPanel = menu.Menu.createIdentificadorPanel("Apartamentos", Icones.quartos);
+        JPanel identificadorPanel = new JPanel();
         identificadorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 0));
 
-        JButton btnAdicionar = new JButton("Adicionar");
-        btnAdicionar.setPreferredSize(new Dimension(125, 40));
-        btnAdicionar.addActionListener(e -> {});
+        btnAdicionar = btn_verde("Adicionar Quarto");
 
         identificadorPanel.add(btnAdicionar, BorderLayout.EAST);
         topPanel.add(identificadorPanel, BorderLayout.NORTH);
-
-
-        btnAdicionar.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                new AdicionarQuartoFrame(quartosRepository, null, RoomsPanel.this);
-            }
-        });
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -50,6 +42,7 @@ public class RoomsPanel extends JPanel implements Refreshable {
         add(scrollPane, BorderLayout.CENTER);
 
         adjustGridLayoutColumns(quartoPanel);
+
     }
 
     private void adjustGridLayoutColumns(JPanel quartoPanel) {
@@ -70,7 +63,6 @@ public class RoomsPanel extends JPanel implements Refreshable {
         });
     }
 
-
     @Override
     public void refreshPanel() {
         removeAll();
@@ -78,8 +70,6 @@ public class RoomsPanel extends JPanel implements Refreshable {
         revalidate();
         repaint();
     }
-
-
 }
 
 

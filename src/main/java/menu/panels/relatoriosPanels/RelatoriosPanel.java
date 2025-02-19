@@ -9,11 +9,13 @@ import enums.TipoPagamentoEnum;
 import panels.PanelPopup;
 import repository.RelatoriosRepository;
 import response.RelatoriosResponse;
-import tools.CorPersonalizada;
+import tools.FormatarFloat;
 import tools.Refreshable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
@@ -47,6 +49,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     private ShadowButton saldoBtn;
     private final DateChooser dateChooser = new DateChooser();
     private final ShadowButton searchDateField = new ShadowButton();
+    Font font = new Font("Inter", Font.PLAIN, 16);
 
     public RelatoriosPanel(RelatoriosRepository relatoriosRepository, JFrame menu) {
         this.relatoriosRepository = relatoriosRepository;
@@ -57,7 +60,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     private void mostrarPorData(LocalDate data) {
         updatePanel(() -> {
             var relatorio = relatoriosRepository.buscaRelatorioPorData(data);
-            relatoriosPanel.add(montarPainelDia(relatorio));
+            relatoriosPanel.add(montarPainelDataEDia(relatorio));
         });
     }
 
@@ -100,28 +103,84 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         relatoriosPanel.repaint();
     }
 
-    private JPanel montarPainelDia(RelatoriosResponse.Relatorios relatorio) {
-        JPanel relatorioDiaPanel = new JPanel(new BorderLayout());
-        relatorioDiaPanel.setBackground(BACKGROUND_GRAY);
-        relatorioDiaPanel.setBorder(createEmptyBorder(5, 20, 5, 10));
+    private JPanel montarPainelDataEDia(RelatoriosResponse.Relatorios relatorio) {
+
+        JPanel dataEValorDiaPanel = new JPanel(new BorderLayout());
+        dataEValorDiaPanel.setBackground(LIGHT_GRAY_2);
+        dataEValorDiaPanel.setBorder(createEmptyBorder(15, 20, 5, 20));
 
         var dataBtn = btn_branco(relatorio.data());
+        dataBtn.setBackground(BACKGROUND_GRAY);
+        dataBtn.setFont(font);
+
         var totalBtn = btn_branco("Total do dia: R$ " + format(relatorio.total_do_dia()));
+        totalBtn.setBackground(BACKGROUND_GRAY);
+        totalBtn.setFont(font);
+
+        JPanel headersContainer = new JPanel(new GridLayout(2, 1));
+        headersContainer.setBackground(LIGHT_GRAY_2);
 
         JPanel headerPanel = createHeaderPanel(dataBtn, totalBtn);
-        relatorioDiaPanel.add(headerPanel, BorderLayout.NORTH);
+        headerPanel.setBackground(BACKGROUND_GRAY);
+        headerPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JPanel sumarioPanel = new JPanel(new BorderLayout());
+        sumarioPanel.setBackground(LIGHT_GRAY);
+        sumarioPanel.setBorder(createEmptyBorder(5, 15, 5, 30));
+
+        JLabel aptLabel = new JLabel("Apt");
+        aptLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+        aptLabel.setFont(font);
+
+        JLabel horaLabel = new JLabel("Hora");
+        horaLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
+        horaLabel.setFont(font);
+
+        JLabel relatorioLabel = new JLabel("Relatorio");
+        relatorioLabel.setFont(font);
+
+        JLabel valorLabel = new JLabel("Valor");
+        valorLabel.setFont(font);
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setBackground(LIGHT_GRAY);
+        leftPanel.add(aptLabel);
+        leftPanel.add(horaLabel);
+        leftPanel.add(relatorioLabel);
+
+        sumarioPanel.add(leftPanel, BorderLayout.WEST);
+        sumarioPanel.add(valorLabel, BorderLayout.EAST);
+
+        headersContainer.add(headerPanel);
+        headersContainer.add(sumarioPanel);
+
+        dataEValorDiaPanel.add(headersContainer, BorderLayout.NORTH);
 
         JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
-        relatoriosDoDiaPanel.setBackground(LIGHT_GRAY);
+        relatoriosDoDiaPanel.setBackground(LIGHT_GRAY_2);
         relatoriosDoDia(relatorio.relatorioDoDia(), relatoriosDoDiaPanel);
-        relatorioDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+        dataEValorDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
 
-        dataBtn.addActionListener(e -> relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible()));
-        return relatorioDiaPanel;
+        headerPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                headerPanel.setBackground(getBackground().darker());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                headerPanel.setBackground(BACKGROUND_GRAY);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible());
+            }
+        });
+        return dataEValorDiaPanel;
     }
 
-    private JPanel montarPainelDiaETipo(LocalDate data, TipoPagamentoEnum tipo,
-                                        List<RelatorioDoDia> lista) {
+    private JPanel montarPainelDiaETipo(LocalDate data, TipoPagamentoEnum tipo, List<RelatorioDoDia> lista) {
         JPanel relatorioDiaPanel = new JPanel(new BorderLayout());
         relatorioDiaPanel.setBackground(BACKGROUND_GRAY);
         relatorioDiaPanel.setBorder(createEmptyBorder(5, 20, 5, 10));
@@ -160,15 +219,18 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     }
 
     private JButton createRelatorioButton(RelatorioDoDia relatorioDoDia) {
-        JButton relatorioButton = new JButton();
+        JButton fitaLateralRelatorio = new JButton();
         var tipoPagamentoButton = btn_branco("DESCONHECIDO");
         JLabel tipoPagamentoText = new JLabel("DESCONHECIDO");
 
         switch (relatorioDoDia.tipo_pagamento()) {
             case "0" -> configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "PAGAMENTO VIA PIX", BLUE);
             case "1" -> {
-                Color cor = relatorioDoDia.valor() < 0 ? RED_2 : GREEN;
-                configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "PAGAMENTO VIA DINHEIRO", cor);
+                if (relatorioDoDia.valor() < 0) {
+                    configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "RETIRADA VIA DINHEIRO", RED_2);
+                } else {
+                    configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "PAGAMENTO VIA DINHEIRO", GREEN);
+                }
             }
             case "2" ->
                     configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "PAGAMENTO VIA CARTÃO DE CRÉDITO", BLUE);
@@ -180,18 +242,18 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                     configureTipoPagamento(tipoPagamentoText, tipoPagamentoButton, "PAGAMENTO VIA TRANSFERÊNCIA BANCÁRIA", BLUE);
         }
 
-        relatorioButton.setBackground(tipoPagamentoButton.getForeground());
-        relatorioButton.setBorder(createEmptyBorder(0, 5, 0, 0));
-        relatorioButton.setBorderPainted(false);
-        relatorioButton.setFocusPainted(false);
-        relatorioButton.setContentAreaFilled(true);
-        relatorioButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        fitaLateralRelatorio.setBackground(tipoPagamentoButton.getForeground());
+        fitaLateralRelatorio.setBorder(createEmptyBorder(0, 5, 0, 0));
+        fitaLateralRelatorio.setBorderPainted(false);
+        fitaLateralRelatorio.setFocusPainted(false);
+        fitaLateralRelatorio.setContentAreaFilled(true);
+        fitaLateralRelatorio.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JPanel buttonContent = createButtonContent(relatorioDoDia, tipoPagamentoText);
-        relatorioButton.setLayout(new BorderLayout());
-        relatorioButton.add(buttonContent);
+        fitaLateralRelatorio.setLayout(new BorderLayout());
+        fitaLateralRelatorio.add(buttonContent);
 
-        return relatorioButton;
+        return fitaLateralRelatorio;
     }
 
     private void configureTipoPagamento(JLabel label, JButton button, String text, Color color) {
@@ -207,7 +269,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         buttonContent.setBackground(BACKGROUND_GRAY);
 
         ShadowButton valorSomaButton =
-                btn_branco(format(relatoriosRepository.somaValorRelatorioMaisAnteriores(relatorioDoDia.relatorio_id())));
+                btn_backgroung(format(relatoriosRepository.somaValorRelatorioMaisAnteriores(relatorioDoDia.relatorio_id())));
 
         var relatorio = relatoriosRepository.compararRelatorioAnterior(relatorioDoDia.relatorio_id(), parseInt(relatorioDoDia.tipo_pagamento()));
 
@@ -249,13 +311,17 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         JPanel descricaoPanel = new JPanel();
         descricaoPanel.setLayout(new BoxLayout(descricaoPanel, BoxLayout.Y_AXIS));
         descricaoPanel.setBackground(BACKGROUND_GRAY);
-        descricaoPanel.setBorder(createEmptyBorder(3, 0, 0, 0));
+        descricaoPanel.setBorder(createEmptyBorder(3, 20, 0, 0));
 
         ShadowButton valorPagamentoButton = btn_branco(valor);
-        valorPagamentoButton.setFont(new Font("Roboto", Font.BOLD, 14));
+        valorPagamentoButton.setBackground(BACKGROUND_GRAY);
+        valorPagamentoButton.setFont(font);
+
         if (relatorioDoDia.valor() < 0) {
+            valorPagamentoButton.setText("- R$ "+ FormatarFloat.format(relatorioDoDia.valor()).replace("-", ""));
             valorPagamentoButton.setForeground(RED_2);
         } else if ("1".equals(relatorioDoDia.tipo_pagamento())) {
+            valorPagamentoButton.setText("+ R$ "+ FormatarFloat.format(relatorioDoDia.valor()).replace("-", ""));
             valorPagamentoButton.setForeground(GREEN);
         } else {
             valorPagamentoButton.setForeground(BLUE);
@@ -266,8 +332,10 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         id_relatorio.setForeground(RED_4);
 
         JLabel descricao = new JLabel(relatorioDoDia.relatorio());
+        descricao.setFont(font);
         descricao.setBorder(null);
-        descricao.setForeground(DARK_GRAY);
+        descricao.setForeground(DARK_GRAY.brighter());
+        descricao.setBorder(BorderFactory.createEmptyBorder(0,0,5,0));
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         leftPanel.setOpaque(false);
@@ -376,7 +444,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         pixButton.setIcon(resizeIcon(pix, 15, 15));
         pixButton.addActionListener(e -> updateSaldoAndPanel(PIX));
 
-        ShadowButton dinheiroButton = btn_verde(" CÉDULAS");
+        ShadowButton dinheiroButton = btn_verde(" DiNHEIRO");
         dinheiroButton.setIcon(resizeIcon(cash, 15, 15));
         dinheiroButton.addActionListener(e -> updateSaldoAndPanel(DINHEIRO));
 
@@ -434,7 +502,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
 
         var responseData = response.relatorios();
-        responseData.forEach(r -> relatoriosPanel.add(montarPainelDia(r)));
+        responseData.forEach(r -> relatoriosPanel.add(montarPainelDataEDia(r)));
 
         scrollPane = new JScrollPane(
                 relatoriosPanel,
@@ -457,7 +525,6 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
             mostrarTodasDatasPorTipo(tipo);
         }
     }
-
 
     @Override
     public void refreshPanel() {

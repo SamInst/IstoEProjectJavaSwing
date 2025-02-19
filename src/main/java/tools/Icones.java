@@ -3,9 +3,9 @@ package tools;
 import javax.swing.*;
 
 public class Icones {
-    public static String PATH = "C:\\IstoEPousada\\icones\\";
-    public static String PATH_MENU = "C:\\IstoEPousada\\icones\\menu\\";
-    public static String PATH_LOGIN = "C:\\IstoEPousada\\icones\\login\\";
+    private static final String PATH = "C:\\IstoEPousada\\icones\\";
+    private static final String PATH_MENU = "C:\\IstoEPousada\\icones\\menu\\";
+    private static final String PATH_LOGIN = "C:\\IstoEPousada\\icones\\login\\";
 
     public static ImageIcon logo = new ImageIcon(PATH + "pousada_logo.png");
 
@@ -63,4 +63,5 @@ public class Icones {
     public static ImageIcon down_single_arrow = new ImageIcon(PATH + "down.png");
     public static ImageIcon equal = new ImageIcon(PATH + "equal.png");
     public static ImageIcon info = new ImageIcon(PATH + "info.png");
+    public static ImageIcon select = new ImageIcon(PATH + "select.png");
 }

@@ -25,6 +25,4 @@ public enum StatusQuartoEnum {
         }
         throw new IllegalArgumentException("Código inválido: " + codigo);
     }
-
-
 }

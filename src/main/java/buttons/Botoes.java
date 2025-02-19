@@ -41,4 +41,10 @@ public class Botoes {
         botao.setForeground(GRAY);
         return botao;
     }
+
+    public static ShadowButton btn_backgroung(String text){
+        var botao = botaoComSombra(BACKGROUND_GRAY, text);
+        botao.setForeground(GRAY);
+        return botao;
+    }
 }

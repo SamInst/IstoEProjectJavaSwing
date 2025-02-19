@@ -38,6 +38,8 @@ public class ShadowButton extends JButton {
     private final Insets shadowSize = new Insets(2, 5, 8, 5);
     private final RippleEffect rippleEffect = new RippleEffect(this);
 
+
+
     public ShadowButton() {
         setBorder(new EmptyBorder(10, 12, 15, 12));
         setContentAreaFilled(false);
@@ -45,17 +47,7 @@ public class ShadowButton extends JButton {
         setForeground(new Color(80, 80, 80));
         rippleEffect.setRippleColor(new Color(220, 220, 220));
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                setBackground(getBackground().darker());
-            }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                setBackground(getBackground().brighter());
-            }
-        });
     }
 
     @Override
@@ -123,6 +115,7 @@ public class ShadowButton extends JButton {
             }
             @Override
             protected void paintBorder(Graphics g) {
+                // Sem borda
             }
         };
         popup.setLayout(new GridLayout(0, 1));
@@ -130,14 +123,24 @@ public class ShadowButton extends JButton {
             popup.add(button);
         }
         popup.pack();
-
-        int x = this.getLocationOnScreen().x;
-        int y = this.getLocationOnScreen().y;
-        Dimension size = this.getSize();
-
-        popup.show(this, 0, 0);
-        popup.setLocation(x, y + size.height);
+        // Exibe o popup logo abaixo do botão
+        popup.show(this, 0, this.getHeight());
     }
 
 
+    public void setHoverEffect(boolean hoverEffect) {
+        if (hoverEffect) {
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setBackground(getBackground().darker());
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setBackground(getBackground().brighter());
+                }
+            });
+        }
+    }
 }
