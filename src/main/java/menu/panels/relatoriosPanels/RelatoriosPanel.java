@@ -29,7 +29,7 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-import static notifications.Notfication.notification;
+import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
 import static notifications.Notifications.Type.INFO;
 import static response.RelatoriosResponse.Relatorios.RelatorioDoDia;

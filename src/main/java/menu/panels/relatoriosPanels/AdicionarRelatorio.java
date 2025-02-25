@@ -3,7 +3,6 @@ package menu.panels.relatoriosPanels;
 import buttons.Botoes;
 import buttons.ShadowButton;
 import enums.TipoPagamentoEnum;
-import panels.PanelPopup;
 import repository.RelatoriosRepository;
 import request.RelatorioRequest;
 import tools.CorPersonalizada;
@@ -20,7 +19,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static notifications.Notfication.notification;
+import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
 import static notifications.Notifications.Type;
 import static notifications.Notifications.Type.SUCCESS;

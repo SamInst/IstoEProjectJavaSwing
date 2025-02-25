@@ -1,28 +1,33 @@
 package menu.panels.reservasPanel;
 
+import buttons.ShadowButton;
 import repository.QuartosRepository;
 import repository.ReservasRepository;
 import request.BuscaReservasResponse;
+import response.QuartoResponse;
 import tools.Refreshable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
+import java.util.Map;
 
-import static buttons.Botoes.btn_backgroung;
-import static notifications.Notfication.notification;
+import static buttons.Botoes.btn_azul;
+import static buttons.Botoes.btn_vermelho;
+import static java.time.LocalDate.now;
+import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
 import static notifications.Notifications.Type;
 import static tools.CorPersonalizada.*;
+import static tools.TruncateText.truncateText;
 
 public class ReservasPanel extends JPanel implements Refreshable {
     private final QuartosRepository quartosRepository = new QuartosRepository();
@@ -30,29 +35,24 @@ public class ReservasPanel extends JPanel implements Refreshable {
     private final JFrame menu;
 
     private LocalDate currentMonth;
-    private JPanel cellsPanel;    // Painel com as células dos dias (grid de datas)
-    private JPanel daysHeader;    // Cabeçalho dos dias
-    private JPanel roomsPanel;    // Painel fixo com os números dos quartos
-
-    // Define tamanho fixo para cada célula de data (ex.: 100x50)
-    private final Dimension cellSize = new Dimension(100, 50);
-
-    private final Border defaultCellBorder = BorderFactory.createLineBorder(LIGHT_GRAY_2);
-    private final Border highlightBorder = new CompoundBorder(new LineBorder(LIGHT_GRAY_2, 1), defaultCellBorder);
-    private final Color selectedColor = GREEN;
+    private JPanel daysHeader;
+    private JPanel roomsPanel;
+    private JPanel backgroundPanel;
 
     private final Map<Long, LocalDate> checkInDateMap = new HashMap<>();
-    private final Map<Long, CalendarCell> checkInCellMap = new HashMap<>();
-
     private List<BuscaReservasResponse> currentReservations;
+
+    private final Dimension cellSize = new Dimension(300, 60);
+    private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
+
+    private final Color selectedColor = GREEN;
 
     public ReservasPanel(JFrame menu) {
         this.menu = menu;
-        currentMonth = LocalDate.now();
+        this.currentMonth = now();
         initializePanel();
     }
 
-    // Cada célula representa um dia para um quarto (somente para a área de datas)
     private class CalendarCell extends JPanel {
         Long roomId;
         LocalDate date;
@@ -63,13 +63,11 @@ public class ReservasPanel extends JPanel implements Refreshable {
             this.date = date;
             this.row = row;
             this.col = col;
-            setBorder(defaultCellBorder);
-            setLayout(new BorderLayout());
             setPreferredSize(cellSize);
+            setBorder(defaultCellBorder);
         }
     }
 
-    // Rótulo para o cabeçalho dos dias
     private class CalendarLabel extends JLabel {
         int col;
         CalendarLabel(String text, int col) {
@@ -77,27 +75,36 @@ public class ReservasPanel extends JPanel implements Refreshable {
             this.col = col;
             setBorder(defaultCellBorder);
             setPreferredSize(cellSize);
+            setOpaque(true);
         }
+    }
+
+    @Override
+    public void refreshPanel() {
+        removeAll();
+        initializePanel();
+        revalidate();
+        repaint();
     }
 
     private void initializePanel() {
         removeAll();
+        setLayout(new BorderLayout());
 
         var quartos = quartosRepository.buscaTodosOsQuartos();
         currentReservations = reservasRepository.buscaReservasAtivas();
 
-        setLayout(new BorderLayout());
-
-        // Painel superior com navegação (mês/ano)
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton btnPrev = btn_backgroung("<");
-        JButton btnNext = btn_backgroung(">");
+        JButton btnPrev = btn_azul("<");
+        JButton btnNext = btn_azul(">");
+
         String monthName = currentMonth.getMonth()
                 .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
                 .toUpperCase();
         String monthYear = monthName + " " + currentMonth.getYear();
         JLabel monthLabel = new JLabel(monthYear, SwingConstants.CENTER);
         monthLabel.setFont(new Font("Inter", Font.BOLD, 16));
+
         headerPanel.add(btnPrev);
         headerPanel.add(monthLabel);
         headerPanel.add(btnNext);
@@ -106,79 +113,101 @@ public class ReservasPanel extends JPanel implements Refreshable {
         int daysInMonth = currentMonth.lengthOfMonth();
         int numRooms = quartos.size();
 
-        // Cabeçalho dos dias (apenas as células de data)
-        daysHeader = new JPanel(new GridLayout(1, daysInMonth, 1, 1));
+        daysHeader = new JPanel(new GridLayout(1, daysInMonth, 0, 0));
         for (int d = 1; d <= daysInMonth; d++) {
+            LocalDate tmpDate = currentMonth.withDayOfMonth(d);
             String dayStr = String.format("%02d/%02d", d, currentMonth.getMonthValue());
-            CalendarLabel dayLabel = new CalendarLabel(dayStr, d);
+            String dayOfWeek = tmpDate.getDayOfWeek()
+                    .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
+            String labelText = "<html><center>" + dayStr + "<br>" + dayOfWeek + "</center></html>";
+
+            CalendarLabel dayLabel = new CalendarLabel(labelText, d);
             dayLabel.setFont(new Font("Inter", Font.PLAIN, 14));
-            dayLabel.addMouseMotionListener(new MouseMotionAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    updateHighlight(-1, dayLabel.col);
-                }
-            });
-            dayLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    clearHighlight();
-                }
-            });
+            dayLabel.setForeground(WHITE);
+            dayLabel.setBackground(tmpDate.isEqual(now()) ? GRAY : BLUE);
             daysHeader.add(dayLabel);
         }
 
-        // Painel fixo para os números dos quartos (row header)
-        roomsPanel = new JPanel(new GridLayout(numRooms, 1, 1, 1));
+        roomsPanel = new JPanel(new GridLayout(numRooms, 1, 0, 0));
+        roomsPanel.setBackground(BACKGROUND_GRAY);
         Dimension roomCellSize = new Dimension(60, cellSize.height);
+
         for (int row = 0; row < numRooms; row++) {
-            var quarto = quartos.get(row);
+            QuartoResponse quarto = quartos.get(row);
             Long roomId = quarto.quarto_id();
-            JLabel roomLabel = new JLabel(roomId < 10 ? "0" + roomId : roomId.toString(), SwingConstants.CENTER);
-            roomLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+            JLabel roomLabel = new JLabel(roomId < 10 ? "0" + roomId : roomId.toString(),
+                    SwingConstants.CENTER);
+            roomLabel.setFont(new Font("Inter", Font.BOLD, 14));
+            roomLabel.setForeground(BLUE);
             roomLabel.setPreferredSize(roomCellSize);
             roomLabel.setBorder(defaultCellBorder);
             roomsPanel.add(roomLabel);
         }
 
-        // Painel com as células dos dias (grid de datas para cada quarto)
-        cellsPanel = new JPanel(new GridLayout(numRooms, daysInMonth, 1, 1));
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setLayout(null);
+
+        int totalWidth = daysInMonth * cellSize.width;
+        int totalHeight = numRooms * cellSize.height;
+        layeredPane.setPreferredSize(new Dimension(totalWidth, totalHeight));
+
+        backgroundPanel = new JPanel(new GridLayout(numRooms, daysInMonth, 0, 0));
+        backgroundPanel.setBounds(0, 0, totalWidth, totalHeight);
+        layeredPane.add(backgroundPanel, JLayeredPane.DEFAULT_LAYER);
+
         for (int row = 0; row < numRooms; row++) {
-            var quarto = quartos.get(row);
+            QuartoResponse quarto = quartos.get(row);
             Long roomId = quarto.quarto_id();
+
             for (int d = 1; d <= daysInMonth; d++) {
-                LocalDate date = LocalDate.of(currentMonth.getYear(), currentMonth.getMonthValue(), d);
+                LocalDate date = currentMonth.withDayOfMonth(d);
                 CalendarCell cell = new CalendarCell(roomId, date, row, d);
-                Optional<String> reservaNome = getReservedNameForRoomOnDate(roomId, date, currentReservations);
-                if (reservaNome.isPresent()) {
-                    cell.setBackground(new Color(255, 102, 102));
-                    JLabel nameLabel = new JLabel(reservaNome.get(), SwingConstants.CENTER);
-                    nameLabel.setFont(new Font("Inter", Font.BOLD, 10));
-                    cell.add(nameLabel, BorderLayout.CENTER);
+
+                if (date.isEqual(now())) {
+                    cell.setBackground(LIGHT_GRAY_2);
                 } else {
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(WHITE);
                 }
+
+                BuscaReservasResponse reserva = findReservationForDate(roomId, date);
+
                 cell.addMouseMotionListener(new MouseMotionAdapter() {
                     @Override
                     public void mouseMoved(MouseEvent e) {
                         if (checkInDateMap.containsKey(cell.roomId)) {
                             updateSelectionForRoom(cell.roomId, cell.date);
                         }
-                        if (cell.col > 0) {
-                            updateHighlight(cell.row, cell.col);
-                        }
                     }
                 });
+
                 cell.addMouseListener(new MouseAdapter() {
                     @Override
+                    public void mouseEntered(MouseEvent e) {
+                        if (reserva == null) {
+                            cell.setBackground(BACKGROUND_GRAY);
+                        }
+                    }
+                    @Override
                     public void mouseExited(MouseEvent e) {
-                        clearHighlight();
+                        if (reserva == null) {
+                            boolean isSelected = isSelectedRange(cell.roomId, cell.date);
+                            if (isSelected) {
+                                cell.setBackground(selectedColor);
+                            } else if (cell.date.isEqual(now())) {
+                                cell.setBackground(LIGHT_GRAY_2);
+                            } else {
+                                cell.setBackground(WHITE);
+                            }
+                        }
                     }
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (reservaNome.isPresent()) return;
+                        if (reserva != null) {
+                            showExistingReservationFrame(reserva);
+                            return;
+                        }
                         if (!checkInDateMap.containsKey(cell.roomId)) {
                             checkInDateMap.put(cell.roomId, cell.date);
-                            checkInCellMap.put(cell.roomId, cell);
                             cell.setBackground(selectedColor);
                         } else {
                             LocalDate checkIn = checkInDateMap.get(cell.roomId);
@@ -189,9 +218,9 @@ public class ReservasPanel extends JPanel implements Refreshable {
                                 checkOut = temp;
                             }
                             if (isOverlappingExistingReservation(cell.roomId, checkIn, checkOut)) {
-                                notification(menu, Type.ERROR, TOP_CENTER, "Período já reservado para este quarto.");
+                                notification(menu, Type.ERROR, TOP_CENTER,
+                                        "Período já reservado para este quarto.");
                                 checkInDateMap.remove(cell.roomId);
-                                checkInCellMap.remove(cell.roomId);
                                 refreshPanel();
                             } else {
                                 showReservationFrame(cell.roomId, checkIn, checkOut);
@@ -200,26 +229,98 @@ public class ReservasPanel extends JPanel implements Refreshable {
                         }
                     }
                 });
-                cellsPanel.add(cell);
+
+                backgroundPanel.add(cell);
             }
         }
 
-        // Junta o cabeçalho e o grid em um painel principal
+        JPanel overlayPanel = new JPanel(null);
+        overlayPanel.setOpaque(false);
+        overlayPanel.setBounds(0, 0, totalWidth, totalHeight);
+        layeredPane.add(overlayPanel, JLayeredPane.PALETTE_LAYER);
+
+        LocalDate monthStart = currentMonth.withDayOfMonth(1);
+        LocalDate monthEnd = currentMonth.withDayOfMonth(daysInMonth);
+
+        for (BuscaReservasResponse reserva : currentReservations) {
+            LocalDate reservationStartDate = reserva.data_entrada();
+            LocalDate reservationEndDate   = reserva.data_saida();
+
+            if (reservationEndDate.isBefore(monthStart) || reservationStartDate.isAfter(monthEnd)) {
+                continue;
+            }
+
+            int rowIndex = encontrarIndiceDoQuarto(quartos, reserva.quarto());
+            if (rowIndex < 0) continue;
+
+            LocalDate clampedStartDate = reservationStartDate.isBefore(monthStart)
+                    ? monthStart
+                    : reservationStartDate;
+            LocalDate clampedEndDate   = reservationEndDate.isAfter(monthEnd)
+                    ? monthEnd
+                    : reservationEndDate;
+
+            int startDayIndex = clampedStartDate.getDayOfMonth() - 1;
+            int endDayIndex   = clampedEndDate.getDayOfMonth() - 1;
+
+            int checkInX  = startDayIndex * cellSize.width + (cellSize.width / 2);
+            int checkOutX = endDayIndex   * cellSize.width + (cellSize.width / 2);
+
+            int reservationWidth = checkOutX - checkInX;
+
+            if (endDayIndex == startDayIndex) {
+                reservationWidth = cellSize.width / 2;
+                checkOutX = checkInX + reservationWidth;
+            }
+
+            int roomY             = rowIndex * cellSize.height;
+            int reservationHeight = cellSize.height;
+
+
+            ShadowButton faixa = new ShadowButton();
+            faixa.setBackground(new Color(255, 200, 102));
+            faixa.setHoverEffect(true);
+            faixa.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
+            faixa.setLayout(new BoxLayout(faixa, BoxLayout.X_AXIS));
+
+            faixa.setBounds(
+                    checkInX,
+                    roomY + 6,
+                    reservationWidth,
+                    reservationHeight - 6
+            );
+
+            ShadowButton qtdPessoa = btn_vermelho(" " + reserva.pessoas().size() + " ");
+            String nome = reserva.pessoas().isEmpty() ? "RESERVADO" : reserva.pessoas().get(0).nome();
+            JLabel labelNome = new JLabel(truncateText(nome, qtdPessoa, faixa.getWidth()));
+            labelNome.setFont(new Font("Inter", Font.PLAIN, 13));
+            labelNome.setForeground(Color.WHITE);
+
+            qtdPessoa.setAlignmentY(Component.CENTER_ALIGNMENT);
+            labelNome.setAlignmentY(0.65f);
+
+            faixa.add(qtdPessoa);
+            faixa.add(Box.createHorizontalStrut(5));
+            faixa.add(labelNome);
+
+            overlayPanel.add(faixa);
+        }
+
+
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(daysHeader, BorderLayout.NORTH);
-        mainPanel.add(cellsPanel, BorderLayout.CENTER);
+        mainPanel.add(layeredPane, BorderLayout.CENTER);
 
-        // Cria o JScrollPane, fixando o row header (números dos quartos) e o column header (dias)
-        JScrollPane scrollPane = new JScrollPane(mainPanel,
+        JScrollPane scrollPane = new JScrollPane(
+                mainPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
         scrollPane.setRowHeaderView(roomsPanel);
         scrollPane.setColumnHeaderView(daysHeader);
-
-        // Aumenta a velocidade do scroll
         scrollPane.getVerticalScrollBar().setUnitIncrement(50);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(50);
-
         add(scrollPane, BorderLayout.CENTER);
 
         btnPrev.addActionListener(e -> {
@@ -235,75 +336,26 @@ public class ReservasPanel extends JPanel implements Refreshable {
         repaint();
     }
 
-    private void updateHighlight(int hoveredRow, int hoveredCol) {
-        clearHighlight();
-        if (hoveredRow == -1) {
-            // Se no cabeçalho, destaca somente o cabeçalho da coluna de data
-            for (Component comp : daysHeader.getComponents()) {
-                if (comp instanceof CalendarLabel cl && cl.col == hoveredCol) {
-                    cl.setBorder(highlightBorder);
-                }
-            }
-        } else {
-            if (hoveredCol > 0) {
-                // Destaca todas as células da coluna correspondente
-                for (Component comp : cellsPanel.getComponents()) {
-                    if (comp instanceof CalendarCell cc && cc.col == hoveredCol) {
-                        cc.setBorder(highlightBorder);
-                    }
-                }
-                // Destaca o cabeçalho correspondente
-                for (Component comp : daysHeader.getComponents()) {
-                    if (comp instanceof CalendarLabel cl && cl.col == hoveredCol) {
-                        cl.setBorder(highlightBorder);
-                    }
-                }
+    private int encontrarIndiceDoQuarto(List<QuartoResponse> quartos, Long quartoId) {
+        for (int i = 0; i < quartos.size(); i++) {
+            if (quartos.get(i).quarto_id().equals(quartoId)) {
+                return i;
             }
         }
+        return -1;
     }
 
-    private void clearHighlight() {
-        for (Component comp : cellsPanel.getComponents()) {
-            if (comp instanceof CalendarCell cell) {
-                cell.setBorder(defaultCellBorder);
-            }
-        }
-        for (Component comp : daysHeader.getComponents()) {
-            if (comp instanceof CalendarLabel cl) {
-                cl.setBorder(defaultCellBorder);
-            }
-        }
-        for (Map.Entry<Long, CalendarCell> entry : checkInCellMap.entrySet()) {
-            entry.getValue().setBorder(defaultCellBorder);
-            entry.getValue().setBackground(selectedColor);
-        }
-    }
-
-    private void updateSelectionForRoom(Long roomId, LocalDate hoveredDate) {
-        LocalDate checkIn = checkInDateMap.get(roomId);
-        if (checkIn == null) return;
-        LocalDate start = checkIn.isBefore(hoveredDate) ? checkIn : hoveredDate;
-        LocalDate end = checkIn.isAfter(hoveredDate) ? checkIn : hoveredDate;
-        for (Component comp : cellsPanel.getComponents()) {
-            if (comp instanceof CalendarCell cell) {
-                if (cell.roomId.equals(roomId) && cell.date != null) {
-                    Optional<String> reserva = getReservedNameForRoomOnDate(roomId, cell.date, currentReservations);
-                    if (!cell.date.isBefore(start) && !cell.date.isAfter(end)) {
-                        if (reserva.isEmpty()) {
-                            cell.setBackground(selectedColor);
-                        } else {
-                            cell.setBackground(new Color(255, 102, 102));
-                        }
-                    } else {
-                        if (reserva.isEmpty()) {
-                            cell.setBackground(Color.WHITE);
-                        } else {
-                            cell.setBackground(new Color(255, 102, 102));
-                        }
-                    }
+    private BuscaReservasResponse findReservationForDate(Long roomId, LocalDate date) {
+        for (BuscaReservasResponse reserva : currentReservations) {
+            if (reserva.quarto().equals(roomId)) {
+                LocalDate start = reserva.data_entrada();
+                LocalDate end = reserva.data_saida();
+                if (!date.isBefore(start) && !date.isAfter(end)) {
+                    return reserva;
                 }
             }
         }
+        return null;
     }
 
     private boolean isOverlappingExistingReservation(Long roomId, LocalDate checkIn, LocalDate checkOut) {
@@ -320,43 +372,73 @@ public class ReservasPanel extends JPanel implements Refreshable {
         return false;
     }
 
+    private void showExistingReservationFrame(BuscaReservasResponse reserva) {
+        JFrame frame = new JFrame("Reserva Existente");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(300, 200);
+        frame.setLayout(new GridLayout(4, 1));
+
+        JLabel lblRoom = new JLabel("Quarto: " + reserva.quarto(), SwingConstants.CENTER);
+        JLabel lblCheckIn = new JLabel("Data de Entrada: " + reserva.data_entrada(), SwingConstants.CENTER);
+        JLabel lblCheckOut = new JLabel("Data de Saída: " + reserva.data_saida(), SwingConstants.CENTER);
+        String occupantName = reserva.pessoas().isEmpty() ? "RESERVADO" : reserva.pessoas().get(0).nome();
+        JLabel lblOccupant = new JLabel("Hóspede: " + occupantName, SwingConstants.CENTER);
+
+        frame.add(lblRoom);
+        frame.add(lblCheckIn);
+        frame.add(lblCheckOut);
+        frame.add(lblOccupant);
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);
+    }
+
     private void showReservationFrame(Long roomId, LocalDate checkIn, LocalDate checkOut) {
         JFrame frame = new JFrame("Nova Reserva");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(300, 150);
         frame.setLayout(new GridLayout(3, 1));
+
         JLabel lblRoom = new JLabel("Quarto: " + roomId, SwingConstants.CENTER);
         JLabel lblCheckIn = new JLabel("Data de Entrada: " + checkIn, SwingConstants.CENTER);
         JLabel lblCheckOut = new JLabel("Data de Saída: " + checkOut, SwingConstants.CENTER);
+
         frame.add(lblRoom);
         frame.add(lblCheckIn);
         frame.add(lblCheckOut);
         frame.setLocationRelativeTo(this);
         frame.setVisible(true);
+
         checkInDateMap.remove(roomId);
-        checkInCellMap.remove(roomId);
     }
 
-    private Optional<String> getReservedNameForRoomOnDate(Long roomId, LocalDate date, List<BuscaReservasResponse> responses) {
-        for (BuscaReservasResponse reserva : responses) {
-            if (reserva.quarto().equals(roomId)
-                    && !date.isBefore(reserva.data_entrada())
-                    && !date.isAfter(reserva.data_saida())) {
-                if (reserva.pessoas().isEmpty()) {
-                    return Optional.of("RESERVADO");
-                } else {
-                    return Optional.of(reserva.pessoas().get(0).nome());
+    private void updateSelectionForRoom(Long roomId, LocalDate hoveredDate) {
+        LocalDate checkIn = checkInDateMap.get(roomId);
+        if (checkIn == null) return;
+
+        LocalDate start = checkIn.isBefore(hoveredDate) ? checkIn : hoveredDate;
+        LocalDate end = checkIn.isAfter(hoveredDate) ? checkIn : hoveredDate;
+
+        for (Component comp : backgroundPanel.getComponents()) {
+            if (comp instanceof CalendarCell cell) {
+                if (cell.roomId.equals(roomId)) {
+                    if (!cell.date.isBefore(start) && !cell.date.isAfter(end)) {
+                        cell.setBackground(selectedColor);
+                    } else {
+                        if (cell.date.isEqual(now())) {
+                            cell.setBackground(LIGHT_GRAY_2);
+                        } else {
+                            cell.setBackground(WHITE);
+                        }
+                    }
                 }
             }
         }
-        return Optional.empty();
     }
 
-    @Override
-    public void refreshPanel() {
-        removeAll();
-        initializePanel();
-        revalidate();
-        repaint();
+    private boolean isSelectedRange(Long roomId, LocalDate date) {
+        LocalDate checkIn = checkInDateMap.get(roomId);
+        if (checkIn == null) return false;
+        return date.equals(checkIn);
     }
+
 }

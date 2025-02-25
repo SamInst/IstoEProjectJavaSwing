@@ -17,7 +17,7 @@ import static config.PostgresDatabaseConnect.connect;
 import static javax.swing.GroupLayout.Alignment.LEADING;
 import static tools.Icones.login_pass;
 import static tools.Icones.login_user;
-import static notifications.Notfication.notification;
+import static notifications.Notification.notification;
 import static notifications.Notifications.Location.*;
 import static notifications.Notifications.Type;
 import static notifications.Notifications.Type.SUCCESS;
