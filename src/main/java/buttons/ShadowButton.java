@@ -13,7 +13,6 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 public class ShadowButton extends JButton {
-
     public void setRound(int round) {
         this.round = round;
         createImageShadow();
@@ -37,8 +36,6 @@ public class ShadowButton extends JButton {
     private BufferedImage imageShadow;
     private final Insets shadowSize = new Insets(2, 5, 8, 5);
     private final RippleEffect rippleEffect = new RippleEffect(this);
-
-
 
     public ShadowButton() {
         setBorder(new EmptyBorder(10, 12, 15, 12));
@@ -113,7 +110,6 @@ public class ShadowButton extends JButton {
             }
             @Override
             protected void paintBorder(Graphics g) {
-                // Sem borda
             }
         };
         popup.setLayout(new GridLayout(0, 1));
@@ -121,7 +117,7 @@ public class ShadowButton extends JButton {
             popup.add(button);
         }
         popup.pack();
-        // Exibe o popup logo abaixo do botão
+
         popup.show(this, 0, this.getHeight());
     }
 

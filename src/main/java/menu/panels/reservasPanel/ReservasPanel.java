@@ -1,10 +1,12 @@
 package menu.panels.reservasPanel;
 
+import buttons.Botoes;
 import buttons.ShadowButton;
 import repository.QuartosRepository;
 import repository.ReservasRepository;
 import request.BuscaReservasResponse;
 import response.QuartoResponse;
+import tools.CorPersonalizada;
 import tools.Refreshable;
 
 import javax.swing.*;
@@ -13,15 +15,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
-import static buttons.Botoes.btn_azul;
-import static buttons.Botoes.btn_vermelho;
+import static buttons.Botoes.*;
 import static java.time.LocalDate.now;
 import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
@@ -39,6 +39,8 @@ public class ReservasPanel extends JPanel implements Refreshable {
     private JPanel roomsPanel;
     private JPanel backgroundPanel;
 
+    private final Color[] reservationColors = getAllColorsFromCorPersonalizada();
+
     private final Map<Long, LocalDate> checkInDateMap = new HashMap<>();
     private List<BuscaReservasResponse> currentReservations;
 
@@ -46,6 +48,7 @@ public class ReservasPanel extends JPanel implements Refreshable {
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
 
     private final Color selectedColor = GREEN;
+    private final Random random = new Random();
 
     public ReservasPanel(JFrame menu) {
         this.menu = menu;
@@ -95,8 +98,8 @@ public class ReservasPanel extends JPanel implements Refreshable {
         currentReservations = reservasRepository.buscaReservasAtivas();
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton btnPrev = btn_azul("<");
-        JButton btnNext = btn_azul(">");
+        JButton btnPrev = btn_azul(" < ");
+        JButton btnNext = btn_azul(" > ");
 
         String monthName = currentMonth.getMonth()
                 .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
@@ -202,10 +205,6 @@ public class ReservasPanel extends JPanel implements Refreshable {
                     }
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (reserva != null) {
-                            showExistingReservationFrame(reserva);
-                            return;
-                        }
                         if (!checkInDateMap.containsKey(cell.roomId)) {
                             checkInDateMap.put(cell.roomId, cell.date);
                             cell.setBackground(selectedColor);
@@ -221,15 +220,14 @@ public class ReservasPanel extends JPanel implements Refreshable {
                                 notification(menu, Type.ERROR, TOP_CENTER,
                                         "Período já reservado para este quarto.");
                                 checkInDateMap.remove(cell.roomId);
-                                refreshPanel();
                             } else {
                                 showReservationFrame(cell.roomId, checkIn, checkOut);
-                                refreshPanel();
                             }
+                            revalidate();
+                            repaint();
                         }
                     }
                 });
-
                 backgroundPanel.add(cell);
             }
         }
@@ -246,10 +244,7 @@ public class ReservasPanel extends JPanel implements Refreshable {
             LocalDate reservationStartDate = reserva.data_entrada();
             LocalDate reservationEndDate   = reserva.data_saida();
 
-            if (reservationEndDate.isBefore(monthStart) || reservationStartDate.isAfter(monthEnd)) {
-                continue;
-            }
-
+            if (reservationEndDate.isBefore(monthStart) || reservationStartDate.isAfter(monthEnd)) continue;
             int rowIndex = encontrarIndiceDoQuarto(quartos, reserva.quarto());
             if (rowIndex < 0) continue;
 
@@ -276,9 +271,9 @@ public class ReservasPanel extends JPanel implements Refreshable {
             int roomY             = rowIndex * cellSize.height;
             int reservationHeight = cellSize.height;
 
-
-            ShadowButton faixa = new ShadowButton();
-            faixa.setBackground(new Color(255, 200, 102));
+            Color reservationColor = reservationColors[random.nextInt(reservationColors.length)];
+            ShadowButton faixa = Botoes.btn_verde("");
+            faixa.setBackground(reservationColor);
             faixa.setHoverEffect(true);
             faixa.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
             faixa.setLayout(new BoxLayout(faixa, BoxLayout.X_AXIS));
@@ -290,11 +285,11 @@ public class ReservasPanel extends JPanel implements Refreshable {
                     reservationHeight - 6
             );
 
-            ShadowButton qtdPessoa = btn_vermelho(" " + reserva.pessoas().size() + " ");
+            ShadowButton qtdPessoa = btn_branco(" " + reserva.pessoas().size() + " ");
             String nome = reserva.pessoas().isEmpty() ? "RESERVADO" : reserva.pessoas().get(0).nome();
-            JLabel labelNome = new JLabel(truncateText(nome, qtdPessoa, faixa.getWidth()));
+            JLabel labelNome = new JLabel(truncateText(nome, qtdPessoa, faixa.getWidth() - 90));
             labelNome.setFont(new Font("Inter", Font.PLAIN, 13));
-            labelNome.setForeground(Color.WHITE);
+            labelNome.setForeground(WHITE);
 
             qtdPessoa.setAlignmentY(Component.CENTER_ALIGNMENT);
             labelNome.setAlignmentY(0.65f);
@@ -305,8 +300,6 @@ public class ReservasPanel extends JPanel implements Refreshable {
 
             overlayPanel.add(faixa);
         }
-
-
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(daysHeader, BorderLayout.NORTH);
@@ -372,25 +365,6 @@ public class ReservasPanel extends JPanel implements Refreshable {
         return false;
     }
 
-    private void showExistingReservationFrame(BuscaReservasResponse reserva) {
-        JFrame frame = new JFrame("Reserva Existente");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(300, 200);
-        frame.setLayout(new GridLayout(4, 1));
-
-        JLabel lblRoom = new JLabel("Quarto: " + reserva.quarto(), SwingConstants.CENTER);
-        JLabel lblCheckIn = new JLabel("Data de Entrada: " + reserva.data_entrada(), SwingConstants.CENTER);
-        JLabel lblCheckOut = new JLabel("Data de Saída: " + reserva.data_saida(), SwingConstants.CENTER);
-        String occupantName = reserva.pessoas().isEmpty() ? "RESERVADO" : reserva.pessoas().get(0).nome();
-        JLabel lblOccupant = new JLabel("Hóspede: " + occupantName, SwingConstants.CENTER);
-
-        frame.add(lblRoom);
-        frame.add(lblCheckIn);
-        frame.add(lblCheckOut);
-        frame.add(lblOccupant);
-        frame.setLocationRelativeTo(this);
-        frame.setVisible(true);
-    }
 
     private void showReservationFrame(Long roomId, LocalDate checkIn, LocalDate checkOut) {
         JFrame frame = new JFrame("Nova Reserva");
@@ -440,5 +414,37 @@ public class ReservasPanel extends JPanel implements Refreshable {
         if (checkIn == null) return false;
         return date.equals(checkIn);
     }
+
+    public void popUp(ShadowButton shadowButton){
+        ShadowButton buttonPanel = new ShadowButton();
+        buttonPanel.setBackground(GRAY);
+        buttonPanel.setPreferredSize(new Dimension(300, 200));
+
+        shadowButton.showPopupWithButtons(buttonPanel);
+    }
+
+    private Color[] getAllColorsFromCorPersonalizada() {
+        List<Color> colors = new ArrayList<>();
+        Field[] fields = CorPersonalizada.class.getDeclaredFields();
+
+        for (Field field : fields) {
+            if (field.getType().equals(Color.class)) {
+                try {
+                    Color color = (Color) field.get(null);
+                    if (!field.getName().equals("WHITE") &&
+                            !field.getName().equals("LIGHT_GRAY") &&
+                            !field.getName().equals("LIGHT_GRAY_2") &&
+                            !field.getName().equals("BACKGROUND_GRAY")) {
+                        colors.add(color);
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return colors.toArray(new Color[0]);
+    }
+
 
 }
