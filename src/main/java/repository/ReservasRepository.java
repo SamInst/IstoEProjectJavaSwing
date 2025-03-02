@@ -137,11 +137,11 @@ public class ReservasRepository {
                     pagamentoStmt.setLong(1, reservaId);
                     ResultSet rsPagamentos = pagamentoStmt.executeQuery();
 
-                    if (rsPagamentos.next()) {
+                    while (rsPagamentos.next()) {
                         pagamentos.add(new BuscaReservasResponse.Pagamentos(
                                 rsPagamentos.getString("tipo_pagamento"),
                                 rsPagamentos.getFloat("valor"),
-                                rsPagamentos.getString("data_hora_pagamento")
+                                rsPagamentos.getTimestamp("data_hora_pagamento").toLocalDateTime()
                         ));
                     }
                 }

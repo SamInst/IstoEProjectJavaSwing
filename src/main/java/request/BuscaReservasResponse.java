@@ -1,6 +1,7 @@
 package request;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record BuscaReservasResponse(
@@ -19,6 +20,6 @@ public record BuscaReservasResponse(
         public record Pagamentos(
                 String tipo_pagamento,
                 Float valor_pagamento,
-                String data_hora_pagamento
+                LocalDateTime data_hora_pagamento
         ){}
 }

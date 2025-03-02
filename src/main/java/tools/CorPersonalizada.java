@@ -4,6 +4,7 @@ import java.awt.*;
 
 public class CorPersonalizada {
     public static final Color WHITE = new Color(0xFFFFFF);
+    public static final Color BLACK = new Color(0x0);
 
     public static final Color GRAY = new Color(0x828282);
     public static final Color LIGHT_GRAY = new Color(0xf0f0f0);

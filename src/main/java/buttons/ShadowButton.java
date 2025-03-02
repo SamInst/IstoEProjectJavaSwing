@@ -53,9 +53,7 @@ public class ShadowButton extends JButton {
         double height = getHeight() - (shadowSize.top + shadowSize.bottom);
         double x = shadowSize.left;
         double y = shadowSize.top;
-        //  Create Shadow Image
         g2.drawImage(imageShadow, 0, 0, null);
-        //  Create Background Color
         g2.setColor(getBackground());
         Area area = new Area(new RoundRectangle2D.Double(x, y, width, height, round, round));
         g2.fill(area);

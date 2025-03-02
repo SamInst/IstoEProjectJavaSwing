@@ -65,4 +65,5 @@ public class Icones {
     public static ImageIcon info = new ImageIcon(PATH + "info.png");
     public static ImageIcon select = new ImageIcon(PATH + "select.png");
     public static ImageIcon user_branco = new ImageIcon(PATH + "user_branco.png");
+    public static ImageIcon relogio = new ImageIcon(PATH + "relogio.png");
 }
