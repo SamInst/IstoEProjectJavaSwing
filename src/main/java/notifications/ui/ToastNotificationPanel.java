@@ -52,7 +52,7 @@ public class ToastNotificationPanel extends JPanel {
     private void installDefault() {
         labelIcon = new JLabel();
         textPane = new JTextPane();
-        textPane.setFont(new Font("sansseriff", Font.BOLD, 15));
+        textPane.setFont(new Font("sansseriff", Font.PLAIN, 15));
         textPane.setForeground(Color.GRAY);
         textPane.setText("Hello!\nToast Notification");
         textPane.setOpaque(false);
@@ -75,15 +75,10 @@ public class ToastNotificationPanel extends JPanel {
     }
 
     public Color getDefaultColor() {
-        if (type == Notifications.Type.SUCCESS) {
-            return Color.decode("#2e7d32");
-        } else if (type == Notifications.Type.INFO) {
-            return Color.decode("#0288d1");
-        } else if (type == Notifications.Type.WARNING) {
-            return Color.decode("#ed6c02");
-        } else {
-            return Color.decode("#d32f2f");
-        }
+        if (type == Notifications.Type.SUCCESS) { return Color.decode("#2e7d32");
+        } else if (type == Notifications.Type.INFO) { return Color.decode("#0288d1");
+        } else if (type == Notifications.Type.WARNING) { return Color.decode("#ed6c02");
+        } else { return Color.decode("#d32f2f"); }
     }
 
     private String toTextColor(Color color) {

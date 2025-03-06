@@ -18,6 +18,7 @@ public record BuscaReservasResponse(
                 String telefone
         ){}
         public record Pagamentos(
+                String descricao,
                 String tipo_pagamento,
                 Float valor_pagamento,
                 LocalDateTime data_hora_pagamento

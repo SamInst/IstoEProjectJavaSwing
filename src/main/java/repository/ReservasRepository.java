@@ -78,12 +78,9 @@ public class ReservasRepository {
             while (rsDiaria.next()) {
                 listaDatasReservadas.add(rsDiaria.getDate("data_entrada").toLocalDate());
             }
-
         } catch (Exception e){ e.printStackTrace(); }
         return listaDatasReservadas;
     }
-
-
 
     public List<BuscaReservasResponse> buscaReservasAtivas(){
         List<BuscaReservasResponse> listaReservas = new ArrayList<>();
@@ -108,7 +105,8 @@ public class ReservasRepository {
             select
                 valor,
                 data_hora_pagamento,
-                tipo_pagamento
+                tipo_pagamento,
+                descricao
             from reserva_pagamento where reserva_id = ?;
             """;
 
@@ -139,6 +137,7 @@ public class ReservasRepository {
 
                     while (rsPagamentos.next()) {
                         pagamentos.add(new BuscaReservasResponse.Pagamentos(
+                                rsPagamentos.getString("descricao"),
                                 rsPagamentos.getString("tipo_pagamento"),
                                 rsPagamentos.getFloat("valor"),
                                 rsPagamentos.getTimestamp("data_hora_pagamento").toLocalDateTime()
@@ -155,13 +154,21 @@ public class ReservasRepository {
                         pagamentos
                 ));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
         return listaReservas;
     }
 
+    public void desativarReserva(long reservaId) {
+        String sql = """
+        UPDATE reservas
+        SET ativa = false
+        WHERE reserva_id = ?;
+    """;
 
-
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        statement.setLong(1, reservaId);
+        statement.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
 }

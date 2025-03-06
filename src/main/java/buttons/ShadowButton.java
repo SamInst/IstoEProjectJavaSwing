@@ -12,7 +12,13 @@ import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
+import static java.awt.Cursor.HAND_CURSOR;
+import static java.awt.Cursor.getPredefinedCursor;
+
 public class ShadowButton extends JButton {
+
+    JPopupMenu popup;
+
     public void setRound(int round) {
         this.round = round;
         createImageShadow();
@@ -98,7 +104,7 @@ public class ShadowButton extends JButton {
     }
 
     public void showPopupWithButtons(ShadowButton... buttons) {
-        JPopupMenu popup = new JPopupMenu() {
+         popup = new JPopupMenu() {
             @Override
             public void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -115,8 +121,11 @@ public class ShadowButton extends JButton {
             popup.add(button);
         }
         popup.pack();
-
         popup.show(this, 0, this.getHeight());
+    }
+
+    public void closePopup(){
+        popup.setVisible(false);
     }
 
 
@@ -133,7 +142,7 @@ public class ShadowButton extends JButton {
                     setBackground(getBackground().brighter());
                 }
             });
-            ShadowButton.this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setCursor(getPredefinedCursor(HAND_CURSOR));
         }
     }
 }

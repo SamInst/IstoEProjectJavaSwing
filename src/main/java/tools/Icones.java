@@ -49,7 +49,6 @@ public class Icones {
     public static ImageIcon search = new ImageIcon(PATH + "search.png");
     public static ImageIcon cash_out = new ImageIcon(PATH + "cash out.png");
     public static ImageIcon card = new ImageIcon(PATH + "card.png");
-    public static ImageIcon saved = new ImageIcon(PATH + "check.gif");
     public static ImageIcon cash = new ImageIcon(PATH + "cash.png");
     public static ImageIcon bank = new ImageIcon(PATH + "bank.png");
     public static ImageIcon check = new ImageIcon(PATH + "check.png");
@@ -64,6 +63,7 @@ public class Icones {
     public static ImageIcon equal = new ImageIcon(PATH + "equal.png");
     public static ImageIcon info = new ImageIcon(PATH + "info.png");
     public static ImageIcon select = new ImageIcon(PATH + "select.png");
-    public static ImageIcon user_branco = new ImageIcon(PATH + "user_branco.png");
     public static ImageIcon relogio = new ImageIcon(PATH + "relogio.png");
+    public static ImageIcon quarto = new ImageIcon(PATH + "quarto.png");
+    public static ImageIcon close = new ImageIcon(PATH + "close.png");
 }
