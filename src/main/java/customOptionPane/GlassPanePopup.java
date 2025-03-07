@@ -7,7 +7,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class GlassPanePopup {
-
     protected JLayeredPane getLayerPane() {
         return layerPane;
     }

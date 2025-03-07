@@ -105,9 +105,9 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
 
     private JPanel montarPainelDataEDia(RelatoriosResponse.Relatorios relatorio) {
 
-        JPanel dataEValorDiaPanel = new JPanel(new BorderLayout());
-        dataEValorDiaPanel.setBackground(LIGHT_GRAY_2);
-        dataEValorDiaPanel.setBorder(createEmptyBorder(15, 20, 5, 20));
+        JPanel background = new JPanel(new BorderLayout());
+        background.setBackground(BACKGROUND_GRAY);
+        background.setBorder(createEmptyBorder(15, 20, 5, 20));
 
         var dataBtn = btn_branco(relatorio.data());
         dataBtn.setBackground(BACKGROUND_GRAY);
@@ -118,14 +118,14 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         totalBtn.setFont(font);
 
         JPanel headersContainer = new JPanel(new GridLayout(2, 1));
-        headersContainer.setBackground(LIGHT_GRAY_2);
+        headersContainer.setBackground(WHITE);
 
         JPanel headerPanel = createHeaderPanel(dataBtn, totalBtn);
         headerPanel.setBackground(BACKGROUND_GRAY);
         headerPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JPanel sumarioPanel = new JPanel(new BorderLayout());
-        sumarioPanel.setBackground(LIGHT_GRAY);
+        sumarioPanel.setBackground(WHITE);
         sumarioPanel.setBorder(createEmptyBorder(5, 15, 5, 30));
 
         JLabel aptLabel = new JLabel("Apt");
@@ -143,7 +143,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         valorLabel.setFont(font);
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftPanel.setBackground(LIGHT_GRAY);
+        leftPanel.setBackground(WHITE);
         leftPanel.add(aptLabel);
         leftPanel.add(horaLabel);
         leftPanel.add(relatorioLabel);
@@ -154,12 +154,12 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         headersContainer.add(headerPanel);
         headersContainer.add(sumarioPanel);
 
-        dataEValorDiaPanel.add(headersContainer, BorderLayout.NORTH);
+        background.add(headersContainer, BorderLayout.NORTH);
 
         JPanel relatoriosDoDiaPanel = new JPanel(new GridLayout(0, 1, 0, 5));
         relatoriosDoDiaPanel.setBackground(LIGHT_GRAY_2);
         relatoriosDoDia(relatorio.relatorioDoDia(), relatoriosDoDiaPanel);
-        dataEValorDiaPanel.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
+        background.add(relatoriosDoDiaPanel, BorderLayout.CENTER);
 
         headerPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -177,7 +177,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                 relatoriosDoDiaPanel.setVisible(!relatoriosDoDiaPanel.isVisible());
             }
         });
-        return dataEValorDiaPanel;
+        return background;
     }
 
     private JPanel montarPainelDiaETipo(LocalDate data, TipoPagamentoEnum tipo, List<RelatorioDoDia> lista) {
@@ -266,7 +266,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         JPanel buttonContent = new JPanel(new BorderLayout());
         Dimension dimension = new Dimension(100, 80);
         buttonContent.setPreferredSize(dimension);
-        buttonContent.setBackground(BACKGROUND_GRAY);
+        buttonContent.setBackground(WHITE);
 
         ShadowButton valorSomaButton =
                 btn_backgroung(format(relatoriosRepository.somaValorRelatorioMaisAnteriores(relatorioDoDia.relatorio_id())));
@@ -288,7 +288,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         }
 
         JPanel rightButtonContent = new JPanel();
-        rightButtonContent.setBackground(BACKGROUND_GRAY);
+        rightButtonContent.setBackground(WHITE);
         rightButtonContent.setPreferredSize(new Dimension(100, buttonContent.getPreferredSize().height));
         rightButtonContent.add(valorSomaButton);
         rightButtonContent.setVisible(false);
@@ -310,11 +310,11 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
 
         JPanel descricaoPanel = new JPanel();
         descricaoPanel.setLayout(new BoxLayout(descricaoPanel, BoxLayout.Y_AXIS));
-        descricaoPanel.setBackground(BACKGROUND_GRAY);
+        descricaoPanel.setBackground(WHITE);
         descricaoPanel.setBorder(createEmptyBorder(3, 20, 0, 0));
 
         ShadowButton valorPagamentoButton = btn_branco(valor);
-        valorPagamentoButton.setBackground(BACKGROUND_GRAY);
+        valorPagamentoButton.setBackground(WHITE);
         valorPagamentoButton.setFont(font);
 
         if (relatorioDoDia.valor() < 0) {
@@ -501,8 +501,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         relatoriosPanel = new JPanel();
         relatoriosPanel.setLayout(new BoxLayout(relatoriosPanel, BoxLayout.Y_AXIS));
 
-        var responseData = response.relatorios();
-        responseData.forEach(r -> relatoriosPanel.add(montarPainelDataEDia(r)));
+        response.relatorios().forEach(r -> relatoriosPanel.add(montarPainelDataEDia(r)));
 
         scrollPane = new JScrollPane(
                 relatoriosPanel,

@@ -291,5 +291,28 @@ public class QuartosRepository {
         return false;
     }
 
+    public Float getValorCategoria(Long quartoId, int quantidadePessoas) {
+        String sql = """
+        SELECT p.valor
+        FROM quarto q
+        JOIN preco_pessoa_categoria p ON q.fk_categoria = p.fk_categoria
+        WHERE q.id = ? AND p.qtd_pessoa = ?
+        """;
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, quartoId);
+            stmt.setInt(2, quantidadePessoas);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getFloat("valor");
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar valor da categoria: " + e.getMessage(), e);
+        }
+    }
+
+
 
 }

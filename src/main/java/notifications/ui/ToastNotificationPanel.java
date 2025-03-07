@@ -2,13 +2,14 @@ package notifications.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import notifications.Notifications;
+
 import javax.swing.*;
 import java.awt.*;
 
-import static tools.Icones.*;
-import static tools.Resize.resizeIcon;
 import static notifications.ToastClientProperties.TOAST_COMPONENT;
 import static notifications.ToastClientProperties.TOAST_ICON;
+import static tools.Icones.*;
+import static tools.Resize.resizeIcon;
 
 public class ToastNotificationPanel extends JPanel {
     int size = 30;

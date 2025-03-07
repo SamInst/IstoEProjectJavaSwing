@@ -3,6 +3,7 @@ package customOptionPane;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;

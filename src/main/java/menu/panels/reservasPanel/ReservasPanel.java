@@ -2,12 +2,17 @@ package menu.panels.reservasPanel;
 
 import buttons.Botoes;
 import buttons.ShadowButton;
-import repository.QuartosRepository;
-import repository.ReservasRepository;
-import request.BuscaReservasResponse;
-import response.QuartoResponse;
 import customOptionPane.GlassPanePopup;
 import customOptionPane.Message;
+import repository.PernoitesRepository;
+import repository.PessoaRepository;
+import repository.QuartosRepository;
+import repository.ReservasRepository;
+import request.BuscaPessoaRequest;
+import request.BuscaReservasResponse;
+import request.PernoiteRequest;
+import response.QuartoResponse;
+import textField.TextFieldComSobra;
 import tools.*;
 
 import javax.swing.*;
@@ -22,19 +27,20 @@ import java.util.List;
 import java.util.*;
 
 import static buttons.Botoes.*;
-import static buttons.Botoes.btn_branco;
+import static enums.StatusQuartoEnum.DISPONIVEL;
 import static java.time.LocalDate.now;
 import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
 import static notifications.Notifications.Type;
 import static tools.CorPersonalizada.*;
 import static tools.Icones.*;
-import static tools.Resize.*;
+import static tools.Resize.resizeIcon;
 import static tools.TruncateText.truncateText;
 
 public class ReservasPanel extends JPanel implements Refreshable {
     private final QuartosRepository quartosRepository = new QuartosRepository();
     private final ReservasRepository reservasRepository = new ReservasRepository();
+    private final PernoitesRepository pernoitesRepository = new PernoitesRepository();
     private final JFrame menu;
     private LocalDate currentMonth;
     private JPanel daysHeader;
@@ -45,6 +51,9 @@ public class ReservasPanel extends JPanel implements Refreshable {
     private final Dimension cellSize = new Dimension(300, 60);
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
     private final Color selectedColor = GREEN;
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final PessoaRepository pessoaRepository  = new PessoaRepository();
 
     ShadowButton pernoiteButton = btn_azul("Pernoite");
     ShadowButton editarButton = btn_branco("Editar");
@@ -469,7 +478,7 @@ public class ReservasPanel extends JPanel implements Refreshable {
 
         popupContainer.add(tabbedPane, BorderLayout.CENTER);
 
-        int popupWidth = Math.max(400, popupContainer.getPreferredSize().width);
+        int popupWidth = Math.max(600, popupContainer.getPreferredSize().width);
         int popupHeight = popupContainer.getPreferredSize().height + 50;
         popupContainer.setPreferredSize(new Dimension(popupWidth, popupHeight));
 
@@ -490,7 +499,14 @@ public class ReservasPanel extends JPanel implements Refreshable {
 
         shadowButton.showPopupWithButtons(popupContainer);
 
+        GlassPanePopup.install(menu);
+
         cancelarReserva(reserva);
+        novoPernoite(reserva);
+
+
+
+        editarReserva(popupContainer, reserva);
     }
 
     private void resetCellsForRoom(Long roomId) {
@@ -522,16 +538,12 @@ public class ReservasPanel extends JPanel implements Refreshable {
     }
 
     private void cancelarReserva(BuscaReservasResponse reserva){
-        GlassPanePopup.install(menu);
-
         for (ActionListener al : cancelarButton.getActionListeners()) {
             cancelarButton.removeActionListener(al);
         }
 
         cancelarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
                 String quartoInfo = "Quarto " + reserva.quarto();
 
                 StringBuilder pessoasFormatadas = new StringBuilder();
@@ -556,9 +568,7 @@ public class ReservasPanel extends JPanel implements Refreshable {
                                 .append(String.format("%.2f", pagamento.valor_pagamento()))
                                 .append("\n");
                     }
-                } else {
-                    pagamentosFormatados.append("Nenhum pagamento registrado.");
-                }
+                } else pagamentosFormatados.append("Nenhum pagamento registrado.");
 
                 Message obj = new Message(
                         "Deseja cancelar a reserva?",
@@ -587,6 +597,380 @@ public class ReservasPanel extends JPanel implements Refreshable {
             }
         });
     }
+
+    private void novoPernoite(BuscaReservasResponse reserva){
+        for (ActionListener al : pernoiteButton.getActionListeners()) {
+            pernoiteButton.removeActionListener(al);
+        }
+
+        pernoiteButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                String quartoInfo = "Quarto " + reserva.quarto();
+
+                StringBuilder pessoasFormatadas = new StringBuilder();
+                if (!reserva.pessoas().isEmpty()) {
+                    for (var pessoa : reserva.pessoas()) {
+                        pessoasFormatadas.append(pessoa.nome())
+                                .append(" - ")
+                                .append(pessoa.telefone())
+                                .append("\n");
+                    }
+                } else pessoasFormatadas.append("Nenhuma pessoa registrada.");
+
+                StringBuilder pagamentosFormatados = new StringBuilder();
+                if (!reserva.pagamentos().isEmpty()) {
+                    for (var pagamento : reserva.pagamentos()) {
+                        pagamentosFormatados.append(pagamento.data_hora_pagamento().format(dtf))
+                                .append(" ")
+                                .append(Converter.converterTipoPagamento(pagamento.tipo_pagamento()))
+                                .append(" R$ ")
+                                .append(String.format("%.2f", pagamento.valor_pagamento()))
+                                .append("\n");
+                    }
+                } else {
+                    pagamentosFormatados.append("Nenhum pagamento registrado.");
+                }
+
+                Message obj = new Message(
+                        "Deseja mover para pernoites?",
+                        "ID #" + reserva.reserva_id() + " - " + quartoInfo + "\n" +
+                                "Check-in: " + reserva.data_entrada() + "  |  Checkout: " + reserva.data_saida() + "\n" +
+                                "\n👥 Pessoas:\n" + pessoasFormatadas +
+                                "\n💳 Pagamentos:\n" + pagamentosFormatados,
+                        "Novo Pernoite",
+                        "Cancelar",
+                        BLUE);
+
+                obj.eventOK(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        mudarReservaParaPernoite(reserva);
+                        GlassPanePopup.closePopupLast();
+                        refreshPanel();
+                        notification(menu, Type.SUCCESS, TOP_CENTER,
+                                "Pernoite adicionado com sucesso! \n" +
+                                        "#" + reserva.reserva_id() + " - " + quartoInfo + "\n" +
+                                        reserva.pessoas().get(0).nome()
+                        );
+                    }
+                });
+                GlassPanePopup.showPopup(obj);
+            }
+        });
+    }
+
+    private void mudarReservaParaPernoite(BuscaReservasResponse reserva){
+        List<Long> pessoasIds = new ArrayList<>();
+        List<BuscaReservasResponse.Pagamentos> pagamentosList = new ArrayList<>(reserva.pagamentos());
+
+        reserva.pessoas().forEach(pessoa -> pessoasIds.add(pessoa.pessoa_id()));
+
+        var diaria = quartosRepository.getValorCategoria(reserva.quarto(), reserva.pessoas().size());
+        var qtd_dias = Period.between(reserva.data_entrada(), reserva.data_saida()).getDays();
+        var total = diaria * qtd_dias;
+
+        reservasRepository.desativarReserva(reserva.reserva_id());
+        pernoitesRepository.adicionarPernoite(new PernoiteRequest(
+                reserva.quarto(),
+                reserva.data_entrada(),
+                reserva.data_saida(),
+                reserva.pessoas().size(),
+                pessoasIds,
+                pagamentosList,
+                total
+        ));
+    }
+
+    private void editarReserva(ShadowButton popupContainer, BuscaReservasResponse reserva) {
+        editarButton.addActionListener(a -> {
+            popupContainer.removeAll();
+            popupContainer.revalidate();
+            popupContainer.repaint();
+
+            JPanel topPanel = new JPanel();
+            topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+            topPanel.setOpaque(false);
+
+            JPanel headerPanel = new JPanel(new BorderLayout());
+            headerPanel.setOpaque(false);
+            JLabel titleLabel = createLabel("Editar reserva #" + reserva.reserva_id(), new Font("Roboto", Font.BOLD, 16), DARK_GRAY, null);
+            headerPanel.add(titleLabel, BorderLayout.WEST);
+            topPanel.add(headerPanel);
+
+            JPanel diariasInfoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JLabel diariasInfoLabel = createLabel("", new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
+            diariasInfoPanel.add(diariasInfoLabel);
+            topPanel.add(diariasInfoPanel);
+
+            popupContainer.add(topPanel, BorderLayout.NORTH);
+
+            MaterialTabbed tabbedPane = new MaterialTabbed();
+            tabbedPane.setForeground(GRAY);
+            List<BuscaReservasResponse.Pessoas> pessoasSelecionadas = new ArrayList<>(reserva.pessoas());
+
+            JPanel infoPanel = new JPanel();
+            infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+            infoPanel.setOpaque(false);
+
+            JPanel quartoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel quartoLabel = createLabel("Quarto:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+            List<QuartoResponse> quartosDisponiveis = quartosRepository.buscaQuartosPorStatus(DISPONIVEL);
+            Vector<String> roomItems = new Vector<>();
+            for (QuartoResponse q : quartosDisponiveis) {
+                roomItems.add(q.quarto_id() + " - " + q.quantidade_pessoas() + " - " + q.status_quarto_enum());
+            }
+            JComboBox<String> quartoComboBox = new JComboBox<>(roomItems);
+            quartoPanel.add(quartoLabel);
+            quartoPanel.add(quartoComboBox);
+            infoPanel.add(quartoPanel);
+
+            JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+            JLabel checkinLabel = createLabel("Checkin:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+
+            TextFieldComSobra checkinField = new TextFieldComSobra();
+            checkinField.setText(reserva.data_entrada().toString());
+
+            ShadowButton checkinCalendarButton = Botoes.btn_backgroung("");
+            checkinCalendarButton.setIcon(Resize.resizeIcon(calendario, 15,15));
+
+            JLabel checkoutLabel = createLabel("Checkout:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+
+            TextFieldComSobra checkoutField = new TextFieldComSobra();
+            checkoutField.setText(reserva.data_saida().toString());
+
+            ShadowButton checkoutCalendarButton = Botoes.btn_backgroung("");
+            checkoutCalendarButton.setIcon(Resize.resizeIcon(calendario, 15,15));
+            datePanel.add(checkinLabel);
+            datePanel.add(checkinField);
+            datePanel.add(checkinCalendarButton);
+            datePanel.add(checkoutLabel);
+            datePanel.add(checkoutField);
+            datePanel.add(checkoutCalendarButton);
+            infoPanel.add(datePanel);
+
+            JPanel horarioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel horarioLabel = createLabel("Horário previsto de chegada:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+
+            TextFieldComSobra horarioField = new TextFieldComSobra();
+            horarioField.setText("13:50");
+            horarioPanel.add(horarioLabel);
+            horarioPanel.add(horarioField);
+            infoPanel.add(horarioPanel);
+
+            Runnable updateDiariasInfo = () -> {
+                try {
+                    LocalDate checkinDate = LocalDate.parse(checkinField.getText());
+                    LocalDate checkoutDate = LocalDate.parse(checkoutField.getText());
+                    int numDiarias = Period.between(checkinDate, checkoutDate).getDays();
+                    Float valorDiariaObj = quartosRepository.getValorCategoria(reserva.quarto(), pessoasSelecionadas.size());
+                    double valorDiaria = (valorDiariaObj != null) ? valorDiariaObj : 0;
+                    double total = numDiarias * valorDiaria;
+                    diariasInfoLabel.setText(
+                            "Pessoas: " + pessoasSelecionadas.size() +
+                                    " | Diarias: " + numDiarias +
+                                    " | Valor Diaria: R$ " + String.format("%.2f", valorDiaria) +
+                                    " | Total: R$ " + String.format("%.2f", total)
+                    );
+                } catch (Exception ex) {
+                    diariasInfoLabel.setText("Calculando valores...");
+                }
+            };
+            updateDiariasInfo.run();
+
+            checkinField.getDocument().addDocumentListener(new SimpleDocumentListener() {
+                public void update() {
+                    updateDiariasInfo.run();
+                }
+            });
+            checkoutField.getDocument().addDocumentListener(new SimpleDocumentListener() {
+                public void update() {
+                    updateDiariasInfo.run();
+                }
+            });
+
+            tabbedPane.addTab("Informações", infoPanel);
+
+            JPanel pessoasPanel = new JPanel();
+            pessoasPanel.setLayout(new BoxLayout(pessoasPanel, BoxLayout.Y_AXIS));
+            pessoasPanel.setOpaque(false);
+
+            JPanel addPessoaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel addPessoaLabel = createLabel("Adicionar pessoa:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+            TextFieldComSobra pessoaSearchField = new TextFieldComSobra();
+            addPessoaPanel.add(addPessoaLabel);
+            addPessoaPanel.add(pessoaSearchField);
+            pessoasPanel.add(addPessoaPanel);
+
+            JPanel searchResultsPanel = new JPanel();
+            searchResultsPanel.setLayout(new BoxLayout(searchResultsPanel, BoxLayout.Y_AXIS));
+            pessoasPanel.add(searchResultsPanel);
+
+
+            final Runnable[] updatePessoasList = new Runnable[1];
+            updatePessoasList[0] = () -> {
+                pessoasPanel.removeAll();
+                pessoasPanel.add(addPessoaPanel);
+                pessoasPanel.add(searchResultsPanel);
+
+                for (BuscaReservasResponse.Pessoas pessoa : new ArrayList<>(pessoasSelecionadas)) {
+                    JPanel pessoaPanel = new JPanel(new BorderLayout());
+                    pessoaPanel.setOpaque(false);
+
+                    JPanel topPessoaPanel = new JPanel(new BorderLayout());
+                    topPessoaPanel.setOpaque(false);
+
+                    JLabel pessoaNomeLabel = createLabel(pessoa.nome(), new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
+                    topPessoaPanel.add(pessoaNomeLabel, BorderLayout.WEST);
+
+                    ShadowButton removePessoaButton = btn_backgroung("");
+                    removePessoaButton.setIcon(Resize.resizeIcon(close, 15, 15));
+                    removePessoaButton.setHoverEffect(true);
+                    removePessoaButton.addActionListener(e -> {
+                        reservasRepository.removerPessoaReserva(pessoa.pessoa_id(), reserva.reserva_id());
+                        pessoasSelecionadas.remove(pessoa);
+                        updatePessoasList[0].run();
+                        updateDiariasInfo.run();
+                        refreshPanel();
+                    });
+                    topPessoaPanel.add(removePessoaButton, BorderLayout.EAST);
+                    pessoaPanel.add(topPessoaPanel, BorderLayout.NORTH);
+
+
+                    pessoasPanel.add(pessoaPanel);
+                    pessoasPanel.add(Box.createVerticalStrut(5));
+                }
+                pessoasPanel.revalidate();
+                pessoasPanel.repaint();
+            };
+
+
+            pessoaSearchField.getDocument().addDocumentListener(new SimpleDocumentListener() {
+                public void update() {
+                    String text = pessoaSearchField.getText();
+                    searchResultsPanel.removeAll();
+                    if (text.length() > 3) {
+                        List<BuscaPessoaRequest> results = pessoaRepository.buscarPessoaPorIdNomeOuCpf(text);
+                        for (BuscaPessoaRequest bp : results) {
+                            JLabel resultLabel = createLabel(bp.nome(), new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+                            resultLabel.addMouseListener(new MouseAdapter() {
+                                public void mouseClicked(MouseEvent e) {
+                                    BuscaReservasResponse.Pessoas novaPessoa =
+                                            new BuscaReservasResponse.Pessoas(bp.id(), bp.nome(), bp.cpf());
+                                    pessoasSelecionadas.add(novaPessoa);
+                                    updatePessoasList[0].run();
+                                    updateDiariasInfo.run();
+                                }
+                            });
+                            searchResultsPanel.add(resultLabel);
+                        }
+                    }
+                    searchResultsPanel.revalidate();
+                    searchResultsPanel.repaint();
+                }
+            });
+            updatePessoasList[0].run();
+            tabbedPane.addTab("Pessoas", pessoasPanel);
+
+            JPanel pagamentosPanel = new JPanel();
+            pagamentosPanel.setLayout(new BoxLayout(pagamentosPanel, BoxLayout.Y_AXIS));
+            pagamentosPanel.setOpaque(false);
+
+            JPanel addPagamentoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JLabel addPagamentoLabel = createLabel("Adicionar novo pagamento", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+            addPagamentoPanel.add(addPagamentoLabel);
+            pagamentosPanel.add(addPagamentoPanel);
+
+            JPanel novoPagamentoPanel = new JPanel(new GridLayout(1, 4, 5, 5));
+            TextFieldComSobra descricaoPagamentoField = new TextFieldComSobra();
+            JComboBox<String> tipoPagamentoComboBox = new JComboBox<>(new String[]{"DINHEIRO", "CARTÃO", "TRANSFERÊNCIA"});
+            TextFieldComSobra valorPagamentoField = new TextFieldComSobra();
+            JButton btnAdicionarPagamento = btn_verde("Adicionar");
+            novoPagamentoPanel.add(descricaoPagamentoField);
+            novoPagamentoPanel.add(tipoPagamentoComboBox);
+            novoPagamentoPanel.add(valorPagamentoField);
+            novoPagamentoPanel.add(btnAdicionarPagamento);
+            pagamentosPanel.add(novoPagamentoPanel);
+
+            JPanel listaPagamentosPanel = new JPanel();
+            listaPagamentosPanel.setLayout(new BoxLayout(listaPagamentosPanel, BoxLayout.Y_AXIS));
+
+            List<BuscaReservasResponse.Pagamentos> pagamentosList = new ArrayList<>(reserva.pagamentos());
+
+            Runnable updatePagamentosList = () -> {
+                listaPagamentosPanel.removeAll();
+                for (BuscaReservasResponse.Pagamentos pagamento : pagamentosList) {
+                    JPanel pagamentoPanel = new JPanel(new BorderLayout());
+                    pagamentoPanel.setOpaque(false);
+                    JLabel pagamentoLabel = createLabel(
+                            pagamento.descricao() + " - " + pagamento.tipo_pagamento() + " - R$ " + String.format("%.2f", pagamento.valor_pagamento()),
+                            new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null
+                    );
+                    pagamentoPanel.add(pagamentoLabel, BorderLayout.CENTER);
+                    listaPagamentosPanel.add(pagamentoPanel);
+                }
+                listaPagamentosPanel.revalidate();
+                listaPagamentosPanel.repaint();
+            };
+            updatePagamentosList.run();
+
+            btnAdicionarPagamento.addActionListener(e -> {
+                try {
+                    String descricao = descricaoPagamentoField.getText();
+                    String tipo = (String) tipoPagamentoComboBox.getSelectedItem();
+                    float valor = Float.parseFloat(valorPagamentoField.getText());
+                    BuscaReservasResponse.Pagamentos novoPagamento = new BuscaReservasResponse.Pagamentos(
+                            descricao, tipo, valor, LocalDate.now().atStartOfDay()
+                    );
+                    pagamentosList.add(novoPagamento);
+                    updatePagamentosList.run();
+                    descricaoPagamentoField.setText("");
+                    valorPagamentoField.setText("");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            pagamentosPanel.add(listaPagamentosPanel);
+            tabbedPane.addTab("Pagamentos", pagamentosPanel);
+
+            popupContainer.add(tabbedPane, BorderLayout.CENTER);
+
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton salvarButton = btn_verde("Salvar");
+            JButton cancelarButton = btn_vermelho("Cancelar");
+            buttonPanel.add(salvarButton);
+            buttonPanel.add(cancelarButton);
+            popupContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+            checkinCalendarButton.addActionListener(e -> {
+            });
+            checkoutCalendarButton.addActionListener(e -> {
+            });
+
+            Dimension currentSize = popupContainer.getSize();
+            if (currentSize.width == 0) {
+                currentSize = popupContainer.getPreferredSize();
+            }
+            int newWidth = currentSize.width * 2;
+            int newHeight = currentSize.height;
+
+            popupContainer.setPreferredSize(new Dimension(newWidth, newHeight));
+            popupContainer.setSize(new Dimension(newWidth, newHeight));
+
+            SwingUtilities.invokeLater(() -> {
+                popupContainer.revalidate();
+                popupContainer.repaint();
+            });
+
+        });
+    }
+
+
+
+
+
+
+
 
 
 

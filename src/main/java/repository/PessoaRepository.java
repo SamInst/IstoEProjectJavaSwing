@@ -1,11 +1,11 @@
 package repository;
 
 import config.PostgresDatabaseConnect;
-import tools.Resize;
 import request.BuscaPessoaRequest;
 import request.PessoaRequest;
 import response.Objeto;
 import response.PessoaResponse;
+import tools.Resize;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

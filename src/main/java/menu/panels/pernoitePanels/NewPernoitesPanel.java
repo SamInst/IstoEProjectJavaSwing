@@ -2,8 +2,8 @@ package menu.panels.pernoitePanels;
 
 import enums.StatusPernoiteEnum;
 import menu.panels.pessoaPanel.IdentificacaoPessoaFrame;
-import tools.Refreshable;
 import repository.PernoitesRepository;
+import tools.Refreshable;
 
 import javax.swing.*;
 import java.awt.*;

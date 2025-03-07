@@ -3,6 +3,7 @@ package repository;
 import config.PostgresDatabaseConnect;
 import enums.StatusPernoiteEnum;
 import enums.StatusQuartoEnum;
+import request.BuscaReservasResponse;
 import request.PernoiteRequest;
 import response.BuscaPernoiteResponse;
 import response.DiariaResponse;
@@ -24,7 +25,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
     QuartosRepository quartosRepository = new QuartosRepository();
     Connection connection = connect();
 
-    public Boolean adicionarPernoite(PernoiteRequest request) {
+    public void adicionarPernoite(PernoiteRequest request) {
         boolean adicionado = true;
         String pernoite_sql = """
         INSERT INTO pernoite (
@@ -59,63 +60,88 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
         VALUES (?, ?);
         """;
 
-            try (PreparedStatement pernoiteStmt = connection.prepareStatement(pernoite_sql, Statement.RETURN_GENERATED_KEYS)) {
-                pernoiteStmt.setLong(1, request.quarto_id());
-                pernoiteStmt.setDate(2, java.sql.Date.valueOf(request.dataEntrada()));
-                pernoiteStmt.setDate(3, java.sql.Date.valueOf(request.dataSaida()));
-                pernoiteStmt.setInt(4, request.quantidade_de_pessoas());
-                pernoiteStmt.setFloat(5, request.total());
-                pernoiteStmt.executeUpdate();
+        String pagamento_sql = """
+        INSERT INTO pagamento_pernoite (
+            valor,
+            pernoite_id,
+            data_hora_pagamento,
+            tipo_pagamento_enum,
+            status_pagamento_enum,
+            descricao)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
-                ResultSet generatedKeys = pernoiteStmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    long pernoiteId = generatedKeys.getLong(1);
+        try (PreparedStatement pernoiteStmt = connection.prepareStatement(pernoite_sql, Statement.RETURN_GENERATED_KEYS)) {
+            pernoiteStmt.setLong(1, request.quarto_id());
+            pernoiteStmt.setDate(2, java.sql.Date.valueOf(request.dataEntrada()));
+            pernoiteStmt.setDate(3, java.sql.Date.valueOf(request.dataSaida()));
+            pernoiteStmt.setInt(4, request.quantidade_de_pessoas());
+            pernoiteStmt.setFloat(5, request.total());
+            pernoiteStmt.executeUpdate();
 
-                    var quantidadeDias = Period.between(request.dataEntrada(), request.dataSaida()).getDays();
-                    LocalDate diariaInicio = request.dataEntrada();
+            ResultSet generatedKeys = pernoiteStmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                long pernoiteId = generatedKeys.getLong(1);
 
-                    try (PreparedStatement diariaStmt = connection.prepareStatement(diaria_sql, Statement.RETURN_GENERATED_KEYS)) {
-                        for (int i = 1; i <= quantidadeDias; i++) {
-                            var valor_diaria = precosRepository.precoDiaria(request.quantidade_de_pessoas());
-                            LocalDate diariaFim = diariaInicio.plusDays(1);
+                var quantidadeDias = Period.between(request.dataEntrada(), request.dataSaida()).getDays();
+                LocalDate diariaInicio = request.dataEntrada();
 
-                            diariaStmt.setDate(1, java.sql.Date.valueOf(diariaInicio)); // data_inicio
-                            diariaStmt.setDate(2, java.sql.Date.valueOf(diariaFim));    // data_fim
-                            diariaStmt.setInt(3, request.quantidade_de_pessoas());      // quantidade_pessoas
-                            diariaStmt.setDouble(4, valor_diaria);                      // valor diaria
-                            diariaStmt.setLong(5, pernoiteId);                          // pernoite_id
-                            diariaStmt.setInt(6, i);                                    // número da diária (diária 1, 2, 3, etc.)
+                try (PreparedStatement diariaStmt = connection.prepareStatement(diaria_sql, Statement.RETURN_GENERATED_KEYS)) {
+                    for (int i = 1; i <= quantidadeDias; i++) {
+                        var valor_diaria = precosRepository.precoDiaria(request.quantidade_de_pessoas());
+                        LocalDate diariaFim = diariaInicio.plusDays(1);
 
-                            diariaStmt.addBatch();
-                            diariaInicio = diariaFim;
-                        }
-                        diariaStmt.executeBatch();
+                        diariaStmt.setDate(1, java.sql.Date.valueOf(diariaInicio)); // data_inicio
+                        diariaStmt.setDate(2, java.sql.Date.valueOf(diariaFim));    // data_fim
+                        diariaStmt.setInt(3, request.quantidade_de_pessoas());      // quantidade_pessoa
+                        diariaStmt.setDouble(4, valor_diaria);                      // valor_diaria
+                        diariaStmt.setLong(5, pernoiteId);                          // pernoite_id
+                        diariaStmt.setInt(6, i);                                    // número da diária
 
-                        try (ResultSet generatedKeysDiarias = diariaStmt.getGeneratedKeys()) {
-                            try (PreparedStatement pessoaStmt = connection.prepareStatement(pessoa_diaria_sql)) {
-                                while (generatedKeysDiarias.next()) {
-                                    long diariaId = generatedKeysDiarias.getLong(1);
+                        diariaStmt.addBatch();
+                        diariaInicio = diariaFim;
+                    }
+                    diariaStmt.executeBatch();
 
-                                    for (Long pessoaId : request.pessoas()) {
-                                        pessoaStmt.setLong(1, diariaId);
-                                        pessoaStmt.setLong(2, pessoaId);
-                                        pessoaStmt.addBatch();
-                                    }
+                    try (ResultSet generatedKeysDiarias = diariaStmt.getGeneratedKeys()) {
+                        try (PreparedStatement pessoaStmt = connection.prepareStatement(pessoa_diaria_sql)) {
+                            while (generatedKeysDiarias.next()) {
+                                long diariaId = generatedKeysDiarias.getLong(1);
+
+                                for (Long pessoaId : request.pessoas()) {
+                                    pessoaStmt.setLong(1, diariaId);
+                                    pessoaStmt.setLong(2, pessoaId);
+                                    pessoaStmt.addBatch();
                                 }
-                                pessoaStmt.executeBatch();
                             }
+                            pessoaStmt.executeBatch();
                         }
                     }
-                } else {
-                    adicionado = false;
-                    throw new SQLException("Falha ao obter o ID do pernoite.");
                 }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+
+                try (PreparedStatement pagamentoStmt = connection.prepareStatement(pagamento_sql)) {
+                    for (BuscaReservasResponse.Pagamentos pagamento : request.pagamentos()) {
+                        pagamentoStmt.setDouble(1, pagamento.valor_pagamento());
+                        pagamentoStmt.setLong(2, pernoiteId);
+                        pagamentoStmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
+                        pagamentoStmt.setString(4, pagamento.tipo_pagamento());
+                        pagamentoStmt.setString(5, null);
+                        pagamentoStmt.setString(6, pagamento.descricao());
+                        pagamentoStmt.addBatch();
+                    }
+                    pagamentoStmt.executeBatch();
+                }
+
+            } else {
+                adicionado = false;
+                throw new SQLException("Falha ao obter o ID do pernoite.");
             }
-            quartosRepository.alterarStatusQuarto(request.quarto_id(), StatusQuartoEnum.OCUPADO);
-        return adicionado;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        quartosRepository.alterarStatusQuarto(request.quarto_id(), StatusQuartoEnum.OCUPADO);
     }
+
 
 
     public PernoiteResponse buscaPernoite(Long pernoiteId) {

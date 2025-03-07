@@ -9,5 +9,6 @@ public record PernoiteRequest(
         LocalDate dataSaida,
         Integer quantidade_de_pessoas,
         List<Long> pessoas,
+        List<BuscaReservasResponse.Pagamentos> pagamentos,
         Float total
 ){}

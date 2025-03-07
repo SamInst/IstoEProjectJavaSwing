@@ -1,7 +1,7 @@
 package tools;
 
-import java.awt.*;
 import javax.swing.border.Border;
+import java.awt.*;
 
 public class RoundedBorder implements Border {
     private int radius;

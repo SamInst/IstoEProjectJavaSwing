@@ -2,12 +2,15 @@ package repository;
 
 import config.PostgresDatabaseConnect;
 import request.AdicionarReservasRequest;
+import request.AtualizarReservaRequest;
 import request.BuscaReservasResponse;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ReservasRepository {
     Connection connection = PostgresDatabaseConnect.connect();
@@ -171,4 +174,86 @@ public class ReservasRepository {
         statement.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
+
+    public void editarReserva(AtualizarReservaRequest request) {
+        String sql_update_reserva = """
+        UPDATE reservas
+        SET quarto_id = ?,
+            data_entrada = ?,
+            data_saida = ?,
+            quantidade_pessoas = ?
+        WHERE reserva_id = ?;
+        """;
+        String sql_insert_reserva_pessoas = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id) VALUES (?, ?);";
+        String sql_select_pessoas = "SELECT pessoa_id FROM reserva_pessoas WHERE reserva_id = ?;";
+        String sql_delete_reserva_pagamentos = "DELETE FROM reserva_pagamento WHERE reserva_id = ?;";
+        String sql_insert_reserva_pagamentos = """
+        INSERT INTO reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento)
+        VALUES (?, ?, ?, ?);
+        """;
+
+        try {
+            try (PreparedStatement updateStmt = connection.prepareStatement(sql_update_reserva)) {
+                updateStmt.setLong(1, request.quarto());
+                updateStmt.setDate(2, Date.valueOf(request.data_entrada()));
+                updateStmt.setDate(3, Date.valueOf(request.data_saida()));
+                updateStmt.setInt(4, request.quantidade_pessoas());
+                updateStmt.setLong(5, request.reserva_id());
+                updateStmt.executeUpdate();
+            }
+            if (request.pessoas() != null) {
+                Set<Long> pessoasExistentes = new HashSet<>();
+                try (PreparedStatement selectPessoasStmt = connection.prepareStatement(sql_select_pessoas)) {
+                    selectPessoasStmt.setLong(1, request.reserva_id());
+                    try (ResultSet rs = selectPessoasStmt.executeQuery()) {
+                        while (rs.next()) {
+                            pessoasExistentes.add(rs.getLong("pessoa_id"));
+                        }
+                    }
+                }
+                for (Long pessoaId : request.pessoas()) {
+                    if (!pessoasExistentes.contains(pessoaId)) {
+                        try (PreparedStatement insertPessoaStmt = connection.prepareStatement(sql_insert_reserva_pessoas)) {
+                            insertPessoaStmt.setLong(1, request.reserva_id());
+                            insertPessoaStmt.setLong(2, pessoaId);
+                            insertPessoaStmt.executeUpdate();
+                        }
+                    }
+                }
+            }
+            try (PreparedStatement deletePagamentosStmt = connection.prepareStatement(sql_delete_reserva_pagamentos)) {
+                deletePagamentosStmt.setLong(1, request.reserva_id());
+                deletePagamentosStmt.executeUpdate();
+            }
+            if (request.pagamentos() != null) {
+                for (BuscaReservasResponse.Pagamentos pagamento : request.pagamentos()) {
+                    try (PreparedStatement insertPagamentoStmt = connection.prepareStatement(sql_insert_reserva_pagamentos)) {
+                        insertPagamentoStmt.setLong(1, request.reserva_id());
+                        insertPagamentoStmt.setFloat(2, pagamento.valor_pagamento());
+                        insertPagamentoStmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
+                        insertPagamentoStmt.setString(4, pagamento.tipo_pagamento());
+                        insertPagamentoStmt.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao atualizar a reserva: " + e.getMessage(), e);
+        }
+    }
+
+    public void removerPessoaReserva(Long idPessoa, Long idReserva) {
+        String sql = "DELETE FROM reserva_pessoas WHERE pessoa_id = ? AND reserva_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, idPessoa);
+            stmt.setLong(2, idReserva);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao remover pessoa da reserva: " + e.getMessage(), e);
+        }
+    }
+
+
+
 }

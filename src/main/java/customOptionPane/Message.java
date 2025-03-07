@@ -6,6 +6,10 @@ import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
 
 public class Message extends javax.swing.JPanel {
+    private Button cmdCancel;
+    private Button cmdOK;
+    private JLabel jLabel1;
+    private JTextPane txt;
 
     public Message(String titulo, String message, String buttonTextOK, String buttonTextCancelar, Color buttonOkColor) {
         initComponents(titulo, message, buttonTextOK, buttonTextCancelar, buttonOkColor);
@@ -97,9 +101,4 @@ public class Message extends javax.swing.JPanel {
     public void eventOK(ActionListener event) {
         cmdOK.addActionListener(event);
     }
-
-    private Button cmdCancel;
-    private Button cmdOK;
-    private JLabel jLabel1;
-    private JTextPane txt;
 }
