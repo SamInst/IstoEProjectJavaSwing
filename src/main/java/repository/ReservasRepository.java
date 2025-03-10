@@ -65,25 +65,35 @@ public class ReservasRepository {
     }
 
 
-    public List<LocalDate> datasReservadas(){
+    public List<LocalDate> datasReservadasPorQuarto(Long quartoId, Long reservaIdExcluida) {
         List<LocalDate> listaDatasReservadas = new ArrayList<>();
-
         String sql = """
-                select distinct r.data_entrada
-                from reservas r where data_entrada >= now()
-                and r.ativa = true
-                order by data_entrada;
-                """;
-
-        try (PreparedStatement diariaStmt = connection.prepareStatement(sql)) {
-            ResultSet rsDiaria = diariaStmt.executeQuery();
-
-            while (rsDiaria.next()) {
-                listaDatasReservadas.add(rsDiaria.getDate("data_entrada").toLocalDate());
+        select r.data_entrada, r.data_saida
+        from reservas r
+        where r.data_entrada >= now()
+          and r.ativa = true
+          and r.quarto_id = ?
+          and r.reserva_id <> ?
+        order by r.data_entrada;
+        """;
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, quartoId);
+            stmt.setLong(2, reservaIdExcluida);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                LocalDate start = rs.getDate("data_entrada").toLocalDate();
+                LocalDate end = rs.getDate("data_saida").toLocalDate();
+                for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+                    listaDatasReservadas.add(d);
+                }
             }
-        } catch (Exception e){ e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return listaDatasReservadas;
     }
+
+
 
     public List<BuscaReservasResponse> buscaReservasAtivas(){
         List<BuscaReservasResponse> listaReservas = new ArrayList<>();
@@ -153,6 +163,7 @@ public class ReservasRepository {
                         rsReserva.getLong("quarto_id"),
                         rsReserva.getDate("data_entrada").toLocalDate(),
                         rsReserva.getDate("data_saida").toLocalDate(),
+                        rsReserva.getTime("hora_prevista").toLocalTime(),
                         listaPessoas,
                         pagamentos
                 ));

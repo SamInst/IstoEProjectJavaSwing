@@ -193,12 +193,17 @@ public class ButtonDate extends JButton {
     }
 
     protected Color getBetweenDateColor() {
-        Color color = FlatUIUtils.getParentBackground(this);
-        if (datePicker.getDateSelectionModel().getToDate() != null) {
-            return ColorFunctions.mix(color, getAccentColor(), 0.9f);
+        Color baseColor = FlatUIUtils.getParentBackground(this);
+        Color accent = getAccentColor();
+        if (accent == null) {
+            accent = baseColor;
         }
-        return FlatLaf.isLafDark() ? ColorFunctions.lighten(color, 0.03f) : ColorFunctions.darken(color, 0.03f);
+        if (datePicker.getDateSelectionModel().getToDate() != null) {
+            return ColorFunctions.mix(baseColor, accent, 0.9f);
+        }
+        return FlatLaf.isLafDark() ? ColorFunctions.lighten(baseColor, 0.03f) : ColorFunctions.darken(baseColor, 0.03f);
     }
+
 
     protected Color getColor() {
         Color color = FlatUIUtils.getParentBackground(this);

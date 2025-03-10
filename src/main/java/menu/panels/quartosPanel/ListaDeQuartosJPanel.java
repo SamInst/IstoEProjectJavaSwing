@@ -87,7 +87,7 @@ public class ListaDeQuartosJPanel {
             topPanel.add(numeroPanel, BorderLayout.WEST);
 
             ShadowButton statusButton = btn_branco(status_quarto.toString());
-            statusButton.setHoverEffect(true);
+            statusButton.enableHoverEffect();
             statusButton.setIcon(resizeIcon(select, largura, altura));
 
             topPanel.add(statusButton, BorderLayout.EAST);

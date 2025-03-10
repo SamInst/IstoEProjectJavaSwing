@@ -51,7 +51,7 @@ public final class DateChooser extends javax.swing.JPanel {
         toDay(false);
     }
 
-    public void setTextReference(ShadowButton txt) {
+    public void setTextReference(ShadowButton txt, boolean showdate) {
         this.textReference = txt;
         this.textReference.setFocusPainted(false);
         this.textReference.addMouseListener(new MouseAdapter() {
@@ -67,13 +67,13 @@ public final class DateChooser extends javax.swing.JPanel {
 
     private void setText(boolean runEvent, int act) {
         if (textReference != null) {
-            try {
-                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-                Date date = df.parse(DAY + "-" + MONTH + "-" + YEAR);
-                textReference.setText(new SimpleDateFormat(dateFormat).format(date));
-            } catch (ParseException e) {
-
-            }
+//            try {
+//                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+//                Date date = df.parse(DAY + "-" + MONTH + "-" + YEAR);
+//                textReference.setText(new SimpleDateFormat(dateFormat).format(date));
+//            } catch (ParseException e) {
+//
+//            }
         }
         if (runEvent) {
             runEvent(act);

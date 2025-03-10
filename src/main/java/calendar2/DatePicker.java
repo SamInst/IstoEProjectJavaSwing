@@ -15,6 +15,8 @@ import calendar2.util.InputUtils;
 import calendar2.util.InputValidationListener;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import lombok.Getter;
+import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -25,22 +27,31 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class DatePicker extends PanelPopupEditor implements DateSelectionModelListener, DateControlListener, ChangeListener {
-
     private DateTimeFormatter format;
     private String dateFormatPattern = "dd/MM/yyyy";
     private DateSelectionListener dateSelectionListener;
     private InputValidationListener<LocalDate> inputValidationListener;
+    @Getter
     private DateSelectionModel dateSelectionModel;
     private PanelDateOption panelDateOption;
+    @Getter
     private PanelDateOptionLabel panelDateOptionLabel;
     private InputUtils.ValueCallback valueCallback;
+    @Getter
     private Icon editorIcon;
+    @Getter
     private String separator = " to ";
+    @Getter
     private boolean usePanelOption;
+    @Getter
+    @Setter
     private boolean closeAfterSelected;
+    @Setter
+    @Getter
     private boolean animationEnabled = true;
     private int month = 10;
     private int year = 2023;
+    @Getter
     private Color color;
     private JButton editorButton;
     private SelectionState selectionState = SelectionState.DATE;
@@ -48,6 +59,7 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
     private PanelMonth panelMonth;
     private PanelYear panelYear;
 
+    @Getter
     private final Header header = new Header();
     private final PanelSlider panelSlider = new PanelSlider();
 
@@ -60,8 +72,7 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
     }
 
     private void init(DateSelectionModel dateSelectionModel) {
-        putClientProperty(FlatClientProperties.STYLE, "" +
-                "[light]background:darken($Panel.background,2%);" +
+        putClientProperty(FlatClientProperties.STYLE, "[light]background:darken($Panel.background,2%);" +
                 "[dark]background:lighten($Panel.background,2%);");
         setLayout(new MigLayout(
                 "wrap,insets 10,fill",
@@ -219,10 +230,6 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
         }
     }
 
-    public Icon getEditorIcon() {
-        return editorIcon;
-    }
-
     public void setEditorIcon(Icon editorIcon) {
         this.editorIcon = editorIcon;
         editorButton.setIcon(editorIcon);
@@ -240,17 +247,9 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
         commitEdit();
     }
 
-    public Color getColor() {
-        return color;
-    }
-
     public void setColor(Color color) {
         this.color = color;
         repaint();
-    }
-
-    public String getSeparator() {
-        return separator;
     }
 
     public void setSeparator(String separator) {
@@ -285,10 +284,6 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
         }
     }
 
-    public boolean isUsePanelOption() {
-        return usePanelOption;
-    }
-
     public void setUsePanelOption(boolean usePanelOption) {
         if (this.usePanelOption != usePanelOption) {
             this.usePanelOption = usePanelOption;
@@ -311,10 +306,6 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
         }
     }
 
-    public PanelDateOptionLabel getPanelDateOptionLabel() {
-        return panelDateOptionLabel;
-    }
-
     public void setPanelDateOptionLabel(PanelDateOptionLabel panelDateOptionLabel) {
         if (panelDateOptionLabel == null) {
             throw new IllegalArgumentException("panelDateOptionLabel can't be null");
@@ -323,22 +314,6 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
         if (panelDateOption != null) {
             panelDateOption.installDateOptionLabel();
         }
-    }
-
-    public boolean isCloseAfterSelected() {
-        return closeAfterSelected;
-    }
-
-    public void setCloseAfterSelected(boolean closeAfterSelected) {
-        this.closeAfterSelected = closeAfterSelected;
-    }
-
-    public boolean isAnimationEnabled() {
-        return animationEnabled;
-    }
-
-    public void setAnimationEnabled(boolean animationEnabled) {
-        this.animationEnabled = animationEnabled;
     }
 
     public void clearSelectedDate() {
@@ -417,14 +392,6 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
 
     public void removeDateSelectionListener(DateSelectionListener listener) {
         listenerList.remove(DateSelectionListener.class, listener);
-    }
-
-    public Header getHeader() {
-        return header;
-    }
-
-    public DateSelectionModel getDateSelectionModel() {
-        return dateSelectionModel;
     }
 
     public void setDateSelectionModel(DateSelectionModel dateSelectionModel) {
@@ -563,7 +530,7 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
     private void setEditorValue() {
         String value = getSelectedDateAsString();
         if (value != null) {
-            if (!editor.getText().toLowerCase().equals(value.toLowerCase())) {
+            if (!editor.getText().equalsIgnoreCase(value)) {
                 editor.setValue(value);
             }
         } else {

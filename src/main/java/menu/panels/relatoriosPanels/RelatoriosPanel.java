@@ -382,8 +382,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
         topPanel.add(identificadorPanel, BorderLayout.CENTER);
 
         searchDateField.setIcon(resizeIcon(search, 15, 15));
-        searchDateField.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        dateChooser.setTextReference(searchDateField);
+        dateChooser.setTextReference(searchDateField, true);
 
         dateChooser.addEventDateChooser(new EventDateChooser() {
             @Override

@@ -7,12 +7,10 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import lombok.Getter;
 import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
-
 import javax.swing.*;
 import java.text.DateFormatSymbols;
 
 public class Header extends JPanel {
-
     protected JButton buttonMonth;
     protected JButton buttonYear;
 
@@ -33,8 +31,7 @@ public class Header extends JPanel {
     }
 
     private void init(int month, int year) {
-        putClientProperty(FlatClientProperties.STYLE, "" +
-                "background:null");
+        putClientProperty(FlatClientProperties.STYLE, "background:null");
         setLayout(new MigLayout("fill,insets 3", "[]push[][]push[]", "fill"));
 
         JButton cmdBack = createButton();
@@ -62,8 +59,7 @@ public class Header extends JPanel {
 
     protected JButton createButton() {
         JButton button = new JButton();
-        button.putClientProperty(FlatClientProperties.STYLE, "" +
-                "background:null;" +
+        button.putClientProperty(FlatClientProperties.STYLE, "background:null;" +
                 "arc:10;" +
                 "borderWidth:0;" +
                 "focusWidth:0;" +
@@ -73,19 +69,15 @@ public class Header extends JPanel {
     }
 
     protected Icon createDefaultBackIcon() {
-        return new FlatSVGIcon("login/datetime/icon/back.svg");
+        return new FlatSVGIcon("icon/back.svg");
     }
 
     protected Icon createDefaultForwardIcon() {
-        return new FlatSVGIcon("login/datetime/icon/forward.svg");
+        return new FlatSVGIcon("icon/forward.svg");
     }
 
     public void addDateControlListener(DateControlListener listener) {
         listenerList.add(DateControlListener.class, listener);
-    }
-
-    public void removeDateControlListener(DateControlListener listener) {
-        listenerList.remove(DateControlListener.class, listener);
     }
 
     public void fireDateControlChanged(DateControlEvent event) {

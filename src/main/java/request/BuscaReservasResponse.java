@@ -2,6 +2,7 @@ package request;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public record BuscaReservasResponse(
@@ -9,6 +10,7 @@ public record BuscaReservasResponse(
             Long quarto,
             LocalDate data_entrada,
             LocalDate data_saida,
+            LocalTime hora_prevista,
             List<Pessoas> pessoas,
             List<Pagamentos> pagamentos
     ){

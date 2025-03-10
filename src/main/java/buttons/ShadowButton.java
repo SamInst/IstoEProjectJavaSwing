@@ -16,7 +16,6 @@ import static java.awt.Cursor.HAND_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
 
 public class ShadowButton extends JButton {
-
     JPopupMenu popup;
 
     public void setRound(int round) {
@@ -104,7 +103,21 @@ public class ShadowButton extends JButton {
     }
 
     public void showPopupWithButtons(ShadowButton... buttons) {
-         popup = new JPopupMenu() {
+        popup = new JPopupMenu() {
+            private boolean allowClose = false;
+
+            public void setAllowClose(boolean allow) {
+                this.allowClose = allow;
+            }
+
+            @Override
+            public void setVisible(boolean b) {
+                if (!b && !allowClose) {
+                    return;
+                }
+                super.setVisible(b);
+            }
+
             @Override
             public void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -112,6 +125,7 @@ public class ShadowButton extends JButton {
                 super.paintComponent(g2d);
                 g2d.dispose();
             }
+
             @Override
             protected void paintBorder(Graphics g) {
             }
@@ -124,13 +138,15 @@ public class ShadowButton extends JButton {
         popup.show(this, 0, this.getHeight());
     }
 
+
     public void closePopup(){
-        popup.setVisible(false);
+        if (this.popup != null) {
+            this.popup.setVisible(false);
+        }
     }
 
 
-    public void setHoverEffect(boolean hoverEffect) {
-        if (hoverEffect) {
+    public void enableHoverEffect() {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
@@ -143,6 +159,5 @@ public class ShadowButton extends JButton {
                 }
             });
             setCursor(getPredefinedCursor(HAND_CURSOR));
-        }
     }
 }

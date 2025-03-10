@@ -10,7 +10,6 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
 public class PanelDate extends JPanel {
-
     private final DatePicker datePicker;
     private final int month;
     private final int year;
@@ -23,8 +22,7 @@ public class PanelDate extends JPanel {
     }
 
     private void init() {
-        putClientProperty(FlatClientProperties.STYLE, "" +
-                "background:null");
+        putClientProperty(FlatClientProperties.STYLE, "background:null");
         setLayout(new MigLayout("novisualpadding,wrap 7,insets 3,gap 0,al center center", "fill", "[fill]10[fill][fill]"));
         load();
     }
@@ -62,7 +60,7 @@ public class PanelDate extends JPanel {
     }
 
     protected void createDateHeader() {
-        String weekdays[] = DateFormatSymbols.getInstance().getShortWeekdays();
+        String[] weekdays = DateFormatSymbols.getInstance().getShortWeekdays();
         for (String week : weekdays) {
             if (!week.isEmpty()) {
                 add(createLabel(week));
@@ -72,8 +70,7 @@ public class PanelDate extends JPanel {
 
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text, JLabel.CENTER);
-        label.putClientProperty(FlatClientProperties.STYLE, "" +
-                "[light]foreground:lighten($Label.foreground,30%);" +
+        label.putClientProperty(FlatClientProperties.STYLE, "[light]foreground:lighten($Label.foreground,30%);" +
                 "[dark]foreground:darken($Label.foreground,30%)");
         return label;
     }
@@ -89,8 +86,7 @@ public class PanelDate extends JPanel {
     public void checkSelection() {
         for (int i = 0; i < getComponentCount(); i++) {
             Component com = getComponent(i);
-            if (com instanceof ButtonDate) {
-                ButtonDate buttonDate = (ButtonDate) com;
+            if (com instanceof ButtonDate buttonDate) {
                 if (datePicker.getDateSelectionModel().getDateSelectionMode() == DatePicker.DateSelectionMode.SINGLE_DATE_SELECTED) {
                     buttonDate.setSelected(buttonDate.getDate().same(datePicker.getDateSelectionModel().getDate()));
                 } else {
