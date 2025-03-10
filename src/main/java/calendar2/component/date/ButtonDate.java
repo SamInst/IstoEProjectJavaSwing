@@ -7,6 +7,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.UIScale;
+import lombok.Setter;
+import repository.ReservasRepository;
+import response.DatasReserva;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +18,9 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ButtonDate extends JButton {
 
@@ -22,7 +28,15 @@ public class ButtonDate extends JButton {
     private final SingleDate date;
     private boolean press;
     private boolean hover;
-    private int rowIndex;
+    private final int rowIndex;
+
+    //            List.of(
+//            new DatasReserva(LocalDate.now(), LocalDate.now().plusDays(1)),
+//            new DatasReserva(LocalDate.now().plusDays(2), LocalDate.now().plusDays(3)),
+//            new DatasReserva(LocalDate.now().plusDays(5), LocalDate.now().plusDays(8)),
+//            new DatasReserva(LocalDate.of(2025,4,4), LocalDate.of(2025,4,6))
+//            );
+
 
     public ButtonDate(DatePicker datePicker, SingleDate date, boolean enable, int rowIndex) {
         this.datePicker = datePicker;
@@ -84,13 +98,11 @@ public class ButtonDate extends JButton {
             }
         });
         if (enable) {
-            putClientProperty(FlatClientProperties.STYLE, "" +
-                    "margin:7,7,7,7;" +
+            putClientProperty(FlatClientProperties.STYLE, "margin:7,7,7,7;" +
                     "focusWidth:2;" +
                     "selectedForeground:contrast($Component.accentColor,$Button.background,#fff)");
         } else {
-            putClientProperty(FlatClientProperties.STYLE, "" +
-                    "margin:7,7,7,7;" +
+            putClientProperty(FlatClientProperties.STYLE, "margin:7,7,7,7;" +
                     "focusWidth:2;" +
                     "selectedForeground:contrast($Component.accentColor,$Button.background,#fff);" +
                     "foreground:$Button.disabledText");
@@ -99,6 +111,7 @@ public class ButtonDate extends JButton {
 
     @Override
     protected void paintComponent(Graphics g) {
+        List<DatasReserva> reservasDoQuarto = datePicker.getReservasDoQuarto();
         Graphics2D g2 = (Graphics2D) g.create();
         FlatUIUtils.setRenderingHints(g2);
         double width = getWidth();
@@ -107,11 +120,20 @@ public class ButtonDate extends JButton {
         double x = (width - size) / 2;
         double y = (height - size) / 2;
 
+        boolean isReserved = false;
+        for (DatasReserva reservaDatas : reservasDoQuarto) {
+            if (!date.toLocalDate().isBefore(reservaDatas.checkin()) && !date.toLocalDate().isAfter(reservaDatas.checkout())) {
+                isReserved = true;
+                break;
+            }
+        }
+
+
+
         g2.setColor(getColor());
         g2.fill(new Ellipse2D.Double(x, y, size, size));
         DateSelectionModel dateSelectionModel = datePicker.getDateSelectionModel();
 
-        //  paint date between selected
         if (dateSelectionModel.getDateSelectionMode() == DatePicker.DateSelectionMode.BETWEEN_DATE_SELECTED && dateSelectionModel.getDate() != null) {
             g2.setColor(getBetweenDateColor());
             if (date.between(dateSelectionModel.getDate(), getToDate())) {
@@ -143,17 +165,25 @@ public class ButtonDate extends JButton {
             double xx = (width - space) / 2;
             double yy = (height - space) / 2;
             Area area = new Area(new Ellipse2D.Double(xx, yy, space, space));
+            float s;
             if (isSelected) {
-                float s = UIScale.scale(1);
-                area.subtract(new Area(new Ellipse2D.Double(x + s, y + s, size - s * 2, size - s * 2)));
+                s = UIScale.scale(1);
             } else {
-                float s = UIScale.scale(2);
-                area.subtract(new Area(new Ellipse2D.Double(x + s, y + s, size - s * 2, size - s * 2)));
+                s = UIScale.scale(2);
             }
+            area.subtract(new Area(new Ellipse2D.Double(x + s, y + s, size - s * 2, size - s * 2)));
             Color accentColor = getAccentColor();
             g2.setColor(isSelected ? getBorderColor(accentColor) : accentColor);
             g2.fill(area);
         }
+
+        if (isReserved) {
+            reservasDoQuarto.forEach(reserva -> {
+                g2.setColor(Color.ORANGE);
+                g2.fill(new Rectangle2D.Double(0, y + size, width, size));
+            });
+        }
+
         g2.dispose();
         super.paintComponent(g);
     }

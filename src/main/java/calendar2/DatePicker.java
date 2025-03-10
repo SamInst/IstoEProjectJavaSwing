@@ -18,6 +18,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import lombok.Getter;
 import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
+import response.DatasReserva;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -25,6 +26,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class DatePicker extends PanelPopupEditor implements DateSelectionModelListener, DateControlListener, ChangeListener {
     private DateTimeFormatter format;
@@ -58,10 +60,16 @@ public class DatePicker extends PanelPopupEditor implements DateSelectionModelLi
     private PanelDate panelDate;
     private PanelMonth panelMonth;
     private PanelYear panelYear;
-
     @Getter
     private final Header header = new Header();
     private final PanelSlider panelSlider = new PanelSlider();
+    @Setter
+    @Getter
+    private List<DatasReserva> reservasDoQuarto;
+
+
+
+
 
     public DatePicker() {
         this(null);

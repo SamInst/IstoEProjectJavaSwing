@@ -4,16 +4,25 @@ import calendar2.DatePicker;
 import calendar2.DateSelectionAble;
 import calendar2.component.date.event.DateSelectionModelEvent;
 import calendar2.component.date.event.DateSelectionModelListener;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.event.EventListenerList;
 
 public class DateSelectionModel {
 
     protected EventListenerList listenerList = new EventListenerList();
+    @Setter
+    @Getter
     private DatePicker.DateSelectionMode dateSelectionMode;
+    @Getter
+    @Setter
     private DateSelectionAble dateSelectionAble;
+    @Getter
     private SingleDate date;
+    @Getter
     private SingleDate toDate;
+    @Getter
     private SingleDate hoverDate;
 
     public DateSelectionModel() {
@@ -33,10 +42,6 @@ public class DateSelectionModel {
         this.dateSelectionAble = dateSelectionAble;
     }
 
-    public SingleDate getDate() {
-        return date;
-    }
-
     public void setDate(SingleDate date) {
         if (equalsDate(this.date, date)) {
             return;
@@ -48,10 +53,6 @@ public class DateSelectionModel {
         fireDatePickerChanged(new DateSelectionModelEvent(this, DateSelectionModelEvent.DATE));
     }
 
-    public SingleDate getToDate() {
-        return toDate;
-    }
-
     public void setToDate(SingleDate toDate) {
         if (equalsDate(this.toDate, toDate)) {
             return;
@@ -60,10 +61,6 @@ public class DateSelectionModel {
             return;
         }
         this.toDate = toDate;
-    }
-
-    public SingleDate getHoverDate() {
-        return hoverDate;
     }
 
     public void setHoverDate(SingleDate hoverDate) {
@@ -108,14 +105,6 @@ public class DateSelectionModel {
         }
     }
 
-    public void setDateSelectionAble(DateSelectionAble dateSelectionAble) {
-        this.dateSelectionAble = dateSelectionAble;
-    }
-
-    public DateSelectionAble getDateSelectionAble() {
-        return dateSelectionAble;
-    }
-
     public void addDatePickerSelectionListener(DateSelectionModelListener listener) {
         listenerList.add(DateSelectionModelListener.class, listener);
     }
@@ -143,14 +132,6 @@ public class DateSelectionModel {
             return false;
         }
         return date1.same(date2);
-    }
-
-    public DatePicker.DateSelectionMode getDateSelectionMode() {
-        return dateSelectionMode;
-    }
-
-    public void setDateSelectionMode(DatePicker.DateSelectionMode dateSelectionMode) {
-        this.dateSelectionMode = dateSelectionMode;
     }
 
     private boolean checkSelection(SingleDate date) {

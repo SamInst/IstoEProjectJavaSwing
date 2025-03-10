@@ -4,6 +4,7 @@ import config.PostgresDatabaseConnect;
 import request.AdicionarReservasRequest;
 import request.AtualizarReservaRequest;
 import request.BuscaReservasResponse;
+import response.DatasReserva;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -17,16 +18,16 @@ public class ReservasRepository {
 
     public void adicionarReserva(AdicionarReservasRequest request) {
         String sql_reserva = """
-            insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa) VALUES (?,?,?,?, true) returning reserva_id;
-            """;
+                insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa) VALUES (?,?,?,?, true) returning reserva_id;
+                """;
 
         String sql_reserva_pessoas = """
-            insert into reserva_pessoas (reserva_id, pessoa_id) VALUES (?,?);
-            """;
+                insert into reserva_pessoas (reserva_id, pessoa_id) VALUES (?,?);
+                """;
 
         String sql_reserva_pagamentos = """
-            insert into reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento) VALUES (?,?,?,?);
-            """;
+                insert into reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento) VALUES (?,?,?,?);
+                """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql_reserva)) {
             statement.setLong(1, request.quarto());
@@ -39,17 +40,19 @@ public class ReservasRepository {
             if (generatedKeys.next()) {
                 long reserva_id = generatedKeys.getLong(1);
 
-                if (request.pessoas() != null){
+                if (request.pessoas() != null) {
                     request.pessoas().forEach(pessoa_id -> {
                         try (PreparedStatement pessoaStatement = connection.prepareStatement(sql_reserva_pessoas)) {
                             pessoaStatement.setLong(1, reserva_id);
                             pessoaStatement.setLong(2, pessoa_id);
                             pessoaStatement.executeUpdate();
-                        } catch (SQLException throwables) { throwables.printStackTrace(); }
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
                     });
                 }
 
-                if (request.pagamentos() != null){
+                if (request.pagamentos() != null) {
                     request.pagamentos().forEach(pagamento -> {
                         try (PreparedStatement pagamentoStatement = connection.prepareStatement(sql_reserva_pagamentos)) {
                             pagamentoStatement.setLong(1, reserva_id);
@@ -57,35 +60,39 @@ public class ReservasRepository {
                             pagamentoStatement.setDate(3, Date.valueOf(LocalDate.now()));
                             pagamentoStatement.setString(4, pagamento.tipo_pagamento());
                             pagamentoStatement.executeUpdate();
-                        } catch (SQLException throwables) { throwables.printStackTrace(); }
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
                     });
                 }
             }
-        } catch (SQLException throwables) { throwables.printStackTrace(); }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 
-    public List<LocalDate> datasReservadasPorQuarto(Long quartoId, Long reservaIdExcluida) {
-        List<LocalDate> listaDatasReservadas = new ArrayList<>();
+    public List<DatasReserva> datasReservadasPorQuarto(Long quartoId, Long reservaIdExcluida) {
+        List<DatasReserva> listaDatasReservadas = new ArrayList<>();
         String sql = """
-        select r.data_entrada, r.data_saida
-        from reservas r
-        where r.data_entrada >= now()
-          and r.ativa = true
-          and r.quarto_id = ?
-          and r.reserva_id <> ?
-        order by r.data_entrada;
-        """;
+                select r.data_entrada, r.data_saida
+                from reservas r
+                where r.data_entrada >= now()
+                  and r.ativa = true
+                  and r.quarto_id = ?
+                  and r.reserva_id <> ?
+                order by r.data_entrada;
+                """;
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, quartoId);
             stmt.setLong(2, reservaIdExcluida);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                LocalDate start = rs.getDate("data_entrada").toLocalDate();
-                LocalDate end = rs.getDate("data_saida").toLocalDate();
-                for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
-                    listaDatasReservadas.add(d);
-                }
+                DatasReserva datasReserva = new DatasReserva(
+                        rs.getDate("data_entrada").toLocalDate(),
+                        rs.getDate("data_saida").toLocalDate()
+                );
+                listaDatasReservadas.add(datasReserva);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,34 +101,33 @@ public class ReservasRepository {
     }
 
 
-
-    public List<BuscaReservasResponse> buscaReservasAtivas(){
+    public List<BuscaReservasResponse> buscaReservasAtivas() {
         List<BuscaReservasResponse> listaReservas = new ArrayList<>();
 
         String sql_reservas = """
-            select distinct *
-            from reservas r where r.ativa = true
-            order by r.data_entrada;
-            """;
+                select distinct *
+                from reservas r where r.ativa = true
+                order by r.data_entrada;
+                """;
 
         String sql_pessoas = """
-            select
-                p.id       as pessoa_id,
-                p.nome     as nome,
-                p.telefone as telefone
-            from reserva_pessoas
-            left join pessoa p on p.id = reserva_pessoas.pessoa_id
-            where reserva_id = ?;
-            """;
+                select
+                    p.id       as pessoa_id,
+                    p.nome     as nome,
+                    p.telefone as telefone
+                from reserva_pessoas
+                left join pessoa p on p.id = reserva_pessoas.pessoa_id
+                where reserva_id = ?;
+                """;
 
         String sql_pagamentos = """
-            select
-                valor,
-                data_hora_pagamento,
-                tipo_pagamento,
-                descricao
-            from reserva_pagamento where reserva_id = ?;
-            """;
+                select
+                    valor,
+                    data_hora_pagamento,
+                    tipo_pagamento,
+                    descricao
+                from reserva_pagamento where reserva_id = ?;
+                """;
 
         try (PreparedStatement reservaStmt = connection.prepareStatement(sql_reservas)) {
             ResultSet rsReserva = reservaStmt.executeQuery();
@@ -168,40 +174,44 @@ public class ReservasRepository {
                         pagamentos
                 ));
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return listaReservas;
     }
 
     public void desativarReserva(long reservaId) {
         String sql = """
-        UPDATE reservas
-        SET ativa = false
-        WHERE reserva_id = ?;
-    """;
+                    UPDATE reservas
+                    SET ativa = false
+                    WHERE reserva_id = ?;
+                """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-        statement.setLong(1, reservaId);
-        statement.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
+            statement.setLong(1, reservaId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void editarReserva(AtualizarReservaRequest request) {
         String sql_update_reserva = """
-        UPDATE reservas
-        SET quarto_id = ?,
-            data_entrada = ?,
-            data_saida = ?,
-            quantidade_pessoas = ?
-        WHERE reserva_id = ?;
-        """;
+                UPDATE reservas
+                SET quarto_id = ?,
+                    data_entrada = ?,
+                    data_saida = ?,
+                    quantidade_pessoas = ?
+                WHERE reserva_id = ?;
+                """;
         String sql_insert_reserva_pessoas = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id) VALUES (?, ?);";
         String sql_select_pessoas = "SELECT pessoa_id FROM reserva_pessoas WHERE reserva_id = ?;";
         String sql_delete_reserva_pagamentos = "DELETE FROM reserva_pagamento WHERE reserva_id = ?;";
         String sql_insert_reserva_pagamentos = """
-        INSERT INTO reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento)
-        VALUES (?, ?, ?, ?);
-        """;
+                INSERT INTO reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento)
+                VALUES (?, ?, ?, ?);
+                """;
 
         try {
             try (PreparedStatement updateStmt = connection.prepareStatement(sql_update_reserva)) {
@@ -264,7 +274,6 @@ public class ReservasRepository {
             throw new RuntimeException("Erro ao remover pessoa da reserva: " + e.getMessage(), e);
         }
     }
-
 
 
 }
