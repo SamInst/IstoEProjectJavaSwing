@@ -1,5 +1,7 @@
 package buttons;
 
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import shadow.ShadowRenderer;
 
@@ -16,12 +18,17 @@ import static java.awt.Cursor.HAND_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
 
 public class ShadowButton extends JButton {
-    JPopupMenu popup;
+
+    private JDialog dialog;
 
     public void setRound(int round) {
         this.round = round;
         createImageShadow();
         repaint();
+    }
+
+    public void closeJDialog() {
+        dialog.dispose();
     }
 
     public void setShadowColor(Color shadowColor) {
@@ -103,61 +110,37 @@ public class ShadowButton extends JButton {
     }
 
     public void showPopupWithButtons(ShadowButton... buttons) {
-        popup = new JPopupMenu() {
-            private boolean allowClose = false;
+        dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), Dialog.ModalityType.MODELESS);
+        dialog.setUndecorated(true);
+        dialog.setBackground(new Color(0, 0, 0, 0)); // Transparent background
 
-            public void setAllowClose(boolean allow) {
-                this.allowClose = allow;
-            }
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        panel.setBackground(Color.WHITE);
 
-            @Override
-            public void setVisible(boolean b) {
-                if (!b && !allowClose) {
-                    return;
-                }
-                super.setVisible(b);
-            }
-
-            @Override
-            public void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g.create();
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-                super.paintComponent(g2d);
-                g2d.dispose();
-            }
-
-            @Override
-            protected void paintBorder(Graphics g) {
-            }
-        };
-        popup.setLayout(new GridLayout(0, 1));
         for (ShadowButton button : buttons) {
-            popup.add(button);
+            panel.add(button);
         }
-        popup.pack();
-        popup.show(this, 0, this.getHeight());
+
+        dialog.add(panel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setLocation(dialog.getX(), dialog.getY() + this.getHeight());
+        dialog.setVisible(true);
     }
-
-
-    public void closePopup(){
-        if (this.popup != null) {
-            this.popup.setVisible(false);
-        }
-    }
-
 
     public void enableHoverEffect() {
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    setBackground(getBackground().darker());
-                }
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setBackground(getBackground().darker());
+            }
 
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    setBackground(getBackground().brighter());
-                }
-            });
-            setCursor(getPredefinedCursor(HAND_CURSOR));
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setBackground(getBackground().brighter());
+            }
+        });
+        setCursor(getPredefinedCursor(HAND_CURSOR));
     }
 }
