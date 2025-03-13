@@ -4,6 +4,8 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import shadow.ShadowRenderer;
+import tools.CorPersonalizada;
+import tools.PanelArredondado;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 import static java.awt.Cursor.HAND_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
@@ -110,13 +113,14 @@ public class ShadowButton extends JButton {
     }
 
     public void showPopupWithButtons(ShadowButton... buttons) {
-        dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), Dialog.ModalityType.MODELESS);
+        dialog = new JDialog(SwingUtilities.getWindowAncestor(this), Dialog.ModalityType.MODELESS);
         dialog.setUndecorated(true);
-        dialog.setBackground(new Color(0, 0, 0, 0)); // Transparent background
+        dialog.setBackground(new Color(0, 0, 0, 0));
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
-        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        panel.setBackground(Color.WHITE);
+        ShadowButton panel = new ShadowButton();
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        panel.setLayout(new GridLayout(0, 1));
+        panel.setBackground(CorPersonalizada.LIGHT_GRAY);
 
         for (ShadowButton button : buttons) {
             panel.add(button);
@@ -124,8 +128,7 @@ public class ShadowButton extends JButton {
 
         dialog.add(panel);
         dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setLocation(dialog.getX(), dialog.getY() + this.getHeight());
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
