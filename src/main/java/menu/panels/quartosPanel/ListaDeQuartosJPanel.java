@@ -75,7 +75,7 @@ public class ListaDeQuartosJPanel {
 
             JLabel numeroLabel = new JLabel("Quarto " + (numero < 10 ? "0" + numero : numero));
             numeroLabel.setForeground(Color.WHITE);
-            numeroLabel.setFont(new Font("Inter", Font.PLAIN, 16));
+            numeroLabel.setFont(new Font("Roboto", Font.PLAIN, 16));
             numeroLabel.setVerticalAlignment(SwingConstants.CENTER);
             numeroLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -101,12 +101,12 @@ public class ListaDeQuartosJPanel {
 
             var nomeLabel = btn_branco(" " + nome_pessoa);
             nomeLabel.setIcon(resizeIcon(usuarios, largura, altura));
-            nomeLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+            nomeLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
             nomeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             var datasLabel = btn_branco(" " + checkin + " - " + checkout);
             datasLabel.setIcon(resizeIcon(calendario, largura, altura));
-            datasLabel.setFont(new Font("Inter", Font.PLAIN, 14));
+            datasLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
             datasLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             switch (status_quarto) {

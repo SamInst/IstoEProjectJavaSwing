@@ -53,7 +53,7 @@ public class ToastNotificationPanel extends JPanel {
     private void installDefault() {
         labelIcon = new JLabel();
         textPane = new JTextPane();
-        textPane.setFont(new Font("sansseriff", Font.PLAIN, 15));
+        textPane.setFont(new Font("Roboto", Font.PLAIN, 15));
         textPane.setForeground(Color.GRAY);
         textPane.setText("Hello!\nToast Notification");
         textPane.setOpaque(false);

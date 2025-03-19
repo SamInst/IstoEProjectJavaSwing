@@ -21,7 +21,7 @@ public record BuscaReservasResponse(
         ){}
         public record Pagamentos(
                 String descricao,
-                String tipo_pagamento,
+                Integer tipo_pagamento,
                 Float valor_pagamento,
                 LocalDateTime data_hora_pagamento
         ){}

@@ -18,6 +18,32 @@ public class Converter {
         };
     }
 
+    public static String converterTipoPagamento(Integer tipoPagamento) {
+        return switch (tipoPagamento) {
+            case 0 -> "PIX";
+            case 1 -> "DINHEIRO";
+            case 2 -> "CARTÃO DE CRÉDITO";
+            case 3 -> "CARTÃO DE DÉBITO";
+            case 4 -> "TRANSFERÊNCIA BANCÁRIA";
+            case 5 -> "CARTÃO VIRTUAL";
+            default ->  "DESCONHECIDO";
+        };
+    }
+
+    public static Integer converterTipoPagamentoParaInt(String tipoPagamento) {
+        return switch (tipoPagamento.toUpperCase()) {
+            case "PIX" -> 0;
+            case "DINHEIRO" -> 1;
+            case "CARTÃO DE CRÉDITO" -> 2;
+            case "CARTÃO DE DÉBITO" -> 3;
+            case "TRANSFERÊNCIA BANCÁRIA" -> 4;
+            case "CARTÃO VIRTUAL" -> 5;
+            default -> -1;
+        };
+    }
+
+
+
     public static String converterStatusPernoite(String statusPernoite) {
        return switch (statusPernoite) {
             case "0" -> "ATIVO";

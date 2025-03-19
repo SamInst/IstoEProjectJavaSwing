@@ -49,7 +49,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     private ShadowButton saldoBtn;
     private final DateChooser dateChooser = new DateChooser();
     private final ShadowButton searchDateField = new ShadowButton();
-    Font font = new Font("Inter", Font.PLAIN, 16);
+    Font font = new Font("Roboto", Font.PLAIN, 16);
 
     public RelatoriosPanel(RelatoriosRepository relatoriosRepository, JFrame menu) {
         this.relatoriosRepository = relatoriosRepository;

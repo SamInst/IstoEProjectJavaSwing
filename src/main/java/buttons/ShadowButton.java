@@ -1,11 +1,8 @@
 package buttons;
 
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import shadow.ShadowRenderer;
 import tools.CorPersonalizada;
-import tools.PanelArredondado;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 import static java.awt.Cursor.HAND_CURSOR;
 import static java.awt.Cursor.getPredefinedCursor;
@@ -53,7 +49,7 @@ public class ShadowButton extends JButton {
     private final RippleEffect rippleEffect = new RippleEffect(this);
 
     public ShadowButton() {
-        setBorder(new EmptyBorder(10, 12, 15, 12));
+        setBorder(new EmptyBorder(8, 12, 15, 12));
         setContentAreaFilled(false);
         setBackground(new Color(255, 255, 255));
         setForeground(new Color(80, 80, 80));

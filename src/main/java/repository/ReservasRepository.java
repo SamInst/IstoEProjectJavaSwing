@@ -157,7 +157,7 @@ public class ReservasRepository {
                     while (rsPagamentos.next()) {
                         pagamentos.add(new BuscaReservasResponse.Pagamentos(
                                 rsPagamentos.getString("descricao"),
-                                rsPagamentos.getString("tipo_pagamento"),
+                                rsPagamentos.getInt("tipo_pagamento"),
                                 rsPagamentos.getFloat("valor"),
                                 rsPagamentos.getTimestamp("data_hora_pagamento").toLocalDateTime()
                         ));
@@ -252,7 +252,7 @@ public class ReservasRepository {
                         insertPagamentoStmt.setLong(1, request.reserva_id());
                         insertPagamentoStmt.setFloat(2, pagamento.valor_pagamento());
                         insertPagamentoStmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
-                        insertPagamentoStmt.setString(4, pagamento.tipo_pagamento());
+                        insertPagamentoStmt.setInt(4, pagamento.tipo_pagamento());
                         insertPagamentoStmt.executeUpdate();
                     }
                 }
@@ -274,6 +274,75 @@ public class ReservasRepository {
             throw new RuntimeException("Erro ao remover pessoa da reserva: " + e.getMessage(), e);
         }
     }
+
+    public void adicionarPagamentoReserva(Long reservaId, BuscaReservasResponse.Pagamentos pagamento) {
+        String sql_insert_pagamento = """
+            INSERT INTO reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento, descricao)
+            VALUES (?, ?, ?, ?, ?);
+            """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql_insert_pagamento)) {
+            stmt.setLong(1, reservaId);
+            stmt.setFloat(2, pagamento.valor_pagamento());
+            stmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
+            stmt.setInt(4, pagamento.tipo_pagamento());
+            stmt.setString(5, pagamento.descricao());
+            stmt.executeUpdate();
+            System.out.println("Adicionando Pagamento: " + reservaId + " : " + pagamento.valor_pagamento());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao adicionar pagamento na reserva: " + e.getMessage(), e);
+        }
+    }
+
+    public void removerPagamentoReserva(Long reservaId, String descricaoPagamento) {
+        String sql_delete_pagamento = """
+            DELETE FROM reserva_pagamento
+            WHERE reserva_id = ? AND descricao = ?;
+            """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql_delete_pagamento)) {
+            stmt.setLong(1, reservaId);
+            stmt.setString(2, descricaoPagamento);
+            stmt.executeUpdate();
+            System.out.println("Removendo Pagamento: " + reservaId + " : " + descricaoPagamento);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao remover pagamento da reserva: " + e.getMessage(), e);
+        }
+    }
+
+    public void adicionarPessoaReserva(Long reservaId, Long pessoaId) {
+        String checkSql = "SELECT COUNT(*) FROM reserva_pessoas WHERE reserva_id = ? AND pessoa_id = ?;";
+        String insertSql = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id) VALUES (?, ?);";
+
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+            checkStmt.setLong(1, reservaId);
+            checkStmt.setLong(2, pessoaId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("Pessoa já vinculada a esta reserva.");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao verificar se a pessoa já está na reserva: " + e.getMessage(), e);
+        }
+
+        try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+            insertStmt.setLong(1, reservaId);
+            insertStmt.setLong(2, pessoaId);
+            insertStmt.executeUpdate();
+            System.out.println("Pessoa adicionada à reserva: " + reservaId + " - Pessoa: " + pessoaId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao adicionar pessoa à reserva: " + e.getMessage(), e);
+        }
+    }
+
+
+
 
 
 }

@@ -124,7 +124,7 @@ public class PernoitesRepository extends PostgresDatabaseConnect {
                         pagamentoStmt.setDouble(1, pagamento.valor_pagamento());
                         pagamentoStmt.setLong(2, pernoiteId);
                         pagamentoStmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
-                        pagamentoStmt.setString(4, pagamento.tipo_pagamento());
+                        pagamentoStmt.setInt(4, pagamento.tipo_pagamento());
                         pagamentoStmt.setString(5, null);
                         pagamentoStmt.setString(6, pagamento.descricao());
                         pagamentoStmt.addBatch();
