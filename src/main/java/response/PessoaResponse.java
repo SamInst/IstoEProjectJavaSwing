@@ -23,7 +23,6 @@ public record PessoaResponse(
         String bairro,
         Integer idade,
         String numero,
-        Integer sexo,
-        Boolean representante
+        Integer sexo
 ) {}
 

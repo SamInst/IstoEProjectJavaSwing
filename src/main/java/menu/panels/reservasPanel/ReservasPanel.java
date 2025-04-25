@@ -963,9 +963,9 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                 datePickerRange.repaint();
             } catch (Exception ex) {
                 labelPessoasValue.setText(String.valueOf(selectedPeople.size()));
-                labelDiariasValue.setText("...");
-                labelValorDiariaValue.setText("...");
-                labelTotalValue.setText("...");
+                labelDiariasValue.setText("Erro ao calcular diarias...");
+                labelValorDiariaValue.setText("Erro ao calcular os valores...");
+                labelTotalValue.setText("Erro ao calcular o total...");
             }
         };
         datePickerRange.addDateSelectionListener(e -> {
@@ -1047,103 +1047,110 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
 
     }
 
-    public BotaoArredondado adicionarBlocoPessoa(PessoaResponse pessoa, BuscaReservasResponse reserva, JPanel pessoasContainer) {
-        BufferedImage pessoaFoto = null;
-        try {
-            pessoaFoto = pessoaRepository.buscarFotoBufferedPessoaPorId(pessoa.id());
-        } catch (SQLException | IOException ignored) {
-        }
+    private BotaoArredondado adicionarBlocoPessoa(
+            PessoaResponse pessoa,
+            BuscaReservasResponse.Pessoas registro,
+            BuscaReservasResponse reserva,
+            JPanel pessoasContainer
+    ) {
+        BufferedImage foto = null;
+        try { foto = pessoaRepository.buscarFotoBufferedPessoaPorId(pessoa.id()); }
+        catch (SQLException | IOException ignored) {}
 
-        LabelArredondado labelFotoPessoa = new LabelArredondado("");
-        labelFotoPessoa.setBackground(BACKGROUND_GRAY);
-        int larguraFoto = 50, alturaFoto = 50;
-        ImageIcon icon;
+        LabelArredondado labelFoto = new LabelArredondado("");
+        labelFoto.setBackground(BACKGROUND_GRAY);
+        ImageIcon icon = (foto != null)
+                ? resizeIcon(new ImageIcon(arredondar(foto)), 50, 50)
+                : resizeIcon(new ImageIcon(arredondar(
+                convertImageIconToBufferedImage(
+                        pessoa.sexo().equals(FEMININO.ordinal()) ? user_sem_foto_feminino : user_sem_foto
+                )
+        )), 50, 50);
+        labelFoto.setIcon(icon);
 
-        if (pessoaFoto != null) {
-            icon = resizeIcon(new ImageIcon(arredondar(pessoaFoto)), larguraFoto, alturaFoto);
-        } else {
-            BufferedImage img = pessoa.sexo().equals(FEMININO.ordinal())
-                    ? arredondar(convertImageIconToBufferedImage(user_sem_foto_feminino))
-                    : arredondar(convertImageIconToBufferedImage(user_sem_foto));
-            icon = resizeIcon(new ImageIcon(img), larguraFoto, alturaFoto);
-        }
+        BotaoArredondado bloco = new BotaoArredondado("");
+        bloco.setBorderPainted(false);
+        bloco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        bloco.setLayout(new BorderLayout());
+        bloco.setOpaque(false);
+        bloco.setContentAreaFilled(false);
+        bloco.setFocusPainted(false);
+        bloco.setBackground(BACKGROUND_GRAY);
+        bloco.setPreferredSize(new Dimension(0, 60));
+        bloco.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 
-        labelFotoPessoa.setIcon(icon);
-        BotaoArredondado blocoPessoaButton = new BotaoArredondado("");
-        blocoPessoaButton.setBorderPainted(false);
-        blocoPessoaButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        blocoPessoaButton.setLayout(new BorderLayout());
-        blocoPessoaButton.setOpaque(false);
-        blocoPessoaButton.setContentAreaFilled(false);
-        blocoPessoaButton.setFocusPainted(false);
-        blocoPessoaButton.setBackground(BACKGROUND_GRAY);
-        blocoPessoaButton.setPreferredSize(new Dimension(0, 60));
-        blocoPessoaButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        JPanel center = new JPanel(new BorderLayout());
+        center.setOpaque(false);
+        JLabel lbl = new JLabel("<html>" + pessoa.nome() + "<br>" + pessoa.telefone() + "</html>");
+        lbl.setForeground(GRAY);
+        lbl.setFont(new Font("Roboto", Font.PLAIN, 14));
+        lbl.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        center.add(lbl, BorderLayout.CENTER);
 
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setOpaque(false);
+        JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 15));
+        btns.setOpaque(false);
 
-        JLabel nomeTelefoneLabel = new JLabel("<html>" + pessoa.nome() + "<br>" + pessoa.telefone() + "</html>");
-        nomeTelefoneLabel.setForeground(GRAY);
-        nomeTelefoneLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
-        nomeTelefoneLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-        centerPanel.add(nomeTelefoneLabel, BorderLayout.CENTER);
+        ShadowButton badge = btn_azul("Representante");
+        badge.setPreferredSize(new Dimension(120, 30));
+        badge.setFocusPainted(false);
+        badge.enableHoverEffect();
 
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 15));
-        buttonsPanel.setOpaque(false);
+        ShadowButton definir = btn_backgroung("Definir Representante");
+        definir.setPreferredSize(new Dimension(150, 30));
+        definir.setFocusPainted(false);
+        definir.enableHoverEffect();
 
-        boolean existeRepresentante = reserva.pessoas().stream().anyMatch(p -> p.representante());
-        boolean ehRepresentante = pessoa.representante();
-        boolean isUnicaPessoa = reserva.pessoas().size() < 2;
+        btns.add(registro.representante() ? badge : definir);
 
-        ShadowButton badgeRepresentante = btn_azul("Representante");
-        badgeRepresentante.setPreferredSize(new Dimension(120, 30));
-        badgeRepresentante.setFocusPainted(false);
-        badgeRepresentante.enableHoverEffect();
-
-        if (ehRepresentante) {
-            buttonsPanel.add(badgeRepresentante);
-        } else {
-            ShadowButton representanteButton = btn_backgroung("Definir Representante");
-            representanteButton.setPreferredSize(new Dimension(150, 30));
-            representanteButton.setFocusPainted(false);
-            representanteButton.enableHoverEffect();
-            representanteButton.addActionListener(e -> {
-                try {
-                    pessoaRepository.definirRepresentante(pessoa.id(), true);
-                    notification(Type.SUCCESS, TOP_CENTER, pessoa.nome() + " definido como representante!");
-
-                    atualizarPainelPessoas(reserva, pessoasContainer);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    notification(Type.ERROR, TOP_CENTER, "Erro ao definir representante: " + ex.getMessage());
+        definir.addActionListener(e -> {
+            try {
+                List<BuscaReservasResponse.Pessoas> todos =
+                        reservasRepository.buscarPessoasPorReserva(reserva.reserva_id());
+                for (var p : todos) {
+                    if (p.representante() && p.pessoa_id() != pessoa.id()) {
+                        reservasRepository.definirRepresentanteDaReserva(
+                                reserva.reserva_id(), p.pessoa_id(), false);
+                    }
                 }
-                refreshPanel();
-            });
-            buttonsPanel.add(representanteButton);
+                reservasRepository.definirRepresentanteDaReserva(
+                        reserva.reserva_id(), pessoa.id(), true);
+                notification(Type.SUCCESS, TOP_CENTER,
+                        pessoa.nome() + " definido como representante!");
+
+                atualizarPainelPessoas(reserva, pessoasContainer);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                notification(Type.ERROR, TOP_CENTER,
+                        "Erro ao definir representante: " + ex.getMessage());
+            }
+            refreshPanel();
+        });
+
+        ShadowButton remove = btn_backgroung("");
+        remove.setIcon(resizeIcon(close, 15, 15));
+        remove.setPreferredSize(new Dimension(40, 30));
+        remove.setFocusPainted(false);
+        remove.enableHoverEffect();
+        remove.addActionListener(e -> {
+            reservasRepository.removerPessoaReserva(pessoa.id(), reserva.reserva_id());
+            notification(Type.WARNING, TOP_CENTER,
+                    "Pessoa removida: " + pessoa.nome());
+            atualizarPainelPessoas(reserva, pessoasContainer);
+            refreshPanel();
+        });
+        btns.add(remove);
+
+        if (reservasRepository.buscarPessoasPorReserva(reserva.reserva_id()).size() < 2) {
+            remove.setEnabled(false);
         }
 
+        bloco.add(labelFoto, BorderLayout.WEST);
+        bloco.add(center, BorderLayout.CENTER);
+        bloco.add(btns, BorderLayout.EAST);
 
-        ShadowButton removeButton = btn_backgroung("");
-        removeButton.setIcon(resizeIcon(close, 15, 15));
-        removeButton.setPreferredSize(new Dimension(40, 30));
-        removeButton.setFocusPainted(false);
-        removeButton.enableHoverEffect();
-        removeButton.addActionListener(e -> {
-            reservasRepository.removerPessoaReserva(pessoa.id(), reserva.reserva_id());
-            notification(Type.WARNING, TOP_CENTER, "Pessoa removida: \n" + pessoa.nome());
-            atualizarPainelPessoas(reserva, pessoasContainer);
-        });
-        buttonsPanel.add(removeButton);
-        if (isUnicaPessoa) { removeButton.setEnabled(false);}
-
-
-        blocoPessoaButton.add(labelFotoPessoa, BorderLayout.WEST);
-        blocoPessoaButton.add(centerPanel, BorderLayout.CENTER);
-        blocoPessoaButton.add(buttonsPanel, BorderLayout.EAST);
-
-        return blocoPessoaButton;
+        return bloco;
     }
+
 
     private void createGoogleStyleBuscaPessoaPanel(JPanel pessoasTab, BuscaReservasResponse reserva) {
         selectedPeople.clear();
@@ -1254,38 +1261,19 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
 
     private void atualizarPainelPessoas(BuscaReservasResponse reserva, JPanel pessoasContainer) {
         pessoasContainer.removeAll();
+        List<BuscaReservasResponse.Pessoas> atuais =
+                reservasRepository.buscarPessoasPorReserva(reserva.reserva_id());
 
-        List<BuscaReservasResponse.Pessoas> pessoas = reservasRepository.buscarPessoasPorReserva(reserva.reserva_id());
-
-        long numRepresentantes = pessoas.stream().filter(BuscaReservasResponse.Pessoas::representante).count();
-
-        if (numRepresentantes > 1) {
-            pessoas.forEach(pessoa -> {
-                try {
-                    pessoaRepository.definirRepresentante(pessoa.pessoa_id(), false);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-
-        if (numRepresentantes == 0 && !pessoas.isEmpty()) {
-            try {
-                pessoaRepository.definirRepresentante(pessoas.get(0).pessoa_id(), true);
-
-                pessoas = reservasRepository.buscarPessoasPorReserva(reserva.reserva_id());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        for (BuscaReservasResponse.Pessoas pessoa : pessoas) {
-            PessoaResponse pessoaCompleta = pessoaRepository.buscarPessoaPorID(pessoa.pessoa_id());
-            BotaoArredondado bloco = adicionarBlocoPessoa(pessoaCompleta, reserva, pessoasContainer);
+        for (BuscaReservasResponse.Pessoas registro : atuais) {
+            PessoaResponse pessoa = pessoaRepository.buscarPessoaPorID(registro.pessoa_id());
+            BotaoArredondado bloco =
+                    adicionarBlocoPessoa(pessoa, registro, reserva, pessoasContainer);
             bloco.setAlignmentX(Component.LEFT_ALIGNMENT);
             pessoasContainer.add(bloco);
         }
+
         pessoasContainer.revalidate();
         pessoasContainer.repaint();
     }
+
 }

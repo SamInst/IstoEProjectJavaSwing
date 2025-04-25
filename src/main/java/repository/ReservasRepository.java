@@ -112,11 +112,11 @@ public class ReservasRepository {
 
         String sql_pessoas = """
                 select
-                    p.id            as pessoa_id,
-                    p.nome          as nome,
-                    p.telefone      as telefone,
-                    p.representante as representante
-                from reserva_pessoas
+                    p.id             as pessoa_id,
+                    p.nome           as nome,
+                    p.telefone       as telefone,
+                    representante
+                from reserva_pessoas 
                 left join pessoa p on p.id = reserva_pessoas.pessoa_id
                 where reserva_id = ?;
                 """;
@@ -316,7 +316,7 @@ public class ReservasRepository {
 
     public void adicionarPessoaReserva(Long reservaId, Long pessoaId) {
         String checkSql = "SELECT COUNT(*) FROM reserva_pessoas WHERE reserva_id = ? AND pessoa_id = ?;";
-        String insertSql = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id) VALUES (?, ?);";
+        String insertSql = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id, representante) VALUES (?, ?, false);";
 
         try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
             checkStmt.setLong(1, reservaId);
@@ -385,11 +385,11 @@ public class ReservasRepository {
             rp.pessoa_id, 
             p.nome, 
             p.telefone, 
-            p.representante
+            rp.representante
         FROM reserva_pessoas rp
         JOIN pessoa p ON p.id = rp.pessoa_id
         WHERE rp.reserva_id = ?
-        ORDER BY p.representante 
+        ORDER BY rp.representante 
         DESC, p.nome
         """;
 
@@ -411,6 +411,24 @@ public class ReservasRepository {
         }
 
         return pessoas;
+    }
+
+    public void definirRepresentanteDaReserva(Long reservaId, Long pessoaID, boolean representante) throws SQLException {
+        System.out.println(reservaId + " : " + pessoaID + " : " + representante);
+        String sql = "UPDATE reserva_pessoas SET representante = ? WHERE reserva_id = ? and pessoa_id = ?;";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setBoolean(1, representante);
+            stmt.setLong(2, reservaId);
+            stmt.setLong(3, pessoaID);
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new SQLException("nao foi possivel definir o representante");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
