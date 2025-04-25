@@ -44,7 +44,8 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                 hospedado,
                 cliente_novo,
                 vezes_hospedado,
-                sexo
+                sexo,
+                representante
            FROM pessoa p
            JOIN public.estados e ON e.id = p.fk_estado
            JOIN public.municipios m ON m.id = p.fk_municipio
@@ -300,7 +301,19 @@ public class PessoaRepository extends PostgresDatabaseConnect {
         }
     }
 
+    public void definirRepresentante(Long pessoaID, boolean representante) throws SQLException {
+        String sql = "UPDATE pessoa SET representante = ? WHERE id = ?;";
 
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setBoolean(1, representante);
+            stmt.setLong(2, pessoaID);
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new SQLException("nao foi possivel definir o representante");
+            }
+        }
+    }
 
     public void atualizarPessoa(Long pessoaID, PessoaRequest pessoaRequest) throws SQLException {
         String sql = """
@@ -400,7 +413,8 @@ public class PessoaRepository extends PostgresDatabaseConnect {
                 rs.getString("bairro"),
                 rs.getInt("idade"),
                 rs.getString("numero"),
-                rs.getInt("sexo")
+                rs.getInt("sexo"),
+                rs.getBoolean("representante")
         );
     }
 

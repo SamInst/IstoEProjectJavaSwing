@@ -395,7 +395,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
 
                     selectedDate = localDate;
                     mostrarPorData(localDate);
-                    notification(menu, INFO, TOP_CENTER, "Buscando por data\n"
+                    notification(INFO, TOP_CENTER, "Buscando por data\n"
                             + date.getDay() + " de " + monthName + " de " + date.getYear());
                 }
             }

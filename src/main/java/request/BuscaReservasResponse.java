@@ -17,7 +17,8 @@ public record BuscaReservasResponse(
         public record Pessoas(
                 Long pessoa_id,
                 String nome,
-                String telefone
+                String telefone,
+                boolean representante
         ){}
         public record Pagamentos(
                 String descricao,

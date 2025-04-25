@@ -1,6 +1,7 @@
 package menu.panels.pessoaPanel;
 
 import buttons.ShadowButton;
+import lateralMenu.tabbed.TabbedForm;
 import menu.panels.empresaPanels.IdentificacaoEmpresaFrame;
 import repository.EmpresaRepository;
 import repository.PessoaRepository;
@@ -25,7 +26,7 @@ import static tools.ImagemArredodanda.convertImageIconToBufferedImage;
 import static tools.Mascaras.adicionarMascaraCPF;
 import static tools.Resize.resizeIcon;
 
-public class PessoaEmpresaPanel extends JPanel implements Refreshable {
+public class PessoaEmpresaPanel extends TabbedForm implements Refreshable {
     private static final Integer FEMININO = 1;
 
     private final TextFieldComSobra textFieldBuscaPorNome = new TextFieldComSobra();

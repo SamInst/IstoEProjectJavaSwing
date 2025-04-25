@@ -67,20 +67,20 @@ public class PanelLoginAndRegister extends JLayeredPane {
             String password = txtPass.getText();
 
             if (username.isEmpty() || password.isEmpty()) {
-                notification(frame, WARNING, TOP_RIGHT, "Campos de usuário e senha não podem ficar vazios!");
+                notification(WARNING, TOP_RIGHT, "Campos de usuário e senha não podem ficar vazios!");
                 return;
             }
 
             if (usuarioRepository.verificarUsuarioESenha(username, password)) {
-                notification(frame, WARNING, TOP_RIGHT, "Usuário já cadastrado");
+                notification(WARNING, TOP_RIGHT, "Usuário já cadastrado");
                 return;
             }
 
             try {
                 usuarioRepository.criarUsuario(username, password);
-                notification(frame, SUCCESS, TOP_RIGHT, "Usuário " + username.toUpperCase() + " cadastrado! Faça login");
+                notification(SUCCESS, TOP_RIGHT, "Usuário " + username.toUpperCase() + " cadastrado! Faça login");
             } catch (Exception ex){
-                notification(frame, Type.ERROR, TOP_RIGHT, "Erro ao cadastrar perfil: " + ex);
+                notification(Type.ERROR, TOP_RIGHT, "Erro ao cadastrar perfil: " + ex);
             }
         });
     }
@@ -115,21 +115,21 @@ public class PanelLoginAndRegister extends JLayeredPane {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (connect() == null)
-                    notification(frame, Type.ERROR, TOP_LEFT, "Erro de conexão com o Banco de Dados\nVerifique as credenciais cadastradas");
+                    notification(Type.ERROR, TOP_LEFT, "Erro de conexão com o Banco de Dados\nVerifique as credenciais cadastradas");
 
                 String username = txtUser.getText();
                 String password = txtPass.getText();
 
                 if (username.isEmpty() || password.isEmpty()) {
-                    notification(frame, WARNING, TOP_LEFT, "Campos de usuário e senha não podem ficar vazios!");
+                    notification( WARNING, TOP_LEFT, "Campos de usuário e senha não podem ficar vazios!");
                     return;
                 }
 
                 if (!usuarioRepository.verificarUsuarioESenha(username, password)) {
-                    notification(frame, Type.ERROR, TOP_LEFT, "Usuário não cadastrado");
+                    notification( Type.ERROR, TOP_LEFT, "Usuário não cadastrado");
                 } else {
                     frame.dispose();
-                    notification(new Menu(username.toUpperCase()), SUCCESS, TOP_CENTER, "Login Efetuado com sucesso!\nUsuário: " + username.toUpperCase());
+                    notification(SUCCESS, TOP_CENTER, "Login Efetuado com sucesso!\nUsuário: " + username.toUpperCase());
                 }
             }
         });

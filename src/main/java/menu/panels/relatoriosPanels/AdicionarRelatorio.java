@@ -208,23 +208,23 @@ public class AdicionarRelatorio extends PanelArredondado {
             RelatorioRequest relatorioRequest = getRelatorioRequest(relatorio);
 
             if (relatorioField.getText().isEmpty()) {
-                notification(menu, WARNING, TOP_CENTER,"Relatório não pode estar vazio!");
+                notification(WARNING, TOP_CENTER,"Relatório não pode estar vazio!");
                 return;
             }
 
             if (campoValor.getText().isEmpty()) {
-                notification(menu, Type.ERROR, TOP_CENTER,"Valor inválido");
+                notification(Type.ERROR, TOP_CENTER,"Valor inválido");
                 return;
             }
 
             relatoriosRepository.adicionarRelatorio(relatorioRequest);
-            notification(menu, SUCCESS, TOP_CENTER, "Relatório Adicionado com sucesso");
+            notification(SUCCESS, TOP_CENTER, "Relatório Adicionado com sucesso");
 
             resetFields();
             relatoriosPanel.refreshPanel();
 
         } catch (Exception ex) {
-            notification(menu, Type.ERROR, TOP_CENTER, "Relatório ou valor inválido");
+            notification(Type.ERROR, TOP_CENTER, "Relatório ou valor inválido");
         }
     }
 

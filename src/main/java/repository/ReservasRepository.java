@@ -112,9 +112,10 @@ public class ReservasRepository {
 
         String sql_pessoas = """
                 select
-                    p.id       as pessoa_id,
-                    p.nome     as nome,
-                    p.telefone as telefone
+                    p.id            as pessoa_id,
+                    p.nome          as nome,
+                    p.telefone      as telefone,
+                    p.representante as representante
                 from reserva_pessoas
                 left join pessoa p on p.id = reserva_pessoas.pessoa_id
                 where reserva_id = ?;
@@ -144,7 +145,8 @@ public class ReservasRepository {
                         listaPessoas.add(new BuscaReservasResponse.Pessoas(
                                 rsPessoas.getLong("pessoa_id"),
                                 rsPessoas.getString("nome"),
-                                rsPessoas.getString("telefone")
+                                rsPessoas.getString("telefone"),
+                                rsPessoas.getBoolean("representante")
                         ));
                     }
                 }
@@ -339,6 +341,76 @@ public class ReservasRepository {
             e.printStackTrace();
             throw new RuntimeException("Erro ao adicionar pessoa à reserva: " + e.getMessage(), e);
         }
+    }
+
+    public List<BuscaReservasResponse.Pagamentos> buscarPagamentosPorReserva(Long reservaId) {
+        List<BuscaReservasResponse.Pagamentos> pagamentos = new ArrayList<>();
+
+        String sql = """
+            SELECT
+                valor,
+                data_hora_pagamento,
+                tipo_pagamento,
+                descricao
+            FROM reserva_pagamento 
+            WHERE reserva_id = ?
+            ORDER BY data_hora_pagamento;
+            """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, reservaId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                pagamentos.add(new BuscaReservasResponse.Pagamentos(
+                        rs.getString("descricao"),
+                        rs.getInt("tipo_pagamento"),
+                        rs.getFloat("valor"),
+                        rs.getTimestamp("data_hora_pagamento").toLocalDateTime()
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar pagamentos da reserva: " + e.getMessage(), e);
+        }
+
+        return pagamentos;
+    }
+
+    public List<BuscaReservasResponse.Pessoas> buscarPessoasPorReserva(Long reservaId) {
+        List<BuscaReservasResponse.Pessoas> pessoas = new ArrayList<>();
+
+        String sql = """
+        SELECT 
+            rp.pessoa_id, 
+            p.nome, 
+            p.telefone, 
+            p.representante
+        FROM reserva_pessoas rp
+        JOIN pessoa p ON p.id = rp.pessoa_id
+        WHERE rp.reserva_id = ?
+        ORDER BY p.representante 
+        DESC, p.nome
+        """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, reservaId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                pessoas.add(new BuscaReservasResponse.Pessoas(
+                        rs.getLong("pessoa_id"),
+                        rs.getString("nome"),
+                        rs.getString("telefone"),
+                        rs.getBoolean("representante")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar pessoas da reserva: " + e.getMessage(), e);
+        }
+
+        return pessoas;
     }
 
 
