@@ -83,7 +83,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         this.selectedRoom = "";
         this.checkinDate = LocalDate.now();
         this.checkoutDate = LocalDate.now().plusDays(1);
-        this.roomPanel = new RoomPanel(this);
+        this.roomPanel = new RoomPanel(this, quartosRepository);
         this.peoplePanel = new PeoplePanel(this);
         this.paymentPanel = new PaymentPanel(this);
         this.animationManager = new AnimationManager();

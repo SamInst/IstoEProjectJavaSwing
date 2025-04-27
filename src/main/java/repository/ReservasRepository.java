@@ -562,4 +562,39 @@ public class ReservasRepository {
             throw new RuntimeException("Erro ao verificar conflito de reserva: " + e.getMessage(), e);
         }
     }
+
+    public record OcupacaoDia(int ocupados, int total, int percentual) {}
+    public static OcupacaoDia buscarOcupacaoPorDia(LocalDate dia) {
+        String sql = """
+        SELECT 
+            (SELECT COUNT(*) FROM quarto) AS total_quartos,
+            (SELECT COUNT(*) 
+             FROM reservas 
+             WHERE ativa = true
+             AND data_entrada <= ?
+             AND data_saida > ?) AS ocupados
+    """;
+
+        try (Connection conn = PostgresDatabaseConnect.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, Date.valueOf(dia));
+            stmt.setDate(2, Date.valueOf(dia));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total_quartos");
+                    int ocupados = rs.getInt("ocupados");
+                    int percentual = total > 0 ? (ocupados * 100) / total : 0;
+                    return new OcupacaoDia(ocupados, total, percentual);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar ocupação por dia: " + e.getMessage(), e);
+        }
+        return new OcupacaoDia(0, 0, 0);
+    }
+
+
+
 }
