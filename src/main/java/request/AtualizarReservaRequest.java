@@ -1,6 +1,7 @@
 package request;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public record AtualizarReservaRequest(
@@ -8,7 +9,6 @@ public record AtualizarReservaRequest(
         Long quarto,
         LocalDate data_entrada,
         LocalDate data_saida,
-        int quantidade_pessoas,
-        List<Long> pessoas,
-        List<BuscaReservasResponse.Pagamentos> pagamentos
+        LocalTime horarioPrevistoChegada,
+        int quantidade_pessoas
 ) {}

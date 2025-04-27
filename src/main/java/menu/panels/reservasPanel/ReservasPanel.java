@@ -3,6 +3,8 @@ package menu.panels.reservasPanel;
 import buttons.Botoes;
 import buttons.ShadowButton;
 import calendar2.DatePicker;
+import calendar2.event.TimeSelectionEvent;
+import calendar2.event.TimeSelectionListener;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -72,8 +75,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     ShadowButton pernoiteButton;
-    ShadowButton cancelarButton = btn_vermelho("Cancelar");
-    JButton salvarButton = btn_verde("Salvar Dados");
+    ShadowButton cancelarButton;
     JLabel labelPessoasValue;
     JLabel labelDiariasValue;
     JLabel labelValorDiariaValue;
@@ -88,6 +90,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     JComboBox<String> tipoPagamentoComboBox;
     private final List<PessoaResponse> selectedPeople = new ArrayList<>();
     JButton btnPrev;
+    TimePicker timePicker = new TimePicker();
 
     private class CalendarCell extends JPanel {
         Long roomId;
@@ -202,16 +205,24 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         for (int d = startDay; d <= currentMonth.lengthOfMonth(); d++) {
             LocalDate tmpDate = currentMonth.withDayOfMonth(d);
             String dayStr = String.format("%02d/%02d", d, currentMonth.getMonthValue());
-            String dayOfWeek = tmpDate.getDayOfWeek().getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
+            String dayOfWeek = tmpDate.getDayOfWeek()
+                    .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
             String labelText = "<html><center>" + dayStr + "<br>" + dayOfWeek + "</center></html>";
+
             CalendarLabel dayLabel = new CalendarLabel(labelText, d);
             dayLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
             dayLabel.setForeground(tmpDate.isEqual(now()) ? DARK_GRAY : WHITE);
             dayLabel.setBackground(tmpDate.isEqual(now()) ? new Color(0xEBEBEB) : BLUE.brighter());
             daysHeader.add(dayLabel);
         }
+
+        daysHeader.setPreferredSize(
+                new Dimension(daysToShow * cellSize.width, cellSize.height)
+        );
+
         return daysHeader;
     }
+
 
     private JPanel createRoomsPanel(List<QuartoResponse> quartos, int numRooms) {
         JPanel roomsPanel = new JPanel(new GridLayout(numRooms, 1, 0, 0));
@@ -742,13 +753,10 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightButtons.setBackground(BACKGROUND_GRAY);
 
-        salvarReservaEditada(reserva);
-
         cancelarButton = btn_vermelho("Cancelar Reserva");
-
         pernoiteButton = btn_azul("Mudar para Pernoite");
+
         leftButtons.add(cancelarButton);
-        rightButtons.add(salvarButton);
         rightButtons.add(pernoiteButton);
 
         buttonPanel.add(leftButtons, BorderLayout.WEST);
@@ -874,44 +882,69 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+
         JPanel quartoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         quartoPanel.setOpaque(false);
         JLabel quartoLabel = createLabel("Quarto:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
         JLabel categoriaLabel = createLabel("Categoria:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
-        JLabel categoriaDescricaoLabel = createLabel(quartosRepository.buscaQuartoPorId(reserva.quarto()).categoria().categoria().toUpperCase(), new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
+        JLabel categoriaDescricaoLabel = createLabel(
+                quartosRepository.buscaQuartoPorId(reserva.quarto())
+                        .categoria()
+                        .categoria()
+                        .toUpperCase(),
+                new Font("Roboto", Font.BOLD, 14),
+                DARK_GRAY,
+                null
+        );
+
         Vector<String> roomItems = new Vector<>();
-//        quartosRepository.buscaTodosOsQuartos().forEach(q -> roomItems.add(q.quarto_id() + " - " + q.status_quarto_enum()));
-        quartosRepository.buscaTodosOsQuartos().forEach(q -> roomItems.add("Quarto " + (q.quarto_id() < 10 ? "0" + q.quarto_id() : q.quarto_id()) + " - " + q.quantidade_pessoas()+ " pessoas"));
+        quartosRepository.buscaTodosOsQuartos()
+                .forEach(q ->
+                        roomItems.add(
+                                "Quarto "
+                                        + (q.quarto_id() < 10 ? "0" + q.quarto_id() : q.quarto_id())
+                                        + " - " + q.quantidade_pessoas() + " pessoas"
+                        )
+                );
         quartoComboBox = new JComboBox<>(roomItems);
         quartoComboBox.setPreferredSize(new Dimension(165, 25));
-        quartoComboBox.setSelectedItem(roomItems.get(reserva.quarto().intValue() - 1));
+        quartoComboBox.setSelectedItem(
+                roomItems.get(reserva.quarto().intValue() - 1)
+        );
+
         quartoPanel.add(quartoLabel);
         quartoPanel.add(quartoComboBox);
         quartoPanel.add(Box.createHorizontalStrut(5));
         quartoPanel.add(categoriaLabel);
         quartoPanel.add(categoriaDescricaoLabel);
         infoPanel.add(quartoPanel);
+
         JPanel mainHorizontalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         mainHorizontalPanel.setBorder(BorderFactory.createEmptyBorder(-8, 0, 0, 0));
         mainHorizontalPanel.setBackground(BACKGROUND_GRAY);
+
         JPanel datePanel = new JPanel(new BorderLayout());
         JPanel checkinCheckoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         checkinCheckoutPanel.setOpaque(false);
-        JLabel checkinLabel = createLabel("Checkin:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+
+        JLabel checkinLabel = createLabel("Check-in:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
         checkinLabel.setPreferredSize(new Dimension(70, 25));
         checkinField = new JFormattedTextField();
         checkinField.setText(reserva.data_entrada().format(df));
         checkinField.setColumns(7);
-        JLabel checkoutLabel = createLabel("Checkout:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+
+        JLabel checkoutLabel = createLabel("Check-out:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
         checkoutLabel.setPreferredSize(new Dimension(70, 25));
         checkoutField = new JFormattedTextField();
         checkoutField.setText(reserva.data_saida().format(df));
         checkoutField.setColumns(7);
+
         checkinCheckoutPanel.add(checkinLabel);
         checkinCheckoutPanel.add(checkinField);
         checkinCheckoutPanel.add(checkoutLabel);
         checkinCheckoutPanel.add(checkoutField);
         datePanel.add(checkinCheckoutPanel, BorderLayout.NORTH);
+
         DatePicker datePickerRange = new DatePicker();
         datePickerRange.setReservasDoQuarto(reservasDoQuarto);
         datePickerRange.setDateSelectionAble(date -> true);
@@ -919,90 +952,132 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         datePickerRange.setSelectedDateRange(reserva.data_entrada(), reserva.data_saida());
         datePickerRange.setPreferredSize(new Dimension(260, 250));
         datePickerRange.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         datePanel.add(datePickerRange, BorderLayout.CENTER);
+
         JPanel timePanel = new JPanel(new BorderLayout());
         timePanel.setOpaque(false);
-        JLabel horarioTitulo = createLabel("Horário previsto de chegada:", new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
+        JLabel horarioTitulo = createLabel(
+                "Horário previsto de chegada:",
+                new Font("Roboto", Font.PLAIN, 14),
+                DARK_GRAY,
+                null
+        );
         horarioTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-        TimePicker timePicker = new TimePicker();
         timePicker.set24HourView(true);
         timePicker.setSelectedTime(reserva.hora_prevista());
         JPanel timePickerContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        timePickerContainer.add(timePicker);
         timePickerContainer.setOpaque(false);
+        timePickerContainer.add(timePicker);
         timePanel.add(horarioTitulo, BorderLayout.NORTH);
         timePanel.add(timePickerContainer, BorderLayout.CENTER);
+
         mainHorizontalPanel.add(datePanel);
         mainHorizontalPanel.add(timePanel);
         infoPanel.add(mainHorizontalPanel);
+
         Runnable updateDiariasInfo = () -> {
             try {
-                LocalDate newCheckin = LocalDate.parse(checkinField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                LocalDate newCheckout = LocalDate.parse(checkoutField.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                checkinDate = newCheckin;
-                checkoutDate = newCheckout;
-                final int numDiarias = Period.between(newCheckin, newCheckout).getDays();
-                int qtdPessoas = selectedPeople.size();
-                String selectedRoomStr = (String) quartoComboBox.getSelectedItem();
-                selectedRoom = selectedRoomStr;
-                String roomNumberStr = selectedRoomStr
-                        .split(" - ")[0]
-                        .replace("Quarto ", "")
-                        .replaceFirst("^0+", "");
-
-                Long roomId = Long.valueOf(roomNumberStr);
-                Float valorDiariaObj = quartosRepository.getValorCategoria(roomId, qtdPessoas);
-                double valorDiaria = (valorDiariaObj != null) ? valorDiariaObj : 0;
-                double total = numDiarias * valorDiaria;
-                animateLabelSpin(labelPessoasValue, parseLabelValue(labelPessoasValue.getText()), qtdPessoas, false);
-                animateLabelSpin(labelDiariasValue, parseLabelValue(labelDiariasValue.getText()), numDiarias, false);
-                animateLabelSpin(labelValorDiariaValue, parseLabelValue(labelValorDiariaValue.getText()), valorDiaria, true);
-                animateLabelSpin(labelTotalValue, parseLabelValue(labelTotalValue.getText()), total, true);
-                datePickerRange.setSelectedDateRange(newCheckin, newCheckout);
-                datePickerRange.repaint();
+                LocalDate newIn = LocalDate.parse(checkinField.getText(), df);
+                LocalDate newOut = LocalDate.parse(checkoutField.getText(), df);
+                checkinDate = newIn;
+                checkoutDate = newOut;
             } catch (Exception ex) {
-                labelPessoasValue.setText(String.valueOf(selectedPeople.size()));
-                labelDiariasValue.setText("Erro ao calcular diarias...");
-                labelValorDiariaValue.setText("Erro ao calcular os valores...");
-                labelTotalValue.setText("Erro ao calcular o total...");
+
             }
         };
+
         datePickerRange.addDateSelectionListener(e -> {
-            LocalDate[] selectedDates = datePickerRange.getSelectedDateRange();
-            if (selectedDates != null && selectedDates[0] != null && selectedDates[1] != null) {
-                checkinField.setText(selectedDates[0].format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                checkoutField.setText(selectedDates[1].format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            LocalDate[] sel = datePickerRange.getSelectedDateRange();
+            if (sel != null && sel[0] != null && sel[1] != null) {
+                checkinField.setText(sel[0].format(df));
+                checkoutField.setText(sel[1].format(df));
                 updateDiariasInfo.run();
             }
         });
+
         checkinField.getDocument().addDocumentListener(new SimpleDocumentListener() {
             public void update() {
                 updateDiariasInfo.run();
+                try {
+                    LocalDate novaIn = LocalDate.parse(checkinField.getText(), df);
+                    long quartoId = Long.parseLong(
+                            ((String) quartoComboBox.getSelectedItem())
+                                    .split(" - ")[0]
+                                    .replace("Quarto ", "")
+                                    .replaceFirst("^0+", "")
+                    );
+
+                    if (reservasRepository.existeConflitoReserva(quartoId, novaIn, checkoutDate, reserva.reserva_id())) {
+                        notification(Type.ERROR, TOP_CENTER, "Conflito de reserva neste período!");
+
+                        checkinField.setText(checkinDate.format(df));
+                        return;
+                    }
+
+                    checkinDate = novaIn;
+                    reservasRepository.atualizarDataEntrada(reserva.reserva_id(), novaIn);
+                    notification(Type.SUCCESS, TOP_CENTER, "Check-in atualizado para " + novaIn.format(df));
+                    refreshPanel();
+                } catch (Exception ex) {}
             }
         });
+
         checkoutField.getDocument().addDocumentListener(new SimpleDocumentListener() {
             public void update() {
                 updateDiariasInfo.run();
+                try {
+                    LocalDate novaOut = LocalDate.parse(checkoutField.getText(), df);
+                    long quartoId = Long.parseLong(
+                            ((String) quartoComboBox.getSelectedItem())
+                                    .split(" - ")[0]
+                                    .replace("Quarto ", "")
+                                    .replaceFirst("^0+", "")
+                    );
+                    if (reservasRepository.existeConflitoReserva(quartoId, checkinDate, novaOut, reserva.reserva_id())) {
+                        notification(Type.ERROR, TOP_CENTER, "Conflito de reserva neste período!");
+                        checkoutField.setText(checkoutDate.format(df));
+                        return;
+                    }
+                    checkoutDate = novaOut;
+                    reservasRepository.atualizarDataSaida(reserva.reserva_id(), novaOut);
+                    notification(Type.SUCCESS, TOP_CENTER, "Check-out atualizado para " + novaOut.format(df));
+                    refreshPanel();
+                } catch (Exception ex) {
+                }
             }
         });
-        quartoComboBox.addActionListener(e -> {
-            String selectedRoomStr = (String) quartoComboBox.getSelectedItem();
-            String roomNumberStr = selectedRoomStr
-                    .split(" - ")[0]
-                    .replace("Quarto ", "")
-                    .replaceFirst("^0+", "");
 
-            Long roomId = Long.valueOf(roomNumberStr);
-            System.out.println(roomId);
-            categoriaDescricaoLabel.setText(quartosRepository.buscaQuartoPorId(roomId).categoria().categoria().toUpperCase());
-            List<DatasReserva> reservasAtualizadas = reservasRepository.datasReservadasPorQuarto(roomId, reserva.reserva_id());
-            datePickerRange.setReservasDoQuarto(reservasAtualizadas);
-            datePickerRange.repaint();
-            updateDiariasInfo.run();
+        quartoComboBox.addActionListener(e -> {
+            long novoQuarto = Long.parseLong(
+                    ((String) quartoComboBox.getSelectedItem())
+                            .split(" - ")[0]
+                            .replace("Quarto ", "")
+                            .replaceFirst("^0+", "")
+            );
+
+            if (reservasRepository.existeConflitoReserva(novoQuarto, checkinDate, checkoutDate, reserva.reserva_id())) {
+                notification(Type.ERROR, TOP_CENTER, "Este quarto já está reservado no período selecionado!");
+
+                quartoComboBox.setSelectedItem(
+                        "Quarto " + reserva.quarto() + " - " + selectedPeople.size() + " pessoas"
+                );
+                return;
+            }
+
+            reservasRepository.atualizarQuarto(reserva.reserva_id(), novoQuarto);
+            categoriaDescricaoLabel.setText(
+                    quartosRepository.buscaQuartoPorId(novoQuarto)
+                            .categoria()
+                            .categoria()
+                            .toUpperCase()
+            );
+            notification(Type.SUCCESS, TOP_CENTER, "Alterado para o Quarto: " + novoQuarto);
+            refreshPanel();
         });
+
         return infoPanel;
     }
+
 
     private void animateLabelSpin(JLabel label, double oldValue, double newValue, boolean isMoney) {
         if (oldValue == newValue) return;
@@ -1031,20 +1106,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         } catch (NumberFormatException ex) {
             return 0.0;
         }
-    }
-
-    private void salvarReservaEditada(BuscaReservasResponse response) {
-        salvarButton.addActionListener(a -> {
-//            reservasRepository.editarReserva(new AtualizarReservaRequest(
-//                    response.reserva_id()
-//                    select
-//            ));
-            notification(Type.SUCCESS, TOP_CENTER, "Dados da reserva atualizados!");
-            refreshPanel();
-
-
-        });
-
     }
 
     private BotaoArredondado adicionarBlocoPessoa(
@@ -1275,5 +1336,4 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         pessoasContainer.revalidate();
         pessoasContainer.repaint();
     }
-
 }

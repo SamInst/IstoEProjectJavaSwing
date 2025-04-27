@@ -8,6 +8,7 @@ import response.DatasReserva;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -199,66 +200,28 @@ public class ReservasRepository {
     }
 
     public void editarReserva(AtualizarReservaRequest request) {
+        System.out.println("Editanto reserva " + request.reserva_id());
         String sql_update_reserva = """
-                UPDATE reservas
-                SET quarto_id = ?,
-                    data_entrada = ?,
-                    data_saida = ?,
-                    quantidade_pessoas = ?
-                WHERE reserva_id = ?;
-                """;
-        String sql_insert_reserva_pessoas = "INSERT INTO reserva_pessoas (reserva_id, pessoa_id) VALUES (?, ?);";
-        String sql_select_pessoas = "SELECT pessoa_id FROM reserva_pessoas WHERE reserva_id = ?;";
-        String sql_delete_reserva_pagamentos = "DELETE FROM reserva_pagamento WHERE reserva_id = ?;";
-        String sql_insert_reserva_pagamentos = """
-                INSERT INTO reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento)
-                VALUES (?, ?, ?, ?);
-                """;
+        UPDATE reservas
+        SET quarto_id          = ?,
+            data_entrada       = ?,
+            data_saida         = ?,
+            hora_prevista      = ?,    
+            quantidade_pessoas = ?
+        WHERE reserva_id = ?;
+        """;
 
         try {
-            try (PreparedStatement updateStmt = connection.prepareStatement(sql_update_reserva)) {
-                updateStmt.setLong(1, request.quarto());
-                updateStmt.setDate(2, Date.valueOf(request.data_entrada()));
-                updateStmt.setDate(3, Date.valueOf(request.data_saida()));
-                updateStmt.setInt(4, request.quantidade_pessoas());
-                updateStmt.setLong(5, request.reserva_id());
-                updateStmt.executeUpdate();
+            try (PreparedStatement stmt = connection.prepareStatement(sql_update_reserva)) {
+                stmt.setLong(1, request.quarto());
+                stmt.setDate(2, Date.valueOf(request.data_entrada()));
+                stmt.setDate(3, Date.valueOf(request.data_saida()));
+                stmt.setTime(4, java.sql.Time.valueOf(request.horarioPrevistoChegada()));
+                stmt.setInt(5, request.quantidade_pessoas());
+                stmt.setLong(6, request.reserva_id());
+                stmt.executeUpdate();
             }
-            if (request.pessoas() != null) {
-                Set<Long> pessoasExistentes = new HashSet<>();
-                try (PreparedStatement selectPessoasStmt = connection.prepareStatement(sql_select_pessoas)) {
-                    selectPessoasStmt.setLong(1, request.reserva_id());
-                    try (ResultSet rs = selectPessoasStmt.executeQuery()) {
-                        while (rs.next()) {
-                            pessoasExistentes.add(rs.getLong("pessoa_id"));
-                        }
-                    }
-                }
-                for (Long pessoaId : request.pessoas()) {
-                    if (!pessoasExistentes.contains(pessoaId)) {
-                        try (PreparedStatement insertPessoaStmt = connection.prepareStatement(sql_insert_reserva_pessoas)) {
-                            insertPessoaStmt.setLong(1, request.reserva_id());
-                            insertPessoaStmt.setLong(2, pessoaId);
-                            insertPessoaStmt.executeUpdate();
-                        }
-                    }
-                }
-            }
-            try (PreparedStatement deletePagamentosStmt = connection.prepareStatement(sql_delete_reserva_pagamentos)) {
-                deletePagamentosStmt.setLong(1, request.reserva_id());
-                deletePagamentosStmt.executeUpdate();
-            }
-            if (request.pagamentos() != null) {
-                for (BuscaReservasResponse.Pagamentos pagamento : request.pagamentos()) {
-                    try (PreparedStatement insertPagamentoStmt = connection.prepareStatement(sql_insert_reserva_pagamentos)) {
-                        insertPagamentoStmt.setLong(1, request.reserva_id());
-                        insertPagamentoStmt.setFloat(2, pagamento.valor_pagamento());
-                        insertPagamentoStmt.setTimestamp(3, Timestamp.valueOf(pagamento.data_hora_pagamento()));
-                        insertPagamentoStmt.setInt(4, pagamento.tipo_pagamento());
-                        insertPagamentoStmt.executeUpdate();
-                    }
-                }
-            }
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Erro ao atualizar a reserva: " + e.getMessage(), e);
@@ -431,8 +394,76 @@ public class ReservasRepository {
         }
     }
 
+    public void atualizarQuarto(long reservaId, long novoQuarto) {
+        String sql = "UPDATE reservas SET quarto_id = ? WHERE reserva_id = ?;";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setLong(1, novoQuarto);
+            st.setLong(2, reservaId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atualizarDataEntrada(long reservaId, LocalDate novaEntrada) {
+        String sql = "UPDATE reservas SET data_entrada = ? WHERE reserva_id = ?;";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setDate(1, Date.valueOf(novaEntrada));
+            st.setLong(2, reservaId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atualizarDataSaida(long reservaId, LocalDate novaSaida) {
+        String sql = "UPDATE reservas SET data_saida = ? WHERE reserva_id = ?;";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setDate(1, Date.valueOf(novaSaida));
+            st.setLong(2, reservaId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atualizarHorarioPrevisto(long reservaId, LocalTime novoHorario) {
+        String sql = "UPDATE reservas SET hora_prevista = ? WHERE reserva_id = ?;";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setTime(1, Time.valueOf(novoHorario));
+            st.setLong(2, reservaId);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
-
+    public boolean existeConflitoReserva(long quartoId,
+                                         LocalDate checkIn,
+                                         LocalDate checkOut,
+                                         long reservaIdParaExcluir) {
+        String sql = """
+        SELECT COUNT(*)
+          FROM reservas
+         WHERE quarto_id = ?
+           AND reserva_id <> ?
+           AND NOT (data_saida < ? OR data_entrada > ?)
+        """;
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setLong(1, quartoId);
+            st.setLong(2, reservaIdParaExcluir);
+            st.setDate(3, Date.valueOf(checkIn));
+            st.setDate(4, Date.valueOf(checkOut));
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar conflito de reserva: " + e.getMessage(), e);
+        }
+        return false;
+    }
 
 }
