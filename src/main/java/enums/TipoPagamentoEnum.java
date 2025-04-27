@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum TipoPagamentoEnum {
+    SELECIONE(-1),
     PIX(0),
     DINHEIRO(1),
     CARTAO_CREDITO(2),

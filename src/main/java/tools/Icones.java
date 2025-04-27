@@ -37,8 +37,8 @@ public class Icones {
     public static FlatSVGIcon cartao = new FlatSVGIcon(PATH + "cartao.svg");
     public static FlatSVGIcon dinheiro = new FlatSVGIcon(PATH + "dinheiro.svg");
     public static FlatSVGIcon pix = new FlatSVGIcon(PATH + "pix.svg");
-    public static FlatSVGIcon user_sem_foto = new FlatSVGIcon(PATH + "user_sem_foto_2.jpg");
-    public static FlatSVGIcon user_sem_foto_feminino = new FlatSVGIcon(PATH + "user_sem_foto_feminino.jpg");
+    public static FlatSVGIcon user_sem_foto = new FlatSVGIcon(PATH + "user_sem_foto_2.svg");
+    public static FlatSVGIcon user_sem_foto_feminino = new FlatSVGIcon(PATH + "user_sem_foto_feminino.svg");
     public static FlatSVGIcon user_funcionario = new FlatSVGIcon(PATH_MENU + "user.svg");
     public static FlatSVGIcon rede = new FlatSVGIcon(PATH + "rede.svg");
     public static FlatSVGIcon cama_casal = new FlatSVGIcon(PATH + "cama_casal.svg");

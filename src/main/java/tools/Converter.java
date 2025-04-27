@@ -1,13 +1,12 @@
 package tools;
 
 import javax.swing.*;
-
 import static tools.Resize.resizeIcon;
-
 
 public class Converter {
     public static String converterTipoPagamento(String tipoPagamento) {
        return switch (tipoPagamento) {
+            case "-1" -> "SELECIONE";
             case "0" -> "PIX";
             case "1" -> "DINHEIRO";
             case "2" -> "CARTÃO DE CRÉDITO";
@@ -20,6 +19,7 @@ public class Converter {
 
     public static String converterTipoPagamento(Integer tipoPagamento) {
         return switch (tipoPagamento) {
+            case -1 -> "SELECIONE";
             case 0 -> "PIX";
             case 1 -> "DINHEIRO";
             case 2 -> "CARTÃO DE CRÉDITO";
@@ -32,6 +32,7 @@ public class Converter {
 
     public static Integer converterTipoPagamentoParaInt(String tipoPagamento) {
         return switch (tipoPagamento.toUpperCase()) {
+            case "SELECIONE" -> -1;
             case "PIX" -> 0;
             case "DINHEIRO" -> 1;
             case "CARTÃO DE CRÉDITO" -> 2;
