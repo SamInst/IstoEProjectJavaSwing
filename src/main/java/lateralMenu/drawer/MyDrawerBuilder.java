@@ -4,6 +4,8 @@ import lateralMenu.form.TestForm;
 import lateralMenu.main.Main;
 import lateralMenu.tabbed.WindowsTabbed;
 import menu.panels.pessoaPanel.PessoaEmpresaPanel;
+import menu.panels.quartosPanel.AdicionarQuartoFrame;
+import menu.panels.quartosPanel.RoomsPanel;
 import menu.panels.reservasPanel.ReservasPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -13,6 +15,7 @@ import raven.drawer.component.menu.MenuEvent;
 import raven.drawer.component.menu.MenuValidation;
 import raven.drawer.component.menu.SimpleMenuOption;
 import raven.swing.AvatarIcon;
+import repository.QuartosRepository;
 
 public class MyDrawerBuilder extends SimpleDrawerBuilder {
 
@@ -71,10 +74,10 @@ public class MyDrawerBuilder extends SimpleDrawerBuilder {
                             new ReservasPanel();
                         }else if (index == 7) {
                             WindowsTabbed.getInstance().addTab("Clientes", new PessoaEmpresaPanel());
-                        }else if (index == 9) {
-                            Main.main.login();
-                        }else if (index == 9) {
-                            Main.main.login();
+                        }else if (index == 3) {
+                            WindowsTabbed.getInstance().addTab("Quartos", new RoomsPanel(new QuartosRepository()));
+                        }else if (index == 2) {
+                            WindowsTabbed.getInstance().addTab("Quartos", new RoomsPanel(new QuartosRepository()));
                         }else if (index == 9) {
                             Main.main.login();
                         }else if (index == 9) {

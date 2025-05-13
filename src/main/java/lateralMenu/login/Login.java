@@ -9,6 +9,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import lateralMenu.main.Main;
+import lateralMenu.tabbed.WindowsTabbed;
+import menu.panels.reservasPanel.ReservasPanel;
 import net.miginfocom.swing.MigLayout;
 
 public class Login extends JPanel {
@@ -40,8 +42,8 @@ public class Login extends JPanel {
                 + "innerFocusWidth:0");
 
         cmdLogin.addActionListener((e) -> {
-            //  Do action login here
             Main.main.showMainForm();
+            WindowsTabbed.getInstance().addTab("Reservas", new ReservasPanel());
         });
         txtUsername.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Enter your username or email");
         txtPassword.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Enter your password");

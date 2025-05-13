@@ -52,7 +52,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     private final Map<Long, LocalDate> checkInDateMap = new HashMap<>();
     private List<BuscaReservasResponse> currentReservations;
 
-
     private String selectedRoom;
     private LocalDate checkinDate;
     private LocalDate checkoutDate;
@@ -83,7 +82,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         this.selectedRoom = "";
         this.checkinDate = LocalDate.now();
         this.checkoutDate = LocalDate.now().plusDays(1);
-        this.roomPanel = new RoomPanel(this, quartosRepository);
+        this.roomPanel = new RoomPanel(this);
         this.peoplePanel = new PeoplePanel(this);
         this.paymentPanel = new PaymentPanel(this);
         this.animationManager = new AnimationManager();
@@ -147,6 +146,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             currentMonth = currentMonth.minusMonths(1);
             refreshPanel();
         });
+
         btnPrev.setPreferredSize(new Dimension(20, 30));
 
         String monthName = roomPanel.getMonthName(currentMonth);
@@ -158,8 +158,8 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             currentMonth = currentMonth.plusMonths(1);
             refreshPanel();
         });
-        btnNext.setPreferredSize(new Dimension(50, 30));
 
+        btnNext.setPreferredSize(new Dimension(50, 30));
         navPanel.add(btnPrev);
         navPanel.add(Box.createHorizontalStrut(5));
         navPanel.add(monthLabel);
@@ -509,6 +509,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         });
 
         quartoComboBox.addActionListener(e -> {
+            System.out.println("antigo quarto " + quartoComboBox.getSelectedItem());
 
             long novoQuarto = Long.parseLong(
                     ((String) quartoComboBox.getSelectedItem())
@@ -516,6 +517,11 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                             .replace("Quarto ", "")
                             .replaceFirst("^0+", "")
             );
+            System.out.println(novoQuarto);
+            if (reservasRepository.existeConflitoReserva(novoQuarto, checkinDate, checkoutDate, reserva.reserva_id())) {
+                notification(Type.ERROR, TOP_CENTER, "Este quarto já está reservado no período selecionado!");
+                return;
+            }
 
             List<DatasReserva> novasDatas =
                     reservasRepository.datasReservadasPorQuarto(
@@ -523,10 +529,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                     );
             datePickerRange.setReservasDoQuarto(novasDatas);
 
-            if (reservasRepository.existeConflitoReserva(novoQuarto, checkinDate, checkoutDate, reserva.reserva_id())) {
-                notification(Type.ERROR, TOP_CENTER, "Este quarto já está reservado no período selecionado!");
-                return;
-            }
 
             reservasRepository.atualizarQuarto(reserva.reserva_id(), novoQuarto);
             categoriaDescricaoLabel.setText(
@@ -673,7 +675,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                         @Override
                         public void action(PopupController pc, int i) {
                             if (i == MessageAlerts.YES_OPTION) {
-                                reservasRepository.desativarReserva(reserva.reserva_id());
+                                reservasRepository.hospedarReserva(reserva.reserva_id());
                                 refreshPanel();
                                 notification(Type.SUCCESS, TOP_CENTER,
                                         "Pernoite adicionado com sucesso!\n#" +
@@ -698,15 +700,12 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     }
 
     public void atualizarContadores(BuscaReservasResponse reserva) {
-        // Obter a versão mais atualizada da reserva
         BuscaReservasResponse reservaAtualizada = reservasRepository.buscarReservaPorId(reserva.reserva_id());
 
-        // Se não conseguir obter a reserva atualizada, use a original
         if (reservaAtualizada == null) {
             reservaAtualizada = reserva;
         }
 
-        // Atualizar o contador de pessoas com o número atual
         labelPessoasValue.setText(String.valueOf(reservaAtualizada.pessoas().size()));
 
         int numDiarias = Period.between(reservaAtualizada.data_entrada(), reservaAtualizada.data_saida()).getDays();
@@ -776,5 +775,4 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     public JLabel getLabelTotalValue() {
         return labelTotalValue;
     }
-
 }

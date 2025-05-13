@@ -18,7 +18,6 @@ import static java.awt.EventQueue.invokeLater;
 import static java.lang.Double.parseDouble;
 
 public class Login extends JFrame {
-
     private final DecimalFormat df = new DecimalFormat("##0.###", DecimalFormatSymbols.getInstance(Locale.US));
     private MigLayout layout;
     private PanelCover cover;

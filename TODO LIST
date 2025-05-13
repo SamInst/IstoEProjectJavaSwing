@@ -1,0 +1,15 @@
+# Calendario de Reservas
+- adicionar cards acima do calendario de reservas com as reservas mais proximas (dia atual ate 2 dias depois, por ordem de data e hora de chegada)
+- ao clicar em uma celula dia mostrar mini dashboard com as informacoes das reservas para o determinado dia
+- mostrar dashboard das reservas do dia atual
+- adicionar botoes ilustrativos na faixa de reserva
+    (pagamento -> if(ok) verde : vermelho)
+    (hospedado -> if(true) verde : vermelho)
+- verificar as reservas de fim de mes, pois estao sumindo as faixas
+- revisar logica de reservas para mesma data e apartamento
+- adicionar nova reserva
+- adicionar validacoes da nova reserva
+- ajustar edicao de horario de chegada
+- adicionar novo campo hospedado na tabela de reservas
+- alterar logica de reservas (setar como hospedado quando o cliente chegar e finalizar a reserva somente quando a data de saida estiver expirada)
+- aumentar o painel para que nao corte as ultimas datas do calendario da reserva individual

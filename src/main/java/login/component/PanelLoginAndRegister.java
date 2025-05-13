@@ -101,7 +101,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
         login.add(txtPass, "w 60%");
 
         ShadowButton cmd = new ShadowButton();
-        cmd.setBackground(new Color(7, 164, 121));
+        cmd.setBackground(new Color(7, 16, 12));
         cmd.setForeground(new Color(250, 250, 250));
         cmd.setFocusPainted(false);
         cmd.setText("ENTRAR");

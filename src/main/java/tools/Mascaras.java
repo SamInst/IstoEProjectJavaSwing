@@ -1,7 +1,6 @@
 package tools;
 
 import textField.TextFieldComSobra;
-
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
@@ -10,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
 import static tools.CorPersonalizada.DARK_GRAY;
 import static tools.CorPersonalizada.DARK_GREEN;
 

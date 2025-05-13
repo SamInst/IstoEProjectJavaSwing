@@ -1,6 +1,7 @@
 package menu.panels.quartosPanel;
 
 import buttons.ShadowButton;
+import lateralMenu.tabbed.TabbedForm;
 import repository.QuartosRepository;
 import tools.Refreshable;
 
@@ -11,12 +12,12 @@ import java.awt.event.ComponentEvent;
 
 import static buttons.Botoes.btn_verde;
 
-public class RoomsPanel extends JPanel implements Refreshable {
+public class RoomsPanel extends TabbedForm implements Refreshable {
     private final QuartosRepository quartosRepository;
     ShadowButton btnAdicionar = new ShadowButton();
 
-    public RoomsPanel(QuartosRepository quartosRepository1) {
-        this.quartosRepository = quartosRepository1;
+    public RoomsPanel(QuartosRepository quartosRepository) {
+        this.quartosRepository = quartosRepository;
         initializePanel();
     }
 

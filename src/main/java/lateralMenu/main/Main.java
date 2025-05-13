@@ -10,7 +10,6 @@ import lateralMenu.login.Login;
 import lateralMenu.tabbed.WindowsTabbed;
 import raven.drawer.Drawer;
 
-
 import raven.popup.GlassPanePopup;
 import raven.toast.Notifications;
 
@@ -18,7 +17,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Main extends JFrame {
-
     public static Main main;
     private Login loginForm;
 
@@ -33,7 +31,6 @@ public class Main extends JFrame {
         MyDrawerBuilder myDrawerBuilder = new MyDrawerBuilder();
         Drawer.getInstance().setDrawerBuilder(myDrawerBuilder);
         WindowsTabbed.getInstance().install(this, body);
-        // applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         login();
     }
 

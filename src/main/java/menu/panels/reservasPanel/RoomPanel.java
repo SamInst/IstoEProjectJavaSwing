@@ -27,7 +27,6 @@ import static tools.CorPersonalizada.*;
 
 public class RoomPanel {
     private final ReservasPanel mainPanel;
-    private final QuartosRepository quartosRepository;
     private final Dimension cellSize = new Dimension(300, 60);
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
     private final Color selectedColor = GREEN;
@@ -35,9 +34,8 @@ public class RoomPanel {
     private JPanel roomsPanel;
     private JPanel backgroundPanel;
 
-    public RoomPanel(ReservasPanel mainPanel, QuartosRepository quartosRepository) {
+    public RoomPanel(ReservasPanel mainPanel) {
         this.mainPanel = mainPanel;
-        this.quartosRepository = quartosRepository;
     }
 
     public Color getSelectedColor() {
@@ -84,7 +82,8 @@ public class RoomPanel {
     }
 
     public JPanel createDaysHeaderPanel(int daysToShow, int startDay, LocalDate currentMonth) {
-        JPanel daysHeader = new JPanel(new GridLayout(1, daysToShow, 0, 0));
+        JPanel daysHeader = new JPanel();
+        daysHeader.setLayout(new BoxLayout(daysHeader, BoxLayout.X_AXIS));
 
         for (int d = startDay; d <= currentMonth.lengthOfMonth(); d++) {
             LocalDate tmpDate = currentMonth.withDayOfMonth(d);
@@ -95,30 +94,32 @@ public class RoomPanel {
             ReservasRepository.OcupacaoDia ocupacao = ReservasRepository.buscarOcupacaoPorDia(tmpDate);
 
             String labelText = String.format(
-                    "<html>" +
-                            "<div style='width: 100%%; padding: 0 5px;'>" +
-                            "<table width='100%%'>" +
-                            "<tr>" +
-                            "<td align='left' style='font-size: 14px;'>%s<br>%s</td>" +
-                            "<td align='right' style='font-size: 14px;'>%d%%<br>%d/%d</td>" +
-                            "</tr>" +
-                            "</table>" +
-                            "</div>" +
-                            "</html>",
+                    "<html><div style='width:150%%;padding:0 5px;'>"
+                            + "<table width='150%%'><tr>"
+                            + "<td align='left'>%s<br>%s</td>"
+                            + "<td align='right'>%d%%<br>%d/%d</td>"
+                            + "</tr></table></div></html>",
                     dayStr, dayOfWeek, ocupacao.percentual(), ocupacao.ocupados(), ocupacao.total()
             );
-
 
             CalendarLabel dayLabel = new CalendarLabel(labelText, d);
             dayLabel.setFont(new Font("Roboto", Font.PLAIN, 13));
             dayLabel.setForeground(tmpDate.isEqual(LocalDate.now()) ? DARK_GRAY : WHITE);
             dayLabel.setBackground(tmpDate.isEqual(LocalDate.now()) ? new Color(0xEBEBEB) : BLUE.brighter());
-            daysHeader.add(dayLabel);
+
+            JPanel cellPanel = new JPanel(new BorderLayout());
+            cellPanel.setPreferredSize(cellSize);
+            cellPanel.setMinimumSize(cellSize);
+            cellPanel.setMaximumSize(cellSize);
+            cellPanel.add(dayLabel, BorderLayout.CENTER);
+
+            daysHeader.add(cellPanel);
         }
 
-        daysHeader.setPreferredSize(
-                new Dimension(daysToShow * cellSize.width, cellSize.height)
-        );
+        Dimension headerSize = new Dimension(daysToShow * cellSize.width, cellSize.height);
+        daysHeader.setPreferredSize(headerSize);
+        daysHeader.setMinimumSize(headerSize);
+        daysHeader.setMaximumSize(headerSize);
 
         this.daysHeader = daysHeader;
         return daysHeader;
@@ -225,9 +226,21 @@ public class RoomPanel {
             if (endDayIndex < 0) continue;
             startDayIndex = Math.max(0, startDayIndex);
 
+            boolean reservaAntesDoInicio = resStartDate.isBefore(visibleStart);
+            boolean reservaDepoisDoFim = resEndDate.isAfter(monthEnd);
+
             int checkInX = startDayIndex * cellSize.width + (cellSize.width / 2);
             int checkOutX = endDayIndex * cellSize.width + (cellSize.width / 2);
-            int reservationWidth = (endDayIndex == startDayIndex) ? cellSize.width / 2 : checkOutX - checkInX;
+
+            if (reservaAntesDoInicio) {
+                checkInX = startDayIndex * cellSize.width;
+            }
+
+            if (reservaDepoisDoFim) {
+                checkOutX = (endDayIndex + 1) * cellSize.width;
+            }
+
+            int reservationWidth = checkOutX - checkInX;
             int roomY = rowIndex * cellSize.height;
 
             ShadowButton faixa = btn_cinza("");
@@ -268,9 +281,17 @@ public class RoomPanel {
     }
 
     public JScrollPane createScrollPane(JLayeredPane layeredPane, JPanel roomsPanel, JPanel daysHeader) {
+        JViewport headerViewport = new JViewport();
+        headerViewport.setView(daysHeader);
+        headerViewport.setPreferredSize(daysHeader.getPreferredSize());
+
         JScrollPane scrollPane = new JScrollPane(layeredPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setRowHeaderView(roomsPanel);
-        scrollPane.setColumnHeaderView(daysHeader);
+        scrollPane.setColumnHeader(headerViewport);
+        
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener(e -> {
+            headerViewport.setViewPosition(new Point(e.getValue(), 0));
+        });
 
         scrollPane.setViewportBorder(BorderFactory.createEmptyBorder());
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -363,7 +384,7 @@ public class RoomPanel {
 
     public static int randomNumberClaro() {
         Random random = new Random();
-        return random.nextInt(90) + 160; // Sorteiando de 180 até 255
+        return random.nextInt(90) + 160; // Sorteando de 160 até 249
     }
 
     public static Color randomCorClara() {

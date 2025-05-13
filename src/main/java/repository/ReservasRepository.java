@@ -41,7 +41,7 @@ public class ReservasRepository {
             """;
 
     private static final String SQL_RESERVA = """
-            insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa) VALUES (?,?,?,?, true) returning reserva_id;
+            insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa, hospedado) VALUES (?,?,?,?, true, false) returning reserva_id;
             """;
 
     private static final String SQL_RESERVA_PESSOAS = """
@@ -243,6 +243,26 @@ public class ReservasRepository {
         }
     }
 
+    public void hospedarReserva(long reservaId) {
+        String sql = """
+                UPDATE reservas
+                SET hospedado = true
+                WHERE reserva_id = ?;
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, reservaId);
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected == 0) {
+                LOGGER.warning("Nenhuma reserva foi hospedada para o ID: " + reservaId);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao desativar reserva: " + reservaId, e);
+            throw new RuntimeException("Erro ao desativar reserva: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * Remove uma pessoa de uma reserva
      *
@@ -326,7 +346,6 @@ public class ReservasRepository {
      * @param pessoaId  ID da pessoa
      */
     public void adicionarPessoaReserva(Long reservaId, Long pessoaId) {
-        // Verificar se a pessoa já está na reserva
         if (verificarPessoaExisteEmReserva(reservaId, pessoaId)) {
             LOGGER.info("Pessoa já vinculada a esta reserva. ID Pessoa: " + pessoaId + ", ID Reserva: " + reservaId);
             return;
@@ -540,20 +559,21 @@ public class ReservasRepository {
                                          LocalDate checkOut,
                                          long reservaIdParaExcluir) {
         String sql = """
-               
         SELECT COUNT(*)
         FROM reservas
         WHERE quarto_id = ?
           AND ativa = true
           AND reserva_id <> ?
-          AND NOT (data_saida <= ? OR data_entrada >= ?)
-                                                               
-                """;
+          AND data_entrada < ?
+          AND data_saida > ?
+    """;
+
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setLong(1, quartoId);
             st.setLong(2, reservaIdParaExcluir);
-            st.setDate(3, Date.valueOf(checkIn));
-            st.setDate(4, Date.valueOf(checkOut));
+            st.setDate(3, Date.valueOf(checkOut));
+            st.setDate(4, Date.valueOf(checkIn));
+
             try (ResultSet rs = st.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
             }
@@ -563,7 +583,10 @@ public class ReservasRepository {
         }
     }
 
+
+
     public record OcupacaoDia(int ocupados, int total, int percentual) {}
+
     public static OcupacaoDia buscarOcupacaoPorDia(LocalDate dia) {
         String sql = """
         SELECT 
@@ -594,7 +617,4 @@ public class ReservasRepository {
         }
         return new OcupacaoDia(0, 0, 0);
     }
-
-
-
 }
