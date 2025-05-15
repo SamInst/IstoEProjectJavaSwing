@@ -111,7 +111,7 @@ public class QuartosRepository {
     public List<QuartoResponse> buscaTodosOsQuartos() {
         List<QuartoResponse> quartos = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(quarto_sql.toString())) {
+        try (PreparedStatement statement = connection.prepareStatement(quarto_sql.toString() + " order by q.id;")) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Long quartoId = resultSet.getLong("quarto_id");

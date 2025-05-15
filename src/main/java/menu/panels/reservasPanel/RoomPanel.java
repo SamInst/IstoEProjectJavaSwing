@@ -6,6 +6,7 @@ import repository.ReservasRepository;
 import request.BuscaReservasResponse;
 import response.DatasReserva;
 import response.QuartoResponse;
+import tools.PanelArredondado;
 import tools.TruncateText;
 
 import javax.swing.*;
@@ -21,18 +22,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import static buttons.Botoes.btn_branco;
-import static buttons.Botoes.btn_cinza;
+import static buttons.Botoes.*;
 import static tools.CorPersonalizada.*;
 
 public class RoomPanel {
     private final ReservasPanel mainPanel;
     private final Dimension cellSize = new Dimension(300, 60);
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
-    private final Color selectedColor = GREEN;
+    private final Color selectedColor = new Color(0x5E9984);
     private JPanel daysHeader;
     private JPanel roomsPanel;
     private JPanel backgroundPanel;
+    private JPanel occupancyPanel;
+    private JLabel currentDateLabel;
+    private JLabel occupancyPercentLabel;
+    private JLabel occupancyCountLabel;
 
     public RoomPanel(ReservasPanel mainPanel) {
         this.mainPanel = mainPanel;
@@ -66,10 +70,12 @@ public class RoomPanel {
 
     private class CalendarLabel extends JLabel {
         int col;
+        LocalDate date;
 
-        CalendarLabel(String text, int col) {
+        CalendarLabel(String text, int col, LocalDate date) {
             super(text, SwingConstants.CENTER);
             this.col = col;
+            this.date = date;
             setBorder(BorderFactory.createCompoundBorder(
                     defaultCellBorder,
                     BorderFactory.createEmptyBorder(0, 0, 0, 0)
@@ -81,92 +87,159 @@ public class RoomPanel {
         }
     }
 
+    public JPanel createOccupancyPanel() {
+        PanelArredondado panel = new PanelArredondado();
+        panel.setArredondamento(10);
+        panel.setLayout(new BorderLayout());
+        panel.setBackground(new Color(0x5E9984));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        panel.setPreferredSize(new Dimension(0, 80));
+
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setOpaque(false);
+
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titleRow.setOpaque(false);
+        currentDateLabel = createLabel("Ocupação para: Hoje", new Font("Roboto", Font.BOLD, 18), WHITE, null);
+        titleRow.add(currentDateLabel);
+
+        JPanel dataRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        dataRow.setOpaque(false);
+        occupancyPercentLabel = createLabel("Ocupação: 0%", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        dataRow.add(occupancyPercentLabel);
+        dataRow.add(Box.createHorizontalStrut(30));
+        occupancyCountLabel = createLabel("Quartos: 0/0", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        dataRow.add(occupancyCountLabel);
+
+        contentPanel.add(titleRow);
+        contentPanel.add(dataRow);
+        panel.add(contentPanel, BorderLayout.CENTER);
+
+        LocalDate today = LocalDate.now();
+        updateOccupancyPanel(today);
+
+        this.occupancyPanel = panel;
+        return panel;
+    }
+
+    public void updateOccupancyPanel(LocalDate date) {
+        ReservasRepository.OcupacaoDia ocupacao = ReservasRepository.buscarOcupacaoPorDia(date);
+        String dayStr = String.format("%02d/%02d/%d",
+                date.getDayOfMonth(), date.getMonthValue(), date.getYear());
+        String dayOfWeek = date.getDayOfWeek()
+                .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
+        currentDateLabel.setText("Ocupação para: " + dayStr + " (" + dayOfWeek + ")");
+        occupancyPercentLabel.setText("Ocupação: " + ocupacao.percentual() + "%");
+        occupancyCountLabel.setText("Quartos: " + ocupacao.ocupados() + "/" + ocupacao.total());
+    }
+
     public JPanel createDaysHeaderPanel(int daysToShow, int startDay, LocalDate currentMonth) {
         JPanel daysHeader = new JPanel();
         daysHeader.setLayout(new BoxLayout(daysHeader, BoxLayout.X_AXIS));
 
-        for (int d = startDay; d <= currentMonth.lengthOfMonth(); d++) {
-            LocalDate tmpDate = currentMonth.withDayOfMonth(d);
-            String dayStr = String.format("%02d/%02d", d, currentMonth.getMonthValue());
-            String dayOfWeek = tmpDate.getDayOfWeek()
-                    .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
+        LocalDate today = LocalDate.now();
+        Color todayBg = new Color(0xE3F2FD).darker();
 
-            ReservasRepository.OcupacaoDia ocupacao = ReservasRepository.buscarOcupacaoPorDia(tmpDate);
+        for (int col = 0; col < daysToShow; col++) {
+            LocalDate date = currentMonth.withDayOfMonth(startDay + col);
 
-            String labelText = String.format(
-                    "<html><div style='width:150%%;padding:0 5px;'>"
-                            + "<table width='150%%'><tr>"
-                            + "<td align='left'>%s<br>%s</td>"
-                            + "<td align='right'>%d%%<br>%d/%d</td>"
-                            + "</tr></table></div></html>",
-                    dayStr, dayOfWeek, ocupacao.percentual(), ocupacao.ocupados(), ocupacao.total()
-            );
-
-            CalendarLabel dayLabel = new CalendarLabel(labelText, d);
-            dayLabel.setFont(new Font("Roboto", Font.PLAIN, 13));
-            dayLabel.setForeground(tmpDate.isEqual(LocalDate.now()) ? DARK_GRAY : WHITE);
-            dayLabel.setBackground(tmpDate.isEqual(LocalDate.now()) ? new Color(0xEBEBEB) : BLUE.brighter());
-
-            JPanel cellPanel = new JPanel(new BorderLayout());
+            JPanel cellPanel = new JPanel();
+            cellPanel.setLayout(new BorderLayout());
             cellPanel.setPreferredSize(cellSize);
-            cellPanel.setMinimumSize(cellSize);
             cellPanel.setMaximumSize(cellSize);
-            cellPanel.add(dayLabel, BorderLayout.CENTER);
+            cellPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY.brighter()));
+            cellPanel.setBackground(Color.WHITE);
+
+
+            JLabel dayNumber = new JLabel(String.valueOf(date.getDayOfMonth()));
+            dayNumber.setFont(new Font("Roboto", Font.BOLD, 35));
+            dayNumber.setForeground(new Color(0x444444));
+            dayNumber.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+            cellPanel.add(dayNumber, BorderLayout.WEST);
+
+            JPanel rightPanel = new JPanel();
+            rightPanel.setOpaque(false);
+            rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+            rightPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 10));
+
+            JLabel weekdayLabel = new JLabel(
+                    date.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
+            );
+            weekdayLabel.setFont(new Font("Roboto", Font.PLAIN, 16));
+            weekdayLabel.setForeground(new Color(0x888888));
+            weekdayLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+            rightPanel.add(weekdayLabel);
+            cellPanel.add(rightPanel, BorderLayout.EAST);
+
+            cellPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    updateOccupancyPanel(date);
+                }
+            });
+
+            if (date.isEqual(today)) {
+                cellPanel.setBackground(todayBg);
+                dayNumber.setForeground(WHITE);
+                weekdayLabel.setForeground(WHITE);
+                cellPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            }
 
             daysHeader.add(cellPanel);
         }
 
-        Dimension headerSize = new Dimension(daysToShow * cellSize.width, cellSize.height);
-        daysHeader.setPreferredSize(headerSize);
-        daysHeader.setMinimumSize(headerSize);
-        daysHeader.setMaximumSize(headerSize);
-
-        this.daysHeader = daysHeader;
+        daysHeader.setPreferredSize(
+                new Dimension(daysToShow * cellSize.width, cellSize.height)
+        );
         return daysHeader;
     }
 
     public JPanel createRoomsPanel(List<QuartoResponse> quartos, int numRooms) {
-        JPanel roomsPanel = new JPanel(new GridLayout(numRooms, 1, 0, 0));
+        PanelArredondado roomsPanel = new PanelArredondado();
+        roomsPanel.setArredondamento(15);
+        roomsPanel.setLayout(new GridLayout(numRooms, 1, 0, 0));
         roomsPanel.setBackground(BACKGROUND_GRAY);
         Dimension roomCellSize = new Dimension(60, cellSize.height);
-
         for (QuartoResponse quarto : quartos) {
             Long roomId = quarto.quarto_id();
-            JLabel roomLabel = createLabel(roomId < 10 ? "0" + roomId : roomId.toString(),
-                    new Font("Roboto", Font.BOLD, 14), BLUE, BACKGROUND_GRAY);
+            JLabel roomLabel = createLabel(
+                    roomId < 10 ? "0" + roomId : roomId.toString(),
+                    new Font("Roboto", Font.BOLD, 16), WHITE, new Color(0x5E9984)
+            );
             roomLabel.setPreferredSize(roomCellSize);
             roomLabel.setBorder(defaultCellBorder);
             roomsPanel.add(roomLabel);
         }
-
         this.roomsPanel = roomsPanel;
         return roomsPanel;
     }
 
-    public JLayeredPane createLayeredPane(List<QuartoResponse> quartos, int daysToShow, int startDay, int numRooms) {
+    public JLayeredPane createLayeredPane(List<QuartoResponse> quartos,
+                                          int daysToShow, int startDay, int numRooms) {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
 
         int totalWidth = daysToShow * cellSize.width;
         int totalHeight = numRooms * cellSize.height;
-
         layeredPane.setPreferredSize(new Dimension(totalWidth + 2, totalHeight));
 
         backgroundPanel = new JPanel(new GridLayout(numRooms, daysToShow, 0, 0));
         backgroundPanel.setBounds(0, 0, totalWidth, totalHeight);
         layeredPane.add(backgroundPanel, JLayeredPane.DEFAULT_LAYER);
-
         mainPanel.setBackgroundPanel(backgroundPanel);
 
         for (int row = 0; row < numRooms; row++) {
             Long roomId = quartos.get(row).quarto_id();
             for (int colIndex = 0; colIndex < daysToShow; colIndex++) {
-                int dayOfMonth = startDay + colIndex;
-                LocalDate date = mainPanel.getCurrentMonth().withDayOfMonth(dayOfMonth);
+                LocalDate date = mainPanel.getCurrentMonth().withDayOfMonth(startDay + colIndex);
                 CalendarCell cell = new CalendarCell(roomId, date, row, colIndex);
-                cell.setBackground(date.isEqual(LocalDate.now()) ?  new Color(0xF8F8FA) : WHITE);
+                cell.setBackground(date.isEqual(LocalDate.now())
+                        ? new Color(0xE3F2FD) : WHITE);
 
                 BuscaReservasResponse reserva = findReservationForDate(roomId, date);
+
                 cell.addMouseMotionListener(new MouseMotionAdapter() {
                     @Override
                     public void mouseMoved(MouseEvent e) {
@@ -178,18 +251,19 @@ public class RoomPanel {
                 cell.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (reserva == null)
-                            cell.setBackground(BACKGROUND_GRAY);
+                        if (reserva == null) cell.setBackground(new Color(0xE3F2FD).darker());
                     }
-
                     @Override
                     public void mouseExited(MouseEvent e) {
                         boolean isSelected = isSelectedRange(cell.roomId, cell.date);
-                        cell.setBackground(isSelected ? selectedColor : (cell.date.isEqual(LocalDate.now()) ? new Color(0xF8F8FA) : WHITE));
+                        cell.setBackground(isSelected
+                                ? selectedColor
+                                : (cell.date.isEqual(LocalDate.now())
+                                ? new Color(0xE3F2FD) : WHITE));
                     }
-
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        updateOccupancyPanel(cell.date);
                         mainPanel.handleCellClick(cell);
                     }
                 });
@@ -244,6 +318,8 @@ public class RoomPanel {
             int roomY = rowIndex * cellSize.height;
 
             ShadowButton faixa = btn_cinza("");
+            if (reserva.hospedado()) faixa = btn_verde("");
+
             faixa.setBackground(randomCorClara());
             faixa.setForeground(LIGHT_GRAY_2);
             faixa.enableHoverEffect();
@@ -267,10 +343,11 @@ public class RoomPanel {
             faixa.add(Box.createHorizontalStrut(5));
             faixa.add(labelNome);
 
+            ShadowButton finalFaixa = faixa;
             faixa.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    mainPanel.popUp(faixa, reserva);
+                    mainPanel.popUp(finalFaixa, reserva);
                 }
             });
 
@@ -280,22 +357,24 @@ public class RoomPanel {
         return layeredPane;
     }
 
-    public JScrollPane createScrollPane(JLayeredPane layeredPane, JPanel roomsPanel, JPanel daysHeader) {
+    public JScrollPane createScrollPane(JLayeredPane layeredPane,
+                                        JPanel roomsPanel, JPanel daysHeader) {
         JViewport headerViewport = new JViewport();
         headerViewport.setView(daysHeader);
         headerViewport.setPreferredSize(daysHeader.getPreferredSize());
 
-        JScrollPane scrollPane = new JScrollPane(layeredPane, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JScrollPane scrollPane = new JScrollPane(
+                layeredPane,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
         scrollPane.setRowHeaderView(roomsPanel);
         scrollPane.setColumnHeader(headerViewport);
-        
-        scrollPane.getHorizontalScrollBar().addAdjustmentListener(e -> {
-            headerViewport.setViewPosition(new Point(e.getValue(), 0));
-        });
-
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener(e ->
+                headerViewport.setViewPosition(new Point(e.getValue(), 0))
+        );
         scrollPane.setViewportBorder(BorderFactory.createEmptyBorder());
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
         scrollPane.getVerticalScrollBar().setUnitIncrement(50);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(50);
         return scrollPane;
@@ -303,23 +382,21 @@ public class RoomPanel {
 
     private BuscaReservasResponse findReservationForDate(Long roomId, LocalDate date) {
         return mainPanel.getCurrentReservations().stream()
-                .filter(reserva -> reserva.quarto().equals(roomId))
-                .filter(reserva -> !date.isBefore(reserva.data_entrada()) && !date.isAfter(reserva.data_saida()))
+                .filter(r -> r.quarto().equals(roomId))
+                .filter(r -> !date.isBefore(r.data_entrada()) && !date.isAfter(r.data_saida()))
                 .findFirst().orElse(null);
     }
 
     private void updateSelectionForRoom(Long roomId, LocalDate hoveredDate) {
         LocalDate checkIn = mainPanel.getCheckInDateMap().get(roomId);
         if (checkIn == null) return;
-
         LocalDate start = checkIn.isBefore(hoveredDate) ? checkIn : hoveredDate;
-        LocalDate end = checkIn.isAfter(hoveredDate) ? checkIn : hoveredDate;
-
+        LocalDate end   = checkIn.isAfter(hoveredDate)  ? checkIn : hoveredDate;
         for (Component comp : mainPanel.getBackgroundPanel().getComponents()) {
             if (comp instanceof CalendarCell cell && cell.roomId.equals(roomId)) {
                 cell.setBackground(!cell.date.isBefore(start) && !cell.date.isAfter(end)
                         ? selectedColor
-                        : (cell.date.isEqual(LocalDate.now()) ? LIGHT_GRAY_2 : WHITE));
+                        : (cell.date.isEqual(LocalDate.now()) ? new Color(0xBBDEFB) : new Color(0xFAFBFA)));
             }
         }
     }
@@ -332,29 +409,30 @@ public class RoomPanel {
     public void resetCellsForRoom(Long roomId) {
         for (Component comp : mainPanel.getBackgroundPanel().getComponents()) {
             if (comp instanceof CalendarCell cell && cell.roomId.equals(roomId)) {
-                cell.setBackground(cell.date.isEqual(LocalDate.now()) ? LIGHT_GRAY_2 : WHITE);
+                cell.setBackground(cell.date.isEqual(LocalDate.now())
+                        ? new Color(0xBBDEFB) : new Color(0xFAFBFA));
                 cell.repaint();
             }
         }
     }
 
-    public JLabel createLabel(String text, Font font, Color foreground, Color background) {
-        JLabel label = new JLabel(text, SwingConstants.CENTER);
-        label.setFont(font);
-        label.setForeground(foreground);
-        if (background != null) {
-            label.setBackground(background);
-            label.setOpaque(true);
+    public JLabel createLabel(String text, Font font, Color fg, Color bg) {
+        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
+        lbl.setFont(font);
+        lbl.setForeground(fg);
+        if (bg != null) {
+            lbl.setBackground(bg);
+            lbl.setOpaque(true);
         }
-        return label;
+        return lbl;
     }
 
-    public JButton createButton(String text, Color background, Color foreground, ActionListener listener) {
-        JButton button = new JButton(text);
-        button.setBackground(background);
-        button.setForeground(foreground);
-        button.addActionListener(listener);
-        return button;
+    public JButton createButton(String text, Color bg, Color fg, ActionListener lst) {
+        JButton btn = new JButton(text);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.addActionListener(lst);
+        return btn;
     }
 
     private int encontrarIndiceDoQuarto(List<QuartoResponse> quartos, Long quartoId) {
@@ -366,25 +444,17 @@ public class RoomPanel {
     }
 
     public String getMonthName(LocalDate date) {
-        return date.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR")).toUpperCase();
+        return date.getMonth()
+                .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
+                .toUpperCase();
     }
 
     public static int randomNumber() {
-        Random random = new Random();
-        return random.nextInt(255) + 1;
-    }
-
-    public static Color corMuitoClara() {
-        Random random = new Random();
-        int r = random.nextInt(16) + 240;
-        int g = random.nextInt(16) + 240;
-        int b = random.nextInt(16) + 240;
-        return new Color(r, g, b);
+        return new Random().nextInt(255) + 1;
     }
 
     public static int randomNumberClaro() {
-        Random random = new Random();
-        return random.nextInt(90) + 160; // Sorteando de 160 até 249
+        return new Random().nextInt(90) + 160;
     }
 
     public static Color randomCorClara() {

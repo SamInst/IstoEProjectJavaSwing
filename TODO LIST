@@ -1,15 +1,23 @@
 # Calendario de Reservas
+
 - adicionar cards acima do calendario de reservas com as reservas mais proximas (dia atual ate 2 dias depois, por ordem de data e hora de chegada)
-- ao clicar em uma celula dia mostrar mini dashboard com as informacoes das reservas para o determinado dia
+- OK ao clicar em uma celula dia mostrar mini dashboard com as informacoes das reservas para o determinado dia
+- adicionar hover effect quando o mouse estiver em cima de uma celula dia
+- pintar bordas quando uma celula dia for selecionada
+- quando a celula dia for descelecionada, voltar a borda normal
 - mostrar dashboard das reservas do dia atual
 - adicionar botoes ilustrativos na faixa de reserva
-    (pagamento -> if(ok) verde : vermelho)
+    (pagamento -> if(pago) verde : vermelho)
     (hospedado -> if(true) verde : vermelho)
 - verificar as reservas de fim de mes, pois estao sumindo as faixas
-- revisar logica de reservas para mesma data e apartamento
+- OK revisar logica de reservas para mesma data e apartamento
 - adicionar nova reserva
 - adicionar validacoes da nova reserva
 - ajustar edicao de horario de chegada
-- adicionar novo campo hospedado na tabela de reservas
-- alterar logica de reservas (setar como hospedado quando o cliente chegar e finalizar a reserva somente quando a data de saida estiver expirada)
-- aumentar o painel para que nao corte as ultimas datas do calendario da reserva individual
+- OK adicionar novo campo hospedado na tabela de reservas
+- OK alterar logica de reservas (setar como hospedado quando o cliente chegar e finalizar a reserva somente quando a data de saida estiver expirada)
+- adicionar rotina para finalizar automaticamente as reservas quando a data de saida for menor que hoje
+- OK aumentar o painel para que nao corte as ultimas datas do calendario da reserva individual
+- adicionar validacao para nao permitir salvar pagamento com campos vazios(DESCRICAO, TIPO DE PAGAMENTO E VALOR)
+- adcicionar status visual de hospedado no popup da reserva selecionada
+- ao cancelar uma reserva, deve sumir o option pane

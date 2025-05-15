@@ -12,7 +12,8 @@ public record BuscaReservasResponse(
             LocalDate data_saida,
             LocalTime hora_prevista,
             List<Pessoas> pessoas,
-            List<Pagamentos> pagamentos
+            List<Pagamentos> pagamentos,
+            Boolean hospedado
     ){
         public record Pessoas(
                 Long pessoa_id,

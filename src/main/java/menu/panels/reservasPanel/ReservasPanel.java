@@ -100,20 +100,31 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     private void initializePanel() {
         removeAll();
         setLayout(new BorderLayout());
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         List<QuartoResponse> quartos = quartosRepository.buscaTodosOsQuartos();
         currentReservations = reservasRepository.buscaReservasAtivas();
 
+        JPanel topContentPanel = new JPanel(new BorderLayout());
+
         JPanel headerPanel = createHeaderPanel();
-        add(headerPanel, BorderLayout.NORTH);
+        JPanel occupancyPanel = roomPanel.createOccupancyPanel();
+
+        topContentPanel.add(headerPanel, BorderLayout.NORTH);
+        topContentPanel.add(occupancyPanel, BorderLayout.CENTER);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setOpaque(false);
+        mainPanel.add(topContentPanel);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         int daysInMonth = currentMonth.lengthOfMonth();
         int startDayOfMonth = 1;
 
         if (currentMonth.getYear() == LocalDate.now().getYear() &&
-                currentMonth.getMonth() == LocalDate.now().getMonth()) {
-            LocalDate yesterday = LocalDate.now().minusDays(1);
-            startDayOfMonth = yesterday.getDayOfMonth();
+            currentMonth.getMonth() == LocalDate.now().getMonth()) {
+            startDayOfMonth = LocalDate.now().getDayOfMonth();
             btnPrev.setEnabled(false);
         }
 
@@ -125,7 +136,9 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JLayeredPane layeredPane = roomPanel.createLayeredPane(quartos, daysToShow, startDayOfMonth, numRooms);
         JScrollPane scrollPane = roomPanel.createScrollPane(layeredPane, roomsPanel, daysHeader);
 
-        add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(scrollPane);
+
+        add(mainPanel, BorderLayout.CENTER);
     }
 
     private JPanel createHeaderPanel() {
@@ -133,7 +146,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         String yearStr = String.valueOf(currentMonth.getYear());
-        JLabel yearLabel = roomPanel.createLabel(yearStr, new Font("Roboto", Font.BOLD, 16), BLUE, BACKGROUND_GRAY);
+        JLabel yearLabel = roomPanel.createLabel(yearStr, new Font("Roboto", Font.PLAIN, 25), DARK_GRAY, WHITE);
         yearLabel.setHorizontalAlignment(SwingConstants.LEFT);
         yearLabel.setPreferredSize(new Dimension(70, 30));
 
@@ -142,7 +155,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         navPanel.setOpaque(false);
         navPanel.setPreferredSize(new Dimension(260, 30));
 
-        btnPrev = roomPanel.createButton(" < ", WHITE, BLUE, e -> {
+        btnPrev = roomPanel.createButton(" < ", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.minusMonths(1);
             refreshPanel();
         });
@@ -150,11 +163,11 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         btnPrev.setPreferredSize(new Dimension(20, 30));
 
         String monthName = roomPanel.getMonthName(currentMonth);
-        JLabel monthLabel = roomPanel.createLabel(monthName, new Font("Roboto", Font.BOLD, 18), BLUE, BACKGROUND_GRAY);
+        JLabel monthLabel = roomPanel.createLabel(monthName, new Font("Roboto", Font.BOLD, 18), DARK_GRAY, BACKGROUND_GRAY);
         monthLabel.setPreferredSize(new Dimension(150, 30));
         monthLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        JButton btnNext = roomPanel.createButton(" > ", WHITE, BLUE, e -> {
+        JButton btnNext = roomPanel.createButton(" > ", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.plusMonths(1);
             refreshPanel();
         });
@@ -173,6 +186,8 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     }
 
     public void handleCellClick(RoomPanel.CalendarCell cell) {
+        roomPanel.updateOccupancyPanel(cell.date);
+
         if (!checkInDateMap.containsKey(cell.roomId)) {
             checkInDateMap.put(cell.roomId, cell.date);
             cell.setBackground(roomPanel.getSelectedColor());
@@ -191,7 +206,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             roomPanel.resetCellsForRoom(cell.roomId);
         }
     }
-
 
     private void showReservationFrame(Long roomId, LocalDate checkIn, LocalDate checkOut) {
         JFrame frame = new JFrame("Nova Reserva");
@@ -228,7 +242,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             if ((e.getChangeFlags() & HierarchyEvent.PARENT_CHANGED) != 0)
                 SwingUtilities.invokeLater(popupContainer::requestFocusInWindow);
         });
-
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -379,8 +392,8 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                 .forEach(q ->
                         roomItems.add(
                                 "Quarto "
-                                        + (q.quarto_id() < 10 ? "0" + q.quarto_id() : q.quarto_id())
-                                        + " - " + q.quantidade_pessoas() + " pessoas"
+                                + (q.quarto_id() < 10 ? "0" + q.quarto_id() : q.quarto_id())
+                                + " - " + q.quantidade_pessoas() + " pessoas"
                         )
                 );
         quartoComboBox = new JComboBox<>(roomItems);
@@ -398,7 +411,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
 
         JPanel mainHorizontalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         mainHorizontalPanel.setBorder(BorderFactory.createEmptyBorder(-8, 0, 0, 0));
-        mainHorizontalPanel.setBackground(BACKGROUND_GRAY);
 
         JPanel datePanel = new JPanel(new BorderLayout());
         JPanel checkinCheckoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
@@ -434,7 +446,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         datePickerRange.setDateSelectionAble(date -> true);
         datePickerRange.setDateSelectionMode(DatePicker.DateSelectionMode.BETWEEN_DATE_SELECTED);
         datePickerRange.setSelectedDateRange(reserva.data_entrada(), reserva.data_saida());
-        datePickerRange.setPreferredSize(new Dimension(260, 250));
+        datePickerRange.setPreferredSize(new Dimension(200, 260));
         datePickerRange.setAlignmentX(Component.CENTER_ALIGNMENT);
         datePanel.add(datePickerRange, BorderLayout.CENTER);
 
@@ -509,27 +521,28 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         });
 
         quartoComboBox.addActionListener(e -> {
-            System.out.println("antigo quarto " + quartoComboBox.getSelectedItem());
-
             long novoQuarto = Long.parseLong(
                     ((String) quartoComboBox.getSelectedItem())
                             .split(" - ")[0]
                             .replace("Quarto ", "")
                             .replaceFirst("^0+", "")
             );
-            System.out.println(novoQuarto);
-            if (reservasRepository.existeConflitoReserva(novoQuarto, checkinDate, checkoutDate, reserva.reserva_id())) {
+
+            // Verifica conflito ANTES de permitir a troca
+            if (!reservasRepository.podeMoverReserva(novoQuarto, checkinDate, checkoutDate, reserva.reserva_id())) {
                 notification(Type.ERROR, TOP_CENTER, "Este quarto já está reservado no período selecionado!");
+                quartoComboBox.setSelectedItem( // Reverte para o quarto anterior
+                        "Quarto " + (reserva.quarto() < 10 ? "0" + reserva.quarto() : reserva.quarto()) +
+                        " - " + quartosRepository.buscaQuartoPorId(reserva.quarto()).quantidade_pessoas() + " pessoas"
+                );
                 return;
             }
 
-            List<DatasReserva> novasDatas =
-                    reservasRepository.datasReservadasPorQuarto(
-                            novoQuarto, reserva.reserva_id()
-                    );
+            // Atualiza as datas reservadas no DatePicker
+            List<DatasReserva> novasDatas = reservasRepository.datasReservadasPorQuarto(novoQuarto, reserva.reserva_id());
             datePickerRange.setReservasDoQuarto(novasDatas);
 
-
+            // Confirma a troca do quarto
             reservasRepository.atualizarQuarto(reserva.reserva_id(), novoQuarto);
             categoriaDescricaoLabel.setText(
                     quartosRepository.buscaQuartoPorId(novoQuarto)
@@ -538,6 +551,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                             .toUpperCase()
             );
 
+            // Atualiza os valores exibidos
             int dias = Period.between(checkinDate, checkoutDate).getDays();
             double valorDia = quartosRepository.getValorCategoria(novoQuarto, reserva.pessoas().size()) != null ?
                     quartosRepository.getValorCategoria(novoQuarto, reserva.pessoas().size()) : 0.0;
@@ -618,9 +632,9 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             MessageAlerts.getInstance().showMessage(
                     "Deseja cancelar a Reserva #" + reserva.reserva_id() + "?",
                     quartoInfo + "\n" +
-                            "Check-in: " + reserva.data_entrada() + "  |  Checkout: " + reserva.data_saida() + "\n" +
-                            "\n👥 Pessoas:\n" + pessoasFormatadas +
-                            "\n💳 Pagamentos:\n" + pagamentosFormatados,
+                    "Check-in: " + reserva.data_entrada() + "  |  Checkout: " + reserva.data_saida() + "\n" +
+                    "\n👥 Pessoas:\n" + pessoasFormatadas +
+                    "\n💳 Pagamentos:\n" + pagamentosFormatados,
                     MessageAlerts.MessageType.ERROR,
                     MessageAlerts.OK_OPTION,
                     new PopupCallbackAction() {
@@ -631,7 +645,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                                 refreshPanel();
                                 notification(Type.SUCCESS, TOP_CENTER,
                                         "Reserva cancelada com sucesso!\n#" + reserva.reserva_id() + " - " + quartoInfo + "\n" +
-                                                reserva.pessoas().get(0).nome());
+                                        reserva.pessoas().get(0).nome());
                             }
                         }
                     });
