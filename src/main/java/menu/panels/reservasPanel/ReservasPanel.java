@@ -157,7 +157,6 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             refreshPanel();
         });
 
-
         JPanel monthPanel = new JPanel(new BorderLayout());
         monthPanel.setOpaque(false);
 

@@ -363,4 +363,117 @@ public class ReservasRepository {
     public boolean podeMoverReserva(long novoQuartoId, LocalDate checkIn, LocalDate checkOut, long reservaIdParaExcluir) {
         return !existeConflitoReserva(novoQuartoId, checkIn, checkOut, reservaIdParaExcluir);
     }
+
+    public static int contarTotalPessoasPorData(LocalDate data) {
+        String sql = """
+            SELECT SUM(r.quantidade_pessoas) as total_pessoas
+            FROM reservas r
+            WHERE r.data_entrada <= ?
+            AND r.data_saida > ?
+            """;
+        try (Connection conn = PostgresDatabaseConnect.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, Date.valueOf(data));
+            stmt.setDate(2, Date.valueOf(data));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total_pessoas");
+                    return rs.wasNull() ? 0 : total;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Erro ao contar total de pessoas por data: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public static int contarPessoasReservasAtivasPorData(LocalDate data) {
+        String sql = """
+            SELECT count(p.id)  as total_pessoas
+            FROM reservas r
+            join public.reserva_pessoas rp on r.reserva_id = rp.reserva_id
+            join public.pessoa p on p.id = rp.pessoa_id
+            WHERE r.ativa = true
+            AND r.data_entrada <= ?
+            AND r.data_saida > ?
+            """;
+        try (Connection conn = PostgresDatabaseConnect.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, Date.valueOf(data));
+            stmt.setDate(2, Date.valueOf(data));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total_pessoas");
+                    return rs.wasNull() ? 0 : total;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Erro ao contar pessoas com reservas ativas por data: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public static int contarPessoasHospedadasPorData(LocalDate data) {
+        String sql = """
+            SELECT count(p.id) as total_pessoas
+            FROM reservas r
+            join public.reserva_pessoas rp on r.reserva_id = rp.reserva_id
+            join public.pessoa p on p.id = rp.pessoa_id
+            WHERE r.ativa = true
+            AND r.hospedado = true
+            AND r.data_entrada <= ?
+            AND r.data_saida > ?
+            """;
+        try (Connection conn = PostgresDatabaseConnect.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, Date.valueOf(data));
+            stmt.setDate(2, Date.valueOf(data));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total_pessoas");
+                    return rs.wasNull() ? 0 : total;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("Erro ao contar pessoas hospedadas por data: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+//    public static int contarPessoasReaisPorData(LocalDate data, boolean apenasHospedadas, boolean apenasAtivas) {
+//        StringBuilder sql = new StringBuilder("""
+//            SELECT COUNT(rp.pessoa_id) as total_pessoas
+//            FROM reserva_pessoas rp
+//            JOIN reservas r ON r.reserva_id = rp.reserva_id
+//            WHERE r.data_entrada <= ?
+//            AND r.data_saida > ?
+//            """);
+//
+//        if (apenasAtivas) {
+//            sql.append("AND r.ativa = true ");
+//        }
+//
+//        if (apenasHospedadas) {
+//            sql.append("AND r.hospedado = true ");
+//        }
+//
+//        try (Connection conn = PostgresDatabaseConnect.connect();
+//             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+//            stmt.setDate(1, Date.valueOf(data));
+//            stmt.setDate(2, Date.valueOf(data));
+//            try (ResultSet rs = stmt.executeQuery()) {
+//                if (rs.next()) {
+//                    int total = rs.getInt("total_pessoas");
+//                    return rs.wasNull() ? 0 : total;
+//                }
+//            }
+//        } catch (SQLException e) {
+//            LOGGER.severe("Erro ao contar pessoas reais por data: " + e.getMessage());
+//            throw new RuntimeException(e);
+//        }
+//        return 0;
+//    }
 }

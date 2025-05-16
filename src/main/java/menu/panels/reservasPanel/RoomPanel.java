@@ -37,6 +37,7 @@ public class RoomPanel {
     private JLabel currentDateLabel;
     private JLabel occupancyPercentLabel;
     private JLabel occupancyCountLabel;
+    private JLabel peopleHospedadasLabel;
 
     public RoomPanel(ReservasPanel mainPanel) {
         this.mainPanel = mainPanel;
@@ -106,11 +107,14 @@ public class RoomPanel {
 
         JPanel dataRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dataRow.setOpaque(false);
-        occupancyPercentLabel = createLabel("Ocupação: 0%", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
-        dataRow.add(occupancyPercentLabel);
+
         dataRow.add(Box.createHorizontalStrut(30));
-        occupancyCountLabel = createLabel("Quartos: 0/0", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        occupancyCountLabel = createLabel("Quartos: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
         dataRow.add(occupancyCountLabel);
+
+        dataRow.add(Box.createHorizontalStrut(30));
+        peopleHospedadasLabel = createLabel("Pessoas Hospedadas: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        dataRow.add(peopleHospedadasLabel);
 
         contentPanel.add(titleRow);
         contentPanel.add(dataRow);
@@ -130,8 +134,20 @@ public class RoomPanel {
         String dayOfWeek = date.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
         currentDateLabel.setText("Ocupação para: " + dayStr + " (" + dayOfWeek + ")");
-        occupancyPercentLabel.setText("Ocupação: " + ocupacao.percentual() + "%");
-        occupancyCountLabel.setText("Quartos: " + ocupacao.ocupados() + "/" + ocupacao.total());
+        occupancyCountLabel.setText(
+                "Quartos: " +
+                ocupacao.ocupados() + "/" + ocupacao.total() +
+                "(" + ocupacao.percentual() + "%)"
+        );
+
+        int hospedadas = ReservasRepository.contarPessoasHospedadasPorData(date);
+        int totalAtivas = ReservasRepository.contarPessoasReservasAtivasPorData(date);
+        int percPessoas = totalAtivas > 0 ? hospedadas * 100 / totalAtivas : 0;
+        peopleHospedadasLabel.setText(
+                "Pessoas Hospedadas: " +
+                hospedadas + "/" + totalAtivas +
+                "(" + percPessoas + "%)"
+        );
     }
 
     public JPanel createDaysHeaderPanel(int daysToShow, int startDay, LocalDate currentMonth) {
@@ -233,8 +249,7 @@ public class RoomPanel {
             for (int colIndex = 0; colIndex < daysToShow; colIndex++) {
                 LocalDate date = mainPanel.getCurrentMonth().withDayOfMonth(startDay + colIndex);
                 CalendarCell cell = new CalendarCell(roomId, date, row, colIndex);
-                cell.setBackground(date.isEqual(LocalDate.now())
-                        ? new Color(0xE3F2FD) : WHITE);
+                cell.setBackground(WHITE);
 
                 BuscaReservasResponse reserva = findReservationForDate(roomId, date);
 
@@ -254,10 +269,7 @@ public class RoomPanel {
                     @Override
                     public void mouseExited(MouseEvent e) {
                         boolean isSelected = isSelectedRange(cell.roomId, cell.date);
-                        cell.setBackground(isSelected
-                                ? selectedColor
-                                : (cell.date.isEqual(LocalDate.now())
-                                ? new Color(0xE3F2FD) : WHITE));
+                        cell.setBackground(WHITE);
                     }
                     @Override
                     public void mouseClicked(MouseEvent e) {
