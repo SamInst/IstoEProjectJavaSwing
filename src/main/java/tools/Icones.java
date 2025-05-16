@@ -66,4 +66,7 @@ public class Icones {
     public static FlatSVGIcon relogio = new FlatSVGIcon(PATH + "relogio.svg");
     public static FlatSVGIcon quarto = new FlatSVGIcon(PATH + "quarto.svg");
     public static FlatSVGIcon close = new FlatSVGIcon(PATH + "close.svg");
+
+    public static FlatSVGIcon back = new FlatSVGIcon("icon/back.svg");
+    public static FlatSVGIcon new_forward = new FlatSVGIcon("icon/forward.svg");
 }

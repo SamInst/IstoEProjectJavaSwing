@@ -40,10 +40,18 @@ public class ShadowButton extends JButton {
         rippleEffect.setRippleColor(color);
     }
 
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+        repaint();
+    }
+
     @Getter
     private int round = 10;
     @Getter
     private Color shadowColor = new Color(170, 170, 170);
+    // Nova variável para armazenar a cor da borda
+    private Color borderColor = null;
+    private int borderWidth = 1;
     private BufferedImage imageShadow;
     private final Insets shadowSize = new Insets(2, 5, 8, 5);
     private final RippleEffect rippleEffect = new RippleEffect(this);
@@ -68,6 +76,14 @@ public class ShadowButton extends JButton {
         g2.setColor(getBackground());
         Area area = new Area(new RoundRectangle2D.Double(x, y, width, height, round, round));
         g2.fill(area);
+
+        // Desenha a borda se a cor da borda não for nula
+        if (borderColor != null) {
+            g2.setColor(borderColor);
+            g2.setStroke(new BasicStroke(borderWidth));
+            g2.draw(new RoundRectangle2D.Double(x, y, width, height, round, round));
+        }
+
         rippleEffect.reder(grphcs, area);
         g2.dispose();
         super.paintComponent(grphcs);

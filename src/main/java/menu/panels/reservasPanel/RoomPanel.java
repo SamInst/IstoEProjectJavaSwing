@@ -144,13 +144,11 @@ public class RoomPanel {
         for (int col = 0; col < daysToShow; col++) {
             LocalDate date = currentMonth.withDayOfMonth(startDay + col);
 
-            JPanel cellPanel = new JPanel();
+            ShadowButton cellPanel = new ShadowButton();
+            cellPanel.enableHoverEffect();
             cellPanel.setLayout(new BorderLayout());
             cellPanel.setPreferredSize(cellSize);
             cellPanel.setMaximumSize(cellSize);
-            cellPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY.brighter()));
-            cellPanel.setBackground(Color.WHITE);
-
 
             JLabel dayNumber = new JLabel(String.valueOf(date.getDayOfMonth()));
             dayNumber.setFont(new Font("Roboto", Font.BOLD, 35));
@@ -182,9 +180,9 @@ public class RoomPanel {
 
             if (date.isEqual(today)) {
                 cellPanel.setBackground(todayBg);
+                cellPanel.setShadowColor(todayBg);
                 dayNumber.setForeground(WHITE);
                 weekdayLabel.setForeground(WHITE);
-                cellPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
             }
 
             daysHeader.add(cellPanel);

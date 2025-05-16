@@ -16,10 +16,7 @@ import request.PernoiteRequest;
 import response.DatasReserva;
 import response.QuartoResponse;
 import timePicker.time.TimePicker;
-import tools.Converter;
-import tools.MaterialTabbed;
-import tools.Refreshable;
-import tools.SimpleDocumentListener;
+import tools.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,8 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 
-import static buttons.Botoes.btn_azul;
-import static buttons.Botoes.btn_vermelho;
+import static buttons.Botoes.*;
 import static java.time.LocalDate.now;
 import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
@@ -67,6 +63,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     private JFormattedTextField checkoutField;
     private JComboBox<String> quartoComboBox;
     private JButton btnPrev;
+    private JButton btnNext;
 
     private final RoomPanel roomPanel;
     private final PeoplePanel peoplePanel;
@@ -117,7 +114,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setOpaque(false);
         mainPanel.add(topContentPanel);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         int daysInMonth = currentMonth.lengthOfMonth();
         int startDayOfMonth = 1;
@@ -146,38 +143,42 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         String yearStr = String.valueOf(currentMonth.getYear());
-        JLabel yearLabel = roomPanel.createLabel(yearStr, new Font("Roboto", Font.PLAIN, 25), DARK_GRAY, WHITE);
+        JLabel yearLabel = roomPanel.createLabel("Calendário de Reservas " + yearStr, new Font("Roboto", Font.PLAIN, 25), GRAY, null);
         yearLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        yearLabel.setPreferredSize(new Dimension(70, 30));
+        yearLabel.setPreferredSize(new Dimension(450, 30));
 
-        JPanel navPanel = new JPanel();
-        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.X_AXIS));
+        ShadowButton navPanel = new ShadowButton();
+        navPanel.setLayout(new BorderLayout(5, 0));
         navPanel.setOpaque(false);
-        navPanel.setPreferredSize(new Dimension(260, 30));
+        navPanel.setPreferredSize(new Dimension(200, 45));
 
-        btnPrev = roomPanel.createButton(" < ", WHITE, DARK_GRAY, e -> {
+        btnPrev = roomPanel.createButton("", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.minusMonths(1);
             refreshPanel();
         });
 
-        btnPrev.setPreferredSize(new Dimension(20, 30));
+
+        JPanel monthPanel = new JPanel(new BorderLayout());
+        monthPanel.setOpaque(false);
 
         String monthName = roomPanel.getMonthName(currentMonth);
-        JLabel monthLabel = roomPanel.createLabel(monthName, new Font("Roboto", Font.BOLD, 18), DARK_GRAY, BACKGROUND_GRAY);
-        monthLabel.setPreferredSize(new Dimension(150, 30));
-        monthLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        String formattedMonthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1).toLowerCase();
+        JLabel monthLabel = roomPanel.createLabel(formattedMonthName, new Font("Roboto", Font.PLAIN, 18), DARK_GRAY, null);
 
-        JButton btnNext = roomPanel.createButton(" > ", WHITE, DARK_GRAY, e -> {
+        monthLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        monthPanel.add(monthLabel, BorderLayout.CENTER);
+
+        btnNext = roomPanel.createButton("", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.plusMonths(1);
             refreshPanel();
         });
 
-        btnNext.setPreferredSize(new Dimension(50, 30));
-        navPanel.add(btnPrev);
-        navPanel.add(Box.createHorizontalStrut(5));
-        navPanel.add(monthLabel);
-        navPanel.add(Box.createHorizontalStrut(5));
-        navPanel.add(btnNext);
+        btnPrev.setIcon(Icones.back);
+        btnNext.setIcon(Icones.new_forward);
+
+        navPanel.add(btnPrev, BorderLayout.WEST);
+        navPanel.add(monthPanel, BorderLayout.CENTER);
+        navPanel.add(btnNext, BorderLayout.EAST);
 
         headerPanel.add(yearLabel, BorderLayout.WEST);
         headerPanel.add(navPanel, BorderLayout.EAST);
@@ -680,9 +681,9 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
             MessageAlerts.getInstance().showMessage(
                     "Deseja mover a Reserva #" + reserva.reserva_id() + "\n para Pernoites?",
                     quartoInfo + "\n" +
-                            "Check-in: " + reserva.data_entrada() + "  |  Checkout: " + reserva.data_saida() + "\n" +
-                            "\n👥 Pessoas:\n" + pessoasFormatadas +
-                            "\n💳 Pagamentos:\n" + pagamentosFormatados,
+                    "Check-in: " + reserva.data_entrada() + "  |  Checkout: " + reserva.data_saida() + "\n" +
+                    "\n👥 Pessoas:\n" + pessoasFormatadas +
+                    "\n💳 Pagamentos:\n" + pagamentosFormatados,
                     MessageAlerts.MessageType.DEFAULT,
                     MessageAlerts.YES_NO_OPTION,
                     new PopupCallbackAction() {
@@ -693,7 +694,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
                                 refreshPanel();
                                 notification(Type.SUCCESS, TOP_CENTER,
                                         "Pernoite adicionado com sucesso!\n#" +
-                                                reserva.pessoas().get(0).nome());
+                                        reserva.pessoas().get(0).nome());
                             }
                         }
                     });
