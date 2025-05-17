@@ -65,7 +65,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     private JButton btnPrev;
     private JButton btnNext;
 
-    private final RoomPanel roomPanel;
+    private final CalendarioPanel calendarioPanel;
     private final PeoplePanel peoplePanel;
     private final PaymentPanel paymentPanel;
     private final AnimationManager animationManager;
@@ -79,7 +79,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         this.selectedRoom = "";
         this.checkinDate = LocalDate.now();
         this.checkoutDate = LocalDate.now().plusDays(1);
-        this.roomPanel = new RoomPanel(this);
+        this.calendarioPanel = new CalendarioPanel(this);
         this.peoplePanel = new PeoplePanel(this);
         this.paymentPanel = new PaymentPanel(this);
         this.animationManager = new AnimationManager();
@@ -105,7 +105,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel topContentPanel = new JPanel(new BorderLayout());
 
         JPanel headerPanel = createHeaderPanel();
-        JPanel occupancyPanel = roomPanel.createOccupancyPanel();
+        JPanel occupancyPanel = calendarioPanel.createOccupancyPanel();
 
         topContentPanel.add(headerPanel, BorderLayout.NORTH);
         topContentPanel.add(occupancyPanel, BorderLayout.CENTER);
@@ -128,10 +128,10 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         int daysToShow = daysInMonth - startDayOfMonth + 1;
         int numRooms = quartos.size();
 
-        JPanel daysHeader = roomPanel.createDaysHeaderPanel(daysToShow, startDayOfMonth, currentMonth);
-        JPanel roomsPanel = roomPanel.createRoomsPanel(quartos, numRooms);
-        JLayeredPane layeredPane = roomPanel.createLayeredPane(quartos, daysToShow, startDayOfMonth, numRooms);
-        JScrollPane scrollPane = roomPanel.createScrollPane(layeredPane, roomsPanel, daysHeader);
+        JPanel daysHeader = calendarioPanel.createDaysHeaderPanel(daysToShow, startDayOfMonth, currentMonth);
+        JPanel roomsPanel = calendarioPanel.createRoomsPanel(quartos, numRooms);
+        JLayeredPane layeredPane = calendarioPanel.createLayeredPane(quartos, daysToShow, startDayOfMonth, numRooms);
+        JScrollPane scrollPane = calendarioPanel.createScrollPane(layeredPane, roomsPanel, daysHeader);
 
         mainPanel.add(scrollPane);
 
@@ -143,7 +143,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         String yearStr = String.valueOf(currentMonth.getYear());
-        JLabel yearLabel = roomPanel.createLabel("Calendário de Reservas " + yearStr, new Font("Roboto", Font.PLAIN, 25), GRAY, null);
+        JLabel yearLabel = calendarioPanel.createLabel("Calendário de Reservas " + yearStr, new Font("Roboto", Font.PLAIN, 25), GRAY, null);
         yearLabel.setHorizontalAlignment(SwingConstants.LEFT);
         yearLabel.setPreferredSize(new Dimension(450, 30));
 
@@ -152,7 +152,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         navPanel.setOpaque(false);
         navPanel.setPreferredSize(new Dimension(200, 45));
 
-        btnPrev = roomPanel.createButton("", WHITE, DARK_GRAY, e -> {
+        btnPrev = calendarioPanel.createButton("", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.minusMonths(1);
             refreshPanel();
         });
@@ -160,14 +160,14 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel monthPanel = new JPanel(new BorderLayout());
         monthPanel.setOpaque(false);
 
-        String monthName = roomPanel.getMonthName(currentMonth);
+        String monthName = calendarioPanel.getMonthName(currentMonth);
         String formattedMonthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1).toLowerCase();
-        JLabel monthLabel = roomPanel.createLabel(formattedMonthName, new Font("Roboto", Font.PLAIN, 18), DARK_GRAY, null);
+        JLabel monthLabel = calendarioPanel.createLabel(formattedMonthName, new Font("Roboto", Font.PLAIN, 18), DARK_GRAY, null);
 
         monthLabel.setHorizontalAlignment(SwingConstants.CENTER);
         monthPanel.add(monthLabel, BorderLayout.CENTER);
 
-        btnNext = roomPanel.createButton("", WHITE, DARK_GRAY, e -> {
+        btnNext = calendarioPanel.createButton("", WHITE, DARK_GRAY, e -> {
             currentMonth = currentMonth.plusMonths(1);
             refreshPanel();
         });
@@ -185,12 +185,12 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         return headerPanel;
     }
 
-    public void handleCellClick(RoomPanel.CalendarCell cell) {
-        roomPanel.updateOccupancyPanel(cell.date);
+    public void handleCellClick(CalendarioPanel.CalendarCell cell) {
+        calendarioPanel.updateOccupancyPanel(cell.date);
 
         if (!checkInDateMap.containsKey(cell.roomId)) {
             checkInDateMap.put(cell.roomId, cell.date);
-            cell.setBackground(roomPanel.getSelectedColor());
+            cell.setBackground(calendarioPanel.getSelectedColor());
         } else {
             LocalDate checkIn = checkInDateMap.get(cell.roomId);
             LocalDate checkOut = cell.date;
@@ -203,7 +203,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
 
             showReservationFrame(cell.roomId, checkIn, checkOut);
 
-            roomPanel.resetCellsForRoom(cell.roomId);
+            calendarioPanel.resetCellsForRoom(cell.roomId);
         }
     }
 
@@ -213,9 +213,9 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         frame.setSize(300, 150);
         frame.setLayout(new GridLayout(3, 1));
 
-        frame.add(roomPanel.createLabel("Quarto: " + roomId, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
-        frame.add(roomPanel.createLabel("Data de Entrada: " + checkIn, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
-        frame.add(roomPanel.createLabel("Data de Saída: " + checkOut, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
+        frame.add(calendarioPanel.createLabel("Quarto: " + roomId, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
+        frame.add(calendarioPanel.createLabel("Data de Entrada: " + checkIn, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
+        frame.add(calendarioPanel.createLabel("Data de Saída: " + checkOut, new Font("Roboto", Font.PLAIN, 14), BLACK, WHITE));
 
         frame.setLocationRelativeTo(this);
         frame.setVisible(true);
@@ -250,7 +250,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
 
-        JLabel titleLabel = roomPanel.createLabel("Detalhes da reserva # " + reserva.reserva_id(),
+        JLabel titleLabel = calendarioPanel.createLabel("Detalhes da reserva # " + reserva.reserva_id(),
                 new Font("Roboto", Font.BOLD, 17), DARK_GRAY, null);
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
@@ -338,13 +338,13 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         infoGridPanel.setOpaque(false);
         infoGridPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
 
-        labelPessoasValue = roomPanel.createLabel(String.valueOf(reserva.pessoas().size()),
+        labelPessoasValue = calendarioPanel.createLabel(String.valueOf(reserva.pessoas().size()),
                 new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
-        labelValorDiariaValue = roomPanel.createLabel("R$ 0,00",
+        labelValorDiariaValue = calendarioPanel.createLabel("R$ 0,00",
                 new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
-        labelDiariasValue = roomPanel.createLabel("0",
+        labelDiariasValue = calendarioPanel.createLabel("0",
                 new Font("Roboto", Font.BOLD, 14), DARK_GRAY, null);
-        labelTotalValue = roomPanel.createLabel("R$ 0,00",
+        labelTotalValue = calendarioPanel.createLabel("R$ 0,00",
                 new Font("Roboto", Font.BOLD, 14), GREEN, null);
 
         infoGridPanel.add(createFlowPanel("Pessoas:", labelPessoasValue));
@@ -358,7 +358,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     private JPanel createFlowPanel(String labelText, JLabel valueLabel) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         panel.setOpaque(false);
-        panel.add(roomPanel.createLabel(labelText, new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null));
+        panel.add(calendarioPanel.createLabel(labelText, new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null));
         panel.add(valueLabel);
         return panel;
     }
@@ -372,12 +372,12 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel quartoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         quartoPanel.setOpaque(false);
 
-        JLabel quartoLabel = roomPanel.createLabel("Quarto:",
+        JLabel quartoLabel = calendarioPanel.createLabel("Quarto:",
                 new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
-        JLabel categoriaLabel = roomPanel.createLabel("Categoria:",
+        JLabel categoriaLabel = calendarioPanel.createLabel("Categoria:",
                 new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
 
-        JLabel categoriaDescricaoLabel = roomPanel.createLabel(
+        JLabel categoriaDescricaoLabel = calendarioPanel.createLabel(
                 quartosRepository.buscaQuartoPorId(reserva.quarto())
                         .categoria()
                         .categoria()
@@ -416,7 +416,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel checkinCheckoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         checkinCheckoutPanel.setOpaque(false);
 
-        JLabel checkinLabel = roomPanel.createLabel("Check-in:",
+        JLabel checkinLabel = calendarioPanel.createLabel("Check-in:",
                 new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
         checkinLabel.setPreferredSize(new Dimension(70, 25));
 
@@ -424,7 +424,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         checkinField.setText(reserva.data_entrada().format(df));
         checkinField.setColumns(7);
 
-        JLabel checkoutLabel = roomPanel.createLabel("Check-out:",
+        JLabel checkoutLabel = calendarioPanel.createLabel("Check-out:",
                 new Font("Roboto", Font.PLAIN, 14), DARK_GRAY, null);
         checkoutLabel.setPreferredSize(new Dimension(70, 25));
 
@@ -453,7 +453,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         JPanel timePanel = new JPanel(new BorderLayout());
         timePanel.setOpaque(false);
 
-        JLabel horarioTitulo = roomPanel.createLabel(
+        JLabel horarioTitulo = calendarioPanel.createLabel(
                 "Horário previsto de chegada:",
                 new Font("Roboto", Font.PLAIN, 14),
                 DARK_GRAY,
@@ -788,5 +788,15 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
 
     public JLabel getLabelTotalValue() {
         return labelTotalValue;
+    }
+
+    private List<JLabel> roomLabels;
+
+    public void setRoomLabels(List<JLabel> roomLabels) {
+        this.roomLabels = roomLabels;
+    }
+
+    public List<JLabel> getRoomLabels() {
+        return this.roomLabels;
     }
 }

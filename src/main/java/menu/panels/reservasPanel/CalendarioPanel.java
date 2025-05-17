@@ -1,7 +1,6 @@
 package menu.panels.reservasPanel;
 
 import buttons.ShadowButton;
-import repository.QuartosRepository;
 import repository.ReservasRepository;
 import request.BuscaReservasResponse;
 import response.DatasReserva;
@@ -18,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -25,7 +25,7 @@ import java.util.Random;
 import static buttons.Botoes.*;
 import static tools.CorPersonalizada.*;
 
-public class RoomPanel {
+public class CalendarioPanel {
     private final ReservasPanel mainPanel;
     private final Dimension cellSize = new Dimension(300, 60);
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
@@ -39,7 +39,7 @@ public class RoomPanel {
     private JLabel occupancyCountLabel;
     private JLabel peopleHospedadasLabel;
 
-    public RoomPanel(ReservasPanel mainPanel) {
+    public CalendarioPanel(ReservasPanel mainPanel) {
         this.mainPanel = mainPanel;
     }
 
@@ -216,6 +216,9 @@ public class RoomPanel {
         roomsPanel.setLayout(new GridLayout(numRooms, 1, 0, 0));
         roomsPanel.setBackground(BACKGROUND_GRAY);
         Dimension roomCellSize = new Dimension(60, cellSize.height);
+
+        List<JLabel> roomLabels = new ArrayList<>();
+
         for (QuartoResponse quarto : quartos) {
             Long roomId = quarto.quarto_id();
             JLabel roomLabel = createLabel(
@@ -225,7 +228,10 @@ public class RoomPanel {
             roomLabel.setPreferredSize(roomCellSize);
             roomLabel.setBorder(defaultCellBorder);
             roomsPanel.add(roomLabel);
+            roomLabels.add(roomLabel);
         }
+
+        mainPanel.setRoomLabels(roomLabels);
         this.roomsPanel = roomsPanel;
         return roomsPanel;
     }
@@ -264,12 +270,37 @@ public class RoomPanel {
                 cell.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (reserva == null) cell.setBackground(new Color(0xE3F2FD).darker());
+                        if (reserva == null) {
+                            cell.setBackground(new Color(0xE3F2FD).darker());
+
+                            // Obtém as referências às células dos quartos do mainPanel
+                            List<JLabel> roomLabels = mainPanel.getRoomLabels();
+                            if (roomLabels != null && cell.row < roomLabels.size()) {
+                                JLabel roomLabel = roomLabels.get(cell.row);
+                                // Salva a cor original para restaurar depois
+                                Color originalColor = roomLabel.getBackground();
+                                roomLabel.putClientProperty("originalColor", originalColor);
+                                roomLabel.setBackground(new Color(0xE3F2FD).darker());
+                            }
+                        }
                     }
+
                     @Override
                     public void mouseExited(MouseEvent e) {
                         boolean isSelected = isSelectedRange(cell.roomId, cell.date);
                         cell.setBackground(WHITE);
+
+                        // Restaura a cor original da célula do quarto
+                        List<JLabel> roomLabels = mainPanel.getRoomLabels();
+                        if (roomLabels != null && cell.row < roomLabels.size()) {
+                            JLabel roomLabel = roomLabels.get(cell.row);
+                            Color originalColor = (Color) roomLabel.getClientProperty("originalColor");
+                            if (originalColor != null) {
+                                roomLabel.setBackground(originalColor);
+                            } else {
+                                roomLabel.setBackground(new Color(0x5E9984)); // Cor padrão
+                            }
+                        }
                     }
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -419,8 +450,7 @@ public class RoomPanel {
     public void resetCellsForRoom(Long roomId) {
         for (Component comp : mainPanel.getBackgroundPanel().getComponents()) {
             if (comp instanceof CalendarCell cell && cell.roomId.equals(roomId)) {
-                cell.setBackground(cell.date.isEqual(LocalDate.now())
-                        ? new Color(0xBBDEFB) : new Color(0xFAFBFA));
+                cell.setBackground(WHITE);
                 cell.repaint();
             }
         }
