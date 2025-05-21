@@ -360,6 +360,32 @@ public class ReservasRepository {
         return new OcupacaoDia(0, 0, 0);
     }
 
+    public static int buscarReservasHospedadasPorDia(LocalDate dia) {
+        String sql = """
+                SELECT COUNT(*) AS reservasHospedadas
+                FROM reservas
+                WHERE ativa = true
+                AND hospedado = true
+                AND data_entrada <= ?
+                AND data_saida > ?
+            """;
+        try (Connection conn = PostgresDatabaseConnect.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, Date.valueOf(dia));
+            stmt.setDate(2, Date.valueOf(dia));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("reservasHospedadas");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
     public boolean podeMoverReserva(long novoQuartoId, LocalDate checkIn, LocalDate checkOut, long reservaIdParaExcluir) {
         return !existeConflitoReserva(novoQuartoId, checkIn, checkOut, reservaIdParaExcluir);
     }

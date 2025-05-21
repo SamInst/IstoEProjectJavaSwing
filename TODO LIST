@@ -4,7 +4,7 @@
 - OK ao clicar em uma celula dia mostrar mini dashboard com as informacoes das reservas para o determinado dia
 - OK adicionar hover effect quando o mouse estiver em cima de uma celula dia
 
-- (OK) mostrar dashboard das reservas do dia atual
+- OK mostrar dashboard das reservas do dia atual
 - adicionar botoes ilustrativos na faixa de reserva
     (pagamento -> if(pago) verde : vermelho)
     (hospedado -> if(true) verde : vermelho)
@@ -21,3 +21,4 @@
 - adcicionar status visual de hospedado no popup da reserva selecionada
 - ao cancelar uma reserva, deve sumir o option pane
 - ao adicionar um pagamento, o tipo de pagamento esta como desconhecido
+- caso a reserva mude para pernoite, impedir uqe sejam adicionados novas pessoas ou novos pagamentos

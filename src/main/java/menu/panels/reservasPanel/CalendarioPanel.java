@@ -17,10 +17,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.stream.Collectors;
 
 import static buttons.Botoes.*;
 import static tools.CorPersonalizada.*;
@@ -36,7 +35,8 @@ public class CalendarioPanel {
     private JPanel occupancyPanel;
     private JLabel currentDateLabel;
     private JLabel occupancyPercentLabel;
-    private JLabel occupancyCountLabel;
+    private JLabel occupancyCountReservadosLabel;
+    private JLabel occupancyCountOcupadosLabel;
     private JLabel peopleHospedadasLabel;
 
     public CalendarioPanel(ReservasPanel mainPanel) {
@@ -109,11 +109,14 @@ public class CalendarioPanel {
         dataRow.setOpaque(false);
 
         dataRow.add(Box.createHorizontalStrut(30));
-        occupancyCountLabel = createLabel("Quartos: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
-        dataRow.add(occupancyCountLabel);
+        occupancyCountReservadosLabel = createLabel("Quartos: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        dataRow.add(occupancyCountReservadosLabel);
+
+        occupancyCountOcupadosLabel = createLabel("Ocupados: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        dataRow.add(occupancyCountOcupadosLabel);
 
         dataRow.add(Box.createHorizontalStrut(30));
-        peopleHospedadasLabel = createLabel("Pessoas Hospedadas: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
+        peopleHospedadasLabel = createLabel("Hospedados: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
         dataRow.add(peopleHospedadasLabel);
 
         contentPanel.add(titleRow);
@@ -129,22 +132,33 @@ public class CalendarioPanel {
 
     public void updateOccupancyPanel(LocalDate date) {
         ReservasRepository.OcupacaoDia ocupacao = ReservasRepository.buscarOcupacaoPorDia(date);
+        Integer reservasHospedadas = ReservasRepository.buscarReservasHospedadasPorDia(date);
+
         String dayStr = String.format("%02d/%02d/%d",
                 date.getDayOfMonth(), date.getMonthValue(), date.getYear());
+
         String dayOfWeek = date.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL_STANDALONE, new Locale("pt", "BR"));
-        currentDateLabel.setText("Ocupação para: " + dayStr + " (" + dayOfWeek + ")");
-        occupancyCountLabel.setText(
-                "Quartos: " +
+
+        currentDateLabel.setText(dayStr + " (" + dayOfWeek + ")");
+
+        occupancyCountReservadosLabel.setText(
+                "Quartos reservados: " +
                 ocupacao.ocupados() + "/" + ocupacao.total() +
                 "(" + ocupacao.percentual() + "%)"
+        );
+
+        occupancyCountOcupadosLabel.setText(
+                "Quartos ocupados: " +
+                        reservasHospedadas + "/" + ocupacao.ocupados()
         );
 
         int hospedadas = ReservasRepository.contarPessoasHospedadasPorData(date);
         int totalAtivas = ReservasRepository.contarPessoasReservasAtivasPorData(date);
         int percPessoas = totalAtivas > 0 ? hospedadas * 100 / totalAtivas : 0;
+
         peopleHospedadasLabel.setText(
-                "Pessoas Hospedadas: " +
+                "Quantidade de pessoas hospedadas: " +
                 hospedadas + "/" + totalAtivas +
                 "(" + percPessoas + "%)"
         );
@@ -273,11 +287,10 @@ public class CalendarioPanel {
                         if (reserva == null) {
                             cell.setBackground(new Color(0xE3F2FD).darker());
 
-                            // Obtém as referências às células dos quartos do mainPanel
                             List<JLabel> roomLabels = mainPanel.getRoomLabels();
                             if (roomLabels != null && cell.row < roomLabels.size()) {
                                 JLabel roomLabel = roomLabels.get(cell.row);
-                                // Salva a cor original para restaurar depois
+
                                 Color originalColor = roomLabel.getBackground();
                                 roomLabel.putClientProperty("originalColor", originalColor);
                                 roomLabel.setBackground(new Color(0xE3F2FD).darker());
@@ -290,7 +303,6 @@ public class CalendarioPanel {
                         boolean isSelected = isSelectedRange(cell.roomId, cell.date);
                         cell.setBackground(WHITE);
 
-                        // Restaura a cor original da célula do quarto
                         List<JLabel> roomLabels = mainPanel.getRoomLabels();
                         if (roomLabels != null && cell.row < roomLabels.size()) {
                             JLabel roomLabel = roomLabels.get(cell.row);
@@ -298,7 +310,7 @@ public class CalendarioPanel {
                             if (originalColor != null) {
                                 roomLabel.setBackground(originalColor);
                             } else {
-                                roomLabel.setBackground(new Color(0x5E9984)); // Cor padrão
+                                roomLabel.setBackground(new Color(0x5E9984));
                             }
                         }
                     }
@@ -359,7 +371,12 @@ public class CalendarioPanel {
             int roomY = rowIndex * cellSize.height;
 
             ShadowButton faixa = btn_cinza("");
+            faixa.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
             if (reserva.hospedado()) faixa = btn_verde("");
+
+            String tooltipPessoas = reserva.pessoas().stream()
+                    .map(p -> p.nome())
+                    .collect(Collectors.joining("\n"));
 
             faixa.setBackground(randomCorClara());
             faixa.setForeground(LIGHT_GRAY_2);
@@ -369,11 +386,16 @@ public class CalendarioPanel {
             faixa.setBounds(checkInX, roomY + 6, reservationWidth, cellSize.height - 6);
 
             ShadowButton qtdPessoa = btn_branco(" " + reserva.pessoas().size() + " ");
+            qtdPessoa.setToolTipText(tooltipPessoas);
+//            ShadowButton pagamento_ok = btn_verde("$");
+//            pagamento_ok.setToolTipText(reserva.pagamentos().size() + " Pagamentos Adicionado(s)");
+//            ShadowButton hopedado = btn_azul("H");
+//            hopedado.setToolTipText("Hospedado");
 
             String nome = reserva.pessoas().stream()
                     .filter(p -> p.representante())
                     .findFirst()
-                    .map(p -> p.nome()).orElse("Reservado (sem pessoa definida)");
+                    .map(p -> reserva.hospedado() ? "[HOSPEDADO] " + p.nome() : p.nome()).orElse("Reservado (sem pessoa definida)");
 
             JLabel labelNome = new JLabel(TruncateText.truncateText(nome, qtdPessoa, faixa.getWidth() - 90));
             labelNome.setFont(new Font("Roboto", Font.PLAIN, 14));
@@ -381,6 +403,8 @@ public class CalendarioPanel {
             labelNome.setAlignmentY(0.65f);
 
             faixa.add(qtdPessoa);
+//            if (reserva.hospedado()) faixa.add(hopedado);
+//            if (reserva.pagamentos().size() > 0) faixa.add(pagamento_ok);
             faixa.add(Box.createHorizontalStrut(5));
             faixa.add(labelNome);
 
@@ -437,7 +461,7 @@ public class CalendarioPanel {
             if (comp instanceof CalendarCell cell && cell.roomId.equals(roomId)) {
                 cell.setBackground(!cell.date.isBefore(start) && !cell.date.isAfter(end)
                         ? selectedColor
-                        : (cell.date.isEqual(LocalDate.now()) ? new Color(0xBBDEFB) : new Color(0xFAFBFA)));
+                        : new Color(0xFAFBFA));
             }
         }
     }

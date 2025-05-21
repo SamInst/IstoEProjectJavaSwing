@@ -69,4 +69,5 @@ public class Icones {
 
     public static FlatSVGIcon back = new FlatSVGIcon("icon/back.svg");
     public static FlatSVGIcon new_forward = new FlatSVGIcon("icon/forward.svg");
+    public static FlatSVGIcon payment_ok = new FlatSVGIcon("icon/payment_ok.svg");
 }
