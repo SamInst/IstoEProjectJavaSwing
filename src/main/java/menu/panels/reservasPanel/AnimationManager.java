@@ -1,13 +1,8 @@
 package menu.panels.reservasPanel;
 
-import request.BuscaReservasResponse;
-
 import javax.swing.*;
-import java.time.Period;
-import java.util.HashMap;
-import java.util.Map;
 
-class AnimationManager {
+public class AnimationManager {
     public double previousDiariasValue = 0.0;
     public double previousValorDiariaValue = 0.0;
     public double previousTotalValue = 0.0;

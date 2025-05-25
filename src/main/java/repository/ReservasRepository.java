@@ -130,9 +130,21 @@ public class ReservasRepository {
                   AND r.reserva_id <> ?
                 ORDER BY r.data_entrada;
                 """;
+        if (reservaIdExcluida == null) {
+            sql = """
+             SELECT r.data_entrada, r.data_saida
+                FROM reservas r
+                WHERE r.data_entrada >= now()
+                  AND r.ativa = true
+                  AND r.quarto_id = ?
+                ORDER BY r.data_entrada;
+            """;
+        }
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, quartoId);
-            stmt.setLong(2, reservaIdExcluida);
+            if (reservaIdExcluida != null) {
+                stmt.setLong(2, reservaIdExcluida);
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     lista.add(new DatasReserva(rs.getDate("data_entrada").toLocalDate(), rs.getDate("data_saida").toLocalDate()));
@@ -310,7 +322,7 @@ public class ReservasRepository {
         }
     }
 
-    public boolean existeConflitoReserva(long quartoId, LocalDate checkIn, LocalDate checkOut, long reservaIdParaExcluir) {
+    public boolean existeConflitoReserva(long quartoId, LocalDate checkIn, LocalDate checkOut, Long reservaIdParaExcluir) {
         String sql = """
                 SELECT COUNT(*)
                 FROM reservas
@@ -323,11 +335,37 @@ public class ReservasRepository {
                       OR (data_saida > ? AND data_saida <= ?)
                   )
                 """;
+        if (reservaIdParaExcluir == null){
+            sql = """
+                SELECT COUNT(*)
+                FROM reservas
+                WHERE quarto_id = ?
+                  AND ativa = true
+                  AND (
+                      (data_entrada < ? AND data_saida > ?)
+                      OR (data_entrada >= ? AND data_entrada < ?)
+                      OR (data_saida > ? AND data_saida <= ?)
+                  )
+            """;
+        }
         try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setLong(1, quartoId); st.setLong(2, reservaIdParaExcluir);
-            st.setDate(3, Date.valueOf(checkOut)); st.setDate(4, Date.valueOf(checkIn));
-            st.setDate(5, Date.valueOf(checkIn)); st.setDate(6, Date.valueOf(checkOut));
-            st.setDate(7, Date.valueOf(checkIn)); st.setDate(8, Date.valueOf(checkOut));
+            if(reservaIdParaExcluir != null){
+                st.setLong(1, quartoId);
+                st.setLong(2, reservaIdParaExcluir);
+                st.setDate(3, Date.valueOf(checkOut));
+                st.setDate(4, Date.valueOf(checkIn));
+                st.setDate(5, Date.valueOf(checkIn));
+                st.setDate(6, Date.valueOf(checkOut));
+                st.setDate(7, Date.valueOf(checkIn));
+                st.setDate(8, Date.valueOf(checkOut));
+            }
+            st.setLong(1, quartoId);
+            st.setDate(2, Date.valueOf(checkOut));
+            st.setDate(3, Date.valueOf(checkIn));
+            st.setDate(4, Date.valueOf(checkIn));
+            st.setDate(5, Date.valueOf(checkOut));
+            st.setDate(6, Date.valueOf(checkIn));
+            st.setDate(7, Date.valueOf(checkOut));
             try (ResultSet rs = st.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
             }
@@ -386,7 +424,7 @@ public class ReservasRepository {
         return 0;
     }
 
-    public boolean podeMoverReserva(long novoQuartoId, LocalDate checkIn, LocalDate checkOut, long reservaIdParaExcluir) {
+    public boolean podeMoverReserva(long novoQuartoId, LocalDate checkIn, LocalDate checkOut, Long reservaIdParaExcluir) {
         return !existeConflitoReserva(novoQuartoId, checkIn, checkOut, reservaIdParaExcluir);
     }
 
@@ -468,38 +506,4 @@ public class ReservasRepository {
         }
         return 0;
     }
-
-//    public static int contarPessoasReaisPorData(LocalDate data, boolean apenasHospedadas, boolean apenasAtivas) {
-//        StringBuilder sql = new StringBuilder("""
-//            SELECT COUNT(rp.pessoa_id) as total_pessoas
-//            FROM reserva_pessoas rp
-//            JOIN reservas r ON r.reserva_id = rp.reserva_id
-//            WHERE r.data_entrada <= ?
-//            AND r.data_saida > ?
-//            """);
-//
-//        if (apenasAtivas) {
-//            sql.append("AND r.ativa = true ");
-//        }
-//
-//        if (apenasHospedadas) {
-//            sql.append("AND r.hospedado = true ");
-//        }
-//
-//        try (Connection conn = PostgresDatabaseConnect.connect();
-//             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-//            stmt.setDate(1, Date.valueOf(data));
-//            stmt.setDate(2, Date.valueOf(data));
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                if (rs.next()) {
-//                    int total = rs.getInt("total_pessoas");
-//                    return rs.wasNull() ? 0 : total;
-//                }
-//            }
-//        } catch (SQLException e) {
-//            LOGGER.severe("Erro ao contar pessoas reais por data: " + e.getMessage());
-//            throw new RuntimeException(e);
-//        }
-//        return 0;
-//    }
 }

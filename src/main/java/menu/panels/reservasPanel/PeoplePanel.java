@@ -16,7 +16,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,7 @@ import static tools.CorPersonalizada.*;
 import static tools.Icones.*;
 import static tools.Resize.resizeIcon;
 
-class PeoplePanel {
+public class PeoplePanel {
     private final ReservasPanel mainPanel;
     private final List<PessoaResponse> selectedPeople = new ArrayList<>();
 

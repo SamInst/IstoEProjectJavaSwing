@@ -112,6 +112,7 @@ public class CalendarioPanel {
         occupancyCountReservadosLabel = createLabel("Quartos: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
         dataRow.add(occupancyCountReservadosLabel);
 
+        dataRow.add(Box.createHorizontalStrut(30));
         occupancyCountOcupadosLabel = createLabel("Ocupados: 0/0(0%)", new Font("Roboto", Font.PLAIN, 16), WHITE, null);
         dataRow.add(occupancyCountOcupadosLabel);
 
@@ -144,8 +145,7 @@ public class CalendarioPanel {
 
         occupancyCountReservadosLabel.setText(
                 "Quartos reservados: " +
-                ocupacao.ocupados() + "/" + ocupacao.total() +
-                "(" + ocupacao.percentual() + "%)"
+                ocupacao.ocupados() + "/" + ocupacao.total()
         );
 
         occupancyCountOcupadosLabel.setText(
@@ -159,8 +159,7 @@ public class CalendarioPanel {
 
         peopleHospedadasLabel.setText(
                 "Quantidade de pessoas hospedadas: " +
-                hospedadas + "/" + totalAtivas +
-                "(" + percPessoas + "%)"
+                hospedadas + "/" + totalAtivas
         );
     }
 

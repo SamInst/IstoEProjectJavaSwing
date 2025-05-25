@@ -305,7 +305,7 @@ public class QuartosRepository {
                 if (rs.next()) {
                     return rs.getFloat("valor");
                 } else {
-                    return null;
+                    return 0F;
                 }
             }
         } catch (SQLException e) {
