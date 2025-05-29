@@ -1,7 +1,6 @@
 package menu.panels.reservasPanel;
 
 
-import buttons.Botoes;
 import buttons.ShadowButton;
 import calendar2.DatePicker;
 import enums.TipoPagamentoEnum;
@@ -9,7 +8,9 @@ import notifications.Notifications;
 import repository.PessoaRepository;
 import repository.QuartosRepository;
 import repository.ReservasRepository;
+import request.AdicionarReservasRequest;
 import request.BuscaReservasResponse;
+import request.PagamentoRequest;
 import response.DatasReserva;
 import response.PessoaResponse;
 import timePicker.time.TimePicker;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,15 +35,16 @@ import java.util.Objects;
 import java.util.Vector;
 
 import static buttons.Botoes.*;
-import static buttons.Botoes.btn_backgroung;
 import static notifications.Notification.notification;
 import static notifications.Notifications.Location.TOP_CENTER;
+import static tools.Converter.converterTipoPagamento;
+import static tools.Converter.converterTipoPagamentoParaInt;
 import static tools.CorPersonalizada.*;
 import static tools.Icones.*;
-import static tools.Icones.user_sem_foto;
 import static tools.Resize.resizeIcon;
 
 public class AdicionarNovaReservaPanel {
+    private final ReservasPanel reservasPanel;
 
     List<BuscaReservasResponse.Pessoas> pessoasList = new ArrayList<>();
 
@@ -58,8 +61,8 @@ public class AdicionarNovaReservaPanel {
     private JLabel labelDiariasValue;
     private JLabel labelValorDiariaValue;
     private JLabel labelTotalValue;
-    private Long roomId; 
-    private LocalDate checkIn; 
+    private Long roomId;
+    private LocalDate checkIn;
     private LocalDate checkOut;
 
     private final List<PessoaResponse> selectedPeople = new ArrayList<>();
@@ -72,7 +75,7 @@ public class AdicionarNovaReservaPanel {
 
     private JPanel pagamentosListPanel;
 
-    public AdicionarNovaReservaPanel(ReservasRepository reservasRepository,
+    public AdicionarNovaReservaPanel(ReservasPanel reservasPanel, ReservasRepository reservasRepository,
                                      Long roomId,
                                      LocalDate checkIn,
                                      LocalDate checkOut,
@@ -80,6 +83,7 @@ public class AdicionarNovaReservaPanel {
                                      PessoaRepository pessoaRepository,
                                      AnimationManager animationManager,
                                      CalendarioPanel calendarioPanel) {
+        this.reservasPanel = reservasPanel;
         this.reservasRepository = reservasRepository;
         this.quartosRepository = quartosRepository;
         this.pessoaRepository = pessoaRepository;
@@ -154,13 +158,27 @@ public class AdicionarNovaReservaPanel {
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setBackground(WHITE);
 
-
         JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightButtons.setBackground(WHITE);
 
-        ShadowButton salvarReservaButton = btn_azul("Adicionar Nova Reserva");
+        ShadowButton salvarReservaButton = btn_verde("Adicionar Nova Reserva");
 
         rightButtons.add(salvarReservaButton);
+
+        salvarReservaButton.addActionListener(e -> {
+            AdicionarReservasRequest request = montarAdicionarReservasRequest();
+            try {
+                reservasRepository.adicionarReserva(request);
+                reservasPanel.refreshPanel();
+                frame.dispose();
+                notification(Notifications.Type.SUCCESS, TOP_CENTER, "Reserva adicionada com sucesso!");
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                notification(Notifications.Type.ERROR, TOP_CENTER, "Erro ao adicionar reserva" + ex);
+            }
+        });
+
 
         buttonPanel.add(rightButtons, BorderLayout.EAST);
 
@@ -453,16 +471,6 @@ public class AdicionarNovaReservaPanel {
     }
 
 
-
-
-
-
-
-
-
-
-
-
     public void createGoogleStyleBuscaPessoaPanel(JPanel pessoasTab) {
         selectedPeople.clear();
 
@@ -596,8 +604,8 @@ public class AdicionarNovaReservaPanel {
         BufferedImage foto = null;
         try {
             foto = pessoaRepository.buscarFotoBufferedPessoaPorId(pessoa.id());
+        } catch (SQLException | IOException ignored) {
         }
-        catch (SQLException | IOException ignored) {}
 
         LabelArredondado labelFoto = new LabelArredondado("");
         ImageIcon icon = (foto != null)
@@ -613,7 +621,7 @@ public class AdicionarNovaReservaPanel {
         bloco.setBorderPainted(false);
         bloco.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         bloco.setLayout(new BorderLayout());
-        bloco.setBackground(new Color(250,250,250));
+        bloco.setBackground(new Color(250, 250, 250));
         bloco.setOpaque(false);
         bloco.setContentAreaFilled(false);
         bloco.setFocusPainted(false);
@@ -684,24 +692,6 @@ public class AdicionarNovaReservaPanel {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public JPanel createPaymentsTab() {
         Font textFont = new Font("Roboto", Font.PLAIN, 14);
 
@@ -739,7 +729,7 @@ public class AdicionarNovaReservaPanel {
 
         Vector<String> tipoPagamentoItems = new Vector<>();
         for (TipoPagamentoEnum tipo : TipoPagamentoEnum.values()) {
-            tipoPagamentoItems.add(Converter.converterTipoPagamento(String.valueOf(tipo.getCodigo())));
+            tipoPagamentoItems.add(converterTipoPagamento(String.valueOf(tipo.getCodigo())));
         }
 
         JComboBox<String> tipoPagamentoComboBox = new JComboBox<>(tipoPagamentoItems);
@@ -787,7 +777,7 @@ public class AdicionarNovaReservaPanel {
             JPanel pagamentoPanel = createPagamentoPanel(
                     descricao,
                     valor,
-                    Converter.converterTipoPagamento(Objects.requireNonNull(tipoPagamentoSelecionado)),
+                    tipoPagamentoSelecionado,
                     LocalDateTime.now().format(dtf));
 
             pagamentosListPanel.add(pagamentoPanel);
@@ -855,9 +845,11 @@ public class AdicionarNovaReservaPanel {
 
         JPanel dataTipoPagamento = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         dataTipoPagamento.setOpaque(false);
+
         JLabel tipoPagamentoLabel = new JLabel(" " + tipoPagamento);
         tipoPagamentoLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
         tipoPagamentoLabel.setForeground(GRAY);
+
         JLabel dataHoraLabel = new JLabel(dataHora);
         dataHoraLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
         dataHoraLabel.setForeground(GRAY);
@@ -874,5 +866,62 @@ public class AdicionarNovaReservaPanel {
 
         return pagamentoPanel;
     }
+
+
+    private AdicionarReservasRequest montarAdicionarReservasRequest() {
+        try {
+            String selectedItem = (String) Objects.requireNonNull(quartoComboBox.getSelectedItem());
+            Long quartoId = Long.parseLong(selectedItem.split(" - ")[0].replace("Quarto ", "").replaceFirst("^0+", ""));
+
+            LocalDate dataEntrada = LocalDate.parse(checkinField.getText(), df);
+            LocalDate dataSaida = LocalDate.parse(checkoutField.getText(), df);
+
+            LocalTime horarioPrevisto = timePicker.getSelectedTime();
+
+            List<AdicionarReservasRequest.PessoaRepresentante> pessoasNovaLista = new ArrayList<>();
+            this.pessoasList.forEach(pessoa -> {
+                pessoasNovaLista.add(new AdicionarReservasRequest.PessoaRepresentante(
+                        pessoa.pessoa_id(),
+                        pessoa.representante()
+                ));
+            });
+
+            List<PagamentoRequest> pagamentos = new ArrayList<>();
+            for (Component c : pagamentosListPanel.getComponents()) {
+                if (c instanceof JPanel pagamentoPanel) {
+                    JPanel linha1 = (JPanel) pagamentoPanel.getComponent(0);
+                    JPanel valorPanel = (JPanel) ((BorderLayout) linha1.getLayout()).getLayoutComponent(BorderLayout.EAST);
+                    JLabel valorLabel = (JLabel) valorPanel.getComponent(0);
+                    String valorTexto = valorLabel.getText().replace("R$", "").trim().replace(",", ".");
+                    Float valor = Float.parseFloat(valorTexto);
+
+                    JLabel descricaoLabel = (JLabel) ((BorderLayout) linha1.getLayout()).getLayoutComponent(BorderLayout.WEST);
+                    String descricao = descricaoLabel.getText();
+
+                    JPanel linha2 = (JPanel) pagamentoPanel.getComponent(1);
+                    JPanel dataTipoPanel = (JPanel) ((BorderLayout) linha2.getLayout()).getLayoutComponent(BorderLayout.WEST);
+                    JLabel tipoLabel = (JLabel) dataTipoPanel.getComponent(1);
+                    Integer tipo = converterTipoPagamentoParaInt(tipoLabel.getText().trim());
+                    System.out.println(tipo);
+
+                    pagamentos.add(new PagamentoRequest(descricao, tipo, valor));
+                }
+            }
+
+            return new AdicionarReservasRequest(
+                    quartoId,
+                    dataEntrada,
+                    dataSaida,
+                    pessoasNovaLista.size(),
+                    horarioPrevisto,
+                    pessoasNovaLista,
+                    pagamentos
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 }

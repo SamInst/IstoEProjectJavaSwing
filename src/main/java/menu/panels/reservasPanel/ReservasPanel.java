@@ -86,6 +86,8 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
         initializePanel();
     }
 
+    public void refreshReservasPanel() {refreshPanel();}
+
     @Override
     public void refreshPanel() {
         removeAll();
@@ -208,7 +210,7 @@ public class ReservasPanel extends TabbedForm implements Refreshable {
     }
 
     private void showReservationFrame(Long roomId, LocalDate checkIn, LocalDate checkOut) {
-        new AdicionarNovaReservaPanel(reservasRepository, roomId, checkIn, checkOut, quartosRepository, pessoaRepository, animationManager,calendarioPanel).showReservationFrame(checkInDateMap);
+        new AdicionarNovaReservaPanel(this, reservasRepository, roomId, checkIn, checkOut, quartosRepository, pessoaRepository, animationManager,calendarioPanel).showReservationFrame(checkInDateMap);
 //        JFrame frame = new JFrame("Nova Reserva");
 //        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 //        frame.setSize(300, 150);

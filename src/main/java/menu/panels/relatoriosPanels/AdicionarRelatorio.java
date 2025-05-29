@@ -3,6 +3,7 @@ package menu.panels.relatoriosPanels;
 import buttons.Botoes;
 import buttons.ShadowButton;
 import enums.TipoPagamentoEnum;
+import lateralMenu.tabbed.TabbedForm;
 import repository.RelatoriosRepository;
 import request.RelatorioRequest;
 import tools.CorPersonalizada;
@@ -30,14 +31,14 @@ import static tools.Icones.plus;
 import static tools.Icones.remove;
 import static tools.Resize.resizeIcon;
 
-public class AdicionarRelatorio extends PanelArredondado {
+public class AdicionarRelatorio extends TabbedForm {
     private final JTextFieldComTextoFixoArredondadoRelatorios relatorioField;
     private final JComboBoxArredondado<TipoPagamentoEnum> tipoPagamentoComboBox;
     private final JTextFieldComTextoFixoArredondadoRelatorios campoQuarto;
     private final JTextFieldComTextoFixoArredondadoRelatorios campoValor;
     ShadowButton x = Botoes.btn_branco("");
 
-    public AdicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel, JFrame menu) {
+    public AdicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         setSize(800, 250);
         setLayout(new BorderLayout());
 
@@ -98,7 +99,7 @@ public class AdicionarRelatorio extends PanelArredondado {
         btnAdicionar.setIcon(resizeIcon(plus, 20,20));
         pretoPanel.add(btnAdicionar);
 
-        btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel, menu));
+        btnAdicionar.addActionListener(e -> adicionarRelatorio(relatoriosRepository, relatoriosPanel));
 
         add(pretoPanel, BorderLayout.SOUTH);
 
@@ -202,7 +203,7 @@ public class AdicionarRelatorio extends PanelArredondado {
         });
     }
 
-    private void adicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel, JFrame menu) {
+    private void adicionarRelatorio(RelatoriosRepository relatoriosRepository, RelatoriosPanel relatoriosPanel) {
         try {
             String relatorio = relatorioField.getText().replace("relatório: ", "").trim().toUpperCase();
             RelatorioRequest relatorioRequest = getRelatorioRequest(relatorio);

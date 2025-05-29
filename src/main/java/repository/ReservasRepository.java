@@ -2,14 +2,12 @@ package repository;
 
 import config.PostgresDatabaseConnect;
 import request.AdicionarReservasRequest;
-import request.AtualizarReservaRequest;
 import request.BuscaReservasResponse;
 import response.DatasReserva;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -41,15 +39,15 @@ public class ReservasRepository {
             """;
 
     private static final String SQL_RESERVA = """
-            insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa, hospedado) VALUES (?,?,?,?, true, false) returning reserva_id;
+            insert into reservas (quarto_id, data_entrada, data_saida, quantidade_pessoas, ativa, hospedado, hora_prevista) VALUES (?,?,?,?, true, false, ?) returning reserva_id;
             """;
 
     private static final String SQL_RESERVA_PESSOAS = """
-            insert into reserva_pessoas (reserva_id, pessoa_id) VALUES (?,?);
+            insert into reserva_pessoas (reserva_id, pessoa_id, representante) VALUES (?,?,?);
             """;
 
     private static final String SQL_RESERVA_PAGAMENTOS = """
-            insert into reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento) VALUES (?,?,?,?);
+            insert into reserva_pagamento (reserva_id, valor, data_hora_pagamento, tipo_pagamento, descricao) VALUES (?,?,?,?,?);
             """;
 
     public ReservasRepository() {
@@ -85,15 +83,17 @@ public class ReservasRepository {
             statement.setDate(2, Date.valueOf(request.data_entrada()));
             statement.setDate(3, Date.valueOf(request.data_saida()));
             statement.setInt(4, request.quantidade_pessoas());
+            statement.setTime(5, Time.valueOf(request.horario_previsto()));
 
             ResultSet generatedKeys = statement.executeQuery();
             if (generatedKeys.next()) {
                 long reserva_id = generatedKeys.getLong(1);
                 if (request.pessoas() != null) {
-                    request.pessoas().forEach(pessoa_id -> {
+                    request.pessoas().forEach(pessoa -> {
                         try (PreparedStatement pessoaStatement = connection.prepareStatement(SQL_RESERVA_PESSOAS)) {
                             pessoaStatement.setLong(1, reserva_id);
-                            pessoaStatement.setLong(2, pessoa_id);
+                            pessoaStatement.setLong(2, pessoa.id());
+                            pessoaStatement.setBoolean(3, pessoa.representante());
                             pessoaStatement.executeUpdate();
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);
@@ -106,7 +106,8 @@ public class ReservasRepository {
                             pagamentoStatement.setLong(1, reserva_id);
                             pagamentoStatement.setFloat(2, pagamento.valor_pagamento());
                             pagamentoStatement.setDate(3, Date.valueOf(LocalDate.now()));
-                            pagamentoStatement.setString(4, pagamento.tipo_pagamento());
+                            pagamentoStatement.setInt(4, pagamento.tipo_pagamento());
+                            pagamentoStatement.setString(5, pagamento.descricao());
                             pagamentoStatement.executeUpdate();
                         } catch (SQLException ex) {
                             throw new RuntimeException(ex);

@@ -73,7 +73,7 @@ class PaymentPanel {
 
         Vector<String> tipoPagamentoItems = new Vector<>();
         for (TipoPagamentoEnum tipo : TipoPagamentoEnum.values()) {
-            tipoPagamentoItems.add(Converter.converterTipoPagamento(String.valueOf(tipo.getCodigo())));
+            tipoPagamentoItems.add(Converter.converterTipoPagamento(tipo.getCodigo()));
         }
 
         JComboBox<String> tipoPagamentoComboBox = new JComboBox<>(tipoPagamentoItems);

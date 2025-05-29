@@ -1,6 +1,7 @@
 package request;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public record AdicionarReservasRequest(
@@ -8,6 +9,12 @@ public record AdicionarReservasRequest(
         LocalDate data_entrada,
         LocalDate data_saida,
         Integer quantidade_pessoas,
-        List<Long> pessoas,
+        LocalTime horario_previsto,
+        List<PessoaRepresentante> pessoas,
         List<PagamentoRequest> pagamentos
-){}
+){
+    public record PessoaRepresentante(
+            Long id,
+            Boolean representante
+    ) {}
+}

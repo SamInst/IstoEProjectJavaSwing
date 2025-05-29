@@ -79,10 +79,10 @@ public class Menu extends JFrame {
         addHoverAndSelectionEffect(btnQuartos, () -> new RoomsPanel(new QuartosRepository()));
         addHoverAndSelectionEffect(btnEntradas, EntryPanel::new);
         addHoverAndSelectionEffect(btnPernoites, ()-> new NewPernoitesPanel(new PernoitesRepository()));
-        addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository(), this));
+        addHoverAndSelectionEffect(btnRelatorio, () -> new RelatoriosPanel(new RelatoriosRepository()));
         addHoverAndSelectionEffect(btnClientes, PessoaEmpresaPanel::new);
         addHoverAndSelectionEffect(btnItens, ItensPanel::new);
-        addHoverAndSelectionEffect(btnReservas, ()-> new ReservasPanel());
+        addHoverAndSelectionEffect(btnReservas, ReservasPanel::new);
         addHoverAndSelectionEffect(btnPrice, PricePanel::new);
 
         showPanel(new ReservasPanel());

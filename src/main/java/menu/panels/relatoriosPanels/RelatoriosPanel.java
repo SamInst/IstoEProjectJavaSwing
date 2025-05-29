@@ -6,6 +6,7 @@ import calendar.EventDateChooser;
 import calendar.SelectedAction;
 import calendar.SelectedDate;
 import enums.TipoPagamentoEnum;
+import lateralMenu.tabbed.TabbedForm;
 import panels.PanelPopup;
 import repository.RelatoriosRepository;
 import response.RelatoriosResponse;
@@ -38,8 +39,7 @@ import static tools.FormatarFloat.format;
 import static tools.Icones.*;
 import static tools.Resize.resizeIcon;
 
-public class RelatoriosPanel extends JPanel implements Refreshable {
-    private final JFrame menu;
+public class RelatoriosPanel extends TabbedForm implements Refreshable {
     private final RelatoriosRepository relatoriosRepository;
     private JPanel relatoriosPanel;
     private JScrollPane scrollPane;
@@ -51,9 +51,8 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
     private final ShadowButton searchDateField = new ShadowButton();
     Font font = new Font("Roboto", Font.PLAIN, 16);
 
-    public RelatoriosPanel(RelatoriosRepository relatoriosRepository, JFrame menu) {
+    public RelatoriosPanel(RelatoriosRepository relatoriosRepository) {
         this.relatoriosRepository = relatoriosRepository;
-        this.menu = menu;
         refreshPanel();
     }
 
@@ -423,8 +422,7 @@ public class RelatoriosPanel extends JPanel implements Refreshable {
                     btnAdicionar,
                     new AdicionarRelatorio(
                             relatoriosRepository,
-                            RelatoriosPanel.this,
-                            menu
+                            RelatoriosPanel.this
                     )
             );
         });
