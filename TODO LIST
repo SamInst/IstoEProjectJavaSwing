@@ -7,18 +7,19 @@
 - OK adicionar botoes ilustrativos na faixa de reserva
     (pagamento -> if(pago) verde : vermelho)
     (hospedado -> if(true) verde : vermelho)
-- verificar as reservas de fim de mes, pois estao sumindo as faixas
+- OK verificar as reservas de fim de mes, pois estao sumindo as faixas
 - OK revisar logica de reservas para mesma data e apartamento
-- adicionar nova reserva
-- adicionar validacoes da nova reserva
+- OK adicionar nova reserva
+- OK adicionar validacoes da nova reserva
 - ajustar edicao de horario de chegada
 - OK adicionar novo campo hospedado na tabela de reservas
 - OK alterar logica de reservas (setar como hospedado quando o cliente chegar e finalizar a reserva somente quando a data de saida estiver expirada)
 - adicionar rotina para finalizar automaticamente as reservas quando a data de saida for menor que hoje
 - OK aumentar o painel para que nao corte as ultimas datas do calendario da reserva individual
-- adicionar validacao para nao permitir salvar pagamento com campos vazios(DESCRICAO, TIPO DE PAGAMENTO E VALOR)
-- adcicionar status visual de hospedado no popup da reserva selecionada
-- ao cancelar uma reserva, deve sumir o option panel
-- ao adicionar um pagamento, o tipo de pagamento esta como desconhecido
-- caso a reserva mude para pernoite, impedir uqe sejam adicionados novas pessoas ou novos pagamentos
-- remover botao de hospedagem quando for hospedado
+- OK adicionar validacao para nao permitir salvar pagamento com campos vazios(DESCRICAO, TIPO DE PAGAMENTO E VALOR)
+- OK adcicionar status visual de hospedado no popup da reserva selecionada
+- OK ao cancelar uma reserva, deve sumir o option panel
+- OK ao adicionar um pagamento, o tipo de pagamento esta como desconhecido
+- OK caso a reserva mude para pernoite, impedir uqe sejam adicionados novas pessoas ou novos pagamentos
+- OK remover botao de hospedagem quando for hospedado
+- adicionar botao para nova reserva

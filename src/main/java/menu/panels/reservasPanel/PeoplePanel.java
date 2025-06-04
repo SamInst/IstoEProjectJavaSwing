@@ -57,7 +57,8 @@ public class PeoplePanel {
         buscarPessoaInputPanel.add(new JLabel("Buscar Pessoa: "));
         buscarPessoaInputPanel.add(buscarPessoaField);
         buscarPessoaPanel.add(buscarPessoaInputPanel, BorderLayout.NORTH);
-        container.add(buscarPessoaPanel, BorderLayout.NORTH);
+
+        if (!reserva.hospedado()) container.add(buscarPessoaPanel, BorderLayout.NORTH);
 
         JPanel pessoasContainer = new JPanel();
         pessoasContainer.setLayout(new BoxLayout(pessoasContainer, BoxLayout.Y_AXIS));
@@ -92,27 +93,24 @@ public class PeoplePanel {
         scrollPaneSugestoes.setPreferredSize(new Dimension(buscarPessoaField.getPreferredSize().width, 150));
         popupMenu.add(scrollPaneSugestoes);
 
-        buscarPessoaField.getDocument().addDocumentListener(new SimpleDocumentListener() {
-            @Override
-            public void update() {
-                String texto = buscarPessoaField.getText().trim();
-                if (texto.length() >= 3) {
-                    List<PessoaResponse> resultados = mainPanel.getPessoaRepository().buscarPessoaPorNome(texto);
-                    List<Long> pessoasIds = reserva.pessoas().stream().map(BuscaReservasResponse.Pessoas::pessoa_id).toList();
-                    resultados.removeIf(p -> pessoasIds.contains(p.id()));
+        buscarPessoaField.getDocument().addDocumentListener((SimpleDocumentListener) () -> {
+            String texto = buscarPessoaField.getText().trim();
+            if (texto.length() >= 3) {
+                List<PessoaResponse> resultados = mainPanel.getPessoaRepository().buscarPessoaPorNome(texto);
+                List<Long> pessoasIds = reserva.pessoas().stream().map(BuscaReservasResponse.Pessoas::pessoa_id).toList();
+                resultados.removeIf(p -> pessoasIds.contains(p.id()));
 
-                    sugestaoModel.clear();
-                    if (!resultados.isEmpty()) {
-                        resultados.forEach(sugestaoModel::addElement);
-                        popupMenu.setFocusable(false);
-                        popupMenu.show(buscarPessoaField, 0, buscarPessoaField.getHeight());
-                        SwingUtilities.invokeLater(buscarPessoaField::requestFocusInWindow);
-                    } else {
-                        popupMenu.setVisible(false);
-                    }
+                sugestaoModel.clear();
+                if (!resultados.isEmpty()) {
+                    resultados.forEach(sugestaoModel::addElement);
+                    popupMenu.setFocusable(false);
+                    popupMenu.show(buscarPessoaField, 0, buscarPessoaField.getHeight());
+                    SwingUtilities.invokeLater(buscarPessoaField::requestFocusInWindow);
                 } else {
                     popupMenu.setVisible(false);
                 }
+            } else {
+                popupMenu.setVisible(false);
             }
         });
 
@@ -253,7 +251,7 @@ public class PeoplePanel {
             mainPanel.refreshPanel();
         });
 
-        btns.add(remove);
+        if (!reserva.hospedado()) btns.add(remove);
 
         if (mainPanel.getReservasRepository().buscarPessoasPorReserva(reserva.reserva_id()).size() < 2) {
             remove.setEnabled(false);

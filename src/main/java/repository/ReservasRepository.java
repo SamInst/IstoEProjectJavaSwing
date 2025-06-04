@@ -359,14 +359,15 @@ public class ReservasRepository {
                 st.setDate(6, Date.valueOf(checkOut));
                 st.setDate(7, Date.valueOf(checkIn));
                 st.setDate(8, Date.valueOf(checkOut));
+            } else {
+                st.setLong(1, quartoId);
+                st.setDate(2, Date.valueOf(checkOut));
+                st.setDate(3, Date.valueOf(checkIn));
+                st.setDate(4, Date.valueOf(checkIn));
+                st.setDate(5, Date.valueOf(checkOut));
+                st.setDate(6, Date.valueOf(checkIn));
+                st.setDate(7, Date.valueOf(checkOut));
             }
-            st.setLong(1, quartoId);
-            st.setDate(2, Date.valueOf(checkOut));
-            st.setDate(3, Date.valueOf(checkIn));
-            st.setDate(4, Date.valueOf(checkIn));
-            st.setDate(5, Date.valueOf(checkOut));
-            st.setDate(6, Date.valueOf(checkIn));
-            st.setDate(7, Date.valueOf(checkOut));
             try (ResultSet rs = st.executeQuery()) {
                 return rs.next() && rs.getInt(1) > 0;
             }

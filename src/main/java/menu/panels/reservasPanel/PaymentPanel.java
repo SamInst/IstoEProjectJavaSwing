@@ -2,6 +2,7 @@ package menu.panels.reservasPanel;
 
 import buttons.ShadowButton;
 import enums.TipoPagamentoEnum;
+import lombok.Getter;
 import notifications.Notifications;
 import request.BuscaReservasResponse;
 import tools.Converter;
@@ -25,15 +26,12 @@ import static tools.Resize.resizeIcon;
 
 class PaymentPanel {
     private final ReservasPanel mainPanel;
+    @Getter
     private JPanel pagamentosListPanel;
 
     public PaymentPanel(ReservasPanel mainPanel) {
         this.mainPanel = mainPanel;
         this.pagamentosListPanel = new JPanel();
-    }
-
-    public JPanel getPagamentosListPanel() {
-        return pagamentosListPanel;
     }
 
     public JPanel createPaymentsTab(BuscaReservasResponse reserva) {
@@ -88,9 +86,9 @@ class PaymentPanel {
         Mascaras.mascaraValor(valorPagamentoField);
         adicionarPagamento.add(valorPagamentoField, BorderLayout.LINE_END);
 
-        pagamentosTab.add(descricaoPagamentoPanel);
+        if (!reserva.hospedado()) pagamentosTab.add(descricaoPagamentoPanel);
         pagamentosTab.add(Box.createVerticalStrut(10));
-        pagamentosTab.add(adicionarPagamento);
+        if (!reserva.hospedado()) pagamentosTab.add(adicionarPagamento);
 
         pagamentosListPanel = new JPanel();
         pagamentosListPanel.setLayout(new BoxLayout(pagamentosListPanel, BoxLayout.Y_AXIS));
@@ -100,23 +98,40 @@ class PaymentPanel {
         adicionarPagamentoButtonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 10));
         adicionarPagamentoButtonPanel.setPreferredSize(new Dimension(720, 40));
         adicionarPagamentoButtonPanel.setMaximumSize(new Dimension(720, 40));
-        adicionarPagamentoButtonPanel.setBackground(BACKGROUND_GRAY);
 
         ShadowButton adicionarPagamentoButton = btn_laranja("Adicionar Pagamento");
         adicionarPagamentoButton.setPreferredSize(new Dimension(150, 40));
         adicionarPagamentoButton.enableHoverEffect();
+
         adicionarPagamentoButtonPanel.add(adicionarPagamentoButton);
 
-        pagamentosTab.add(adicionarPagamentoButtonPanel);
+        if (!reserva.hospedado()) pagamentosTab.add(adicionarPagamentoButtonPanel);
 
         adicionarPagamentoButton.addActionListener(e -> {
             String descricao = descricaoPagamentoField.getText();
+
             String valor = valorPagamentoField.getText()
                     .replace("R$", "")
                     .replace(".", "")
                     .replace(",", ".")
                     .replaceAll("[^0-9.]", "");
+
             String tipoPagamentoSelecionado = (String) tipoPagamentoComboBox.getSelectedItem();
+
+            if (descricao.isEmpty()) {
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Adicione uma descrição ao pagamento.");
+                return;
+            }
+
+            if (Objects.requireNonNull(tipoPagamentoComboBox.getSelectedItem()).equals("SELECIONE")) {
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Escolha uma forma de Pagamento");
+                return;
+            }
+
+            if (valor.isEmpty()) {
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Adicione uma valor.");
+                return;
+            }
 
             JPanel pagamentoPanel = createPagamentoPanel(
                     descricao,

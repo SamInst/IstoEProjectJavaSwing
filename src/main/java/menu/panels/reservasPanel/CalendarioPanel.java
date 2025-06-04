@@ -29,12 +29,10 @@ public class CalendarioPanel {
     private final Dimension cellSize = new Dimension(300, 60);
     private final Border defaultCellBorder = BorderFactory.createLineBorder(BACKGROUND_GRAY);
     private final Color selectedColor = new Color(0x5E9984);
-    private JPanel daysHeader;
-    private JPanel roomsPanel;
+
     private JPanel backgroundPanel;
-    private JPanel occupancyPanel;
     private JLabel currentDateLabel;
-    private JLabel occupancyPercentLabel;
+
     private JLabel occupancyCountReservadosLabel;
     private JLabel occupancyCountOcupadosLabel;
     private JLabel peopleHospedadasLabel;
@@ -66,25 +64,6 @@ public class CalendarioPanel {
                     BorderFactory.createEmptyBorder(0, 0, 0, 0)
             ));
             setLayout(new BorderLayout());
-        }
-    }
-
-    private class CalendarLabel extends JLabel {
-        int col;
-        LocalDate date;
-
-        CalendarLabel(String text, int col, LocalDate date) {
-            super(text, SwingConstants.CENTER);
-            this.col = col;
-            this.date = date;
-            setBorder(BorderFactory.createCompoundBorder(
-                    defaultCellBorder,
-                    BorderFactory.createEmptyBorder(0, 0, 0, 0)
-            ));
-            setPreferredSize(cellSize);
-            setMinimumSize(cellSize);
-            setMaximumSize(cellSize);
-            setOpaque(true);
         }
     }
 
@@ -127,13 +106,12 @@ public class CalendarioPanel {
         LocalDate today = LocalDate.now();
         updateOccupancyPanel(today);
 
-        this.occupancyPanel = panel;
         return panel;
     }
 
     public void updateOccupancyPanel(LocalDate date) {
         ReservasRepository.OcupacaoDia ocupacao = ReservasRepository.buscarOcupacaoPorDia(date);
-        Integer reservasHospedadas = ReservasRepository.buscarReservasHospedadasPorDia(date);
+        int reservasHospedadas = ReservasRepository.buscarReservasHospedadasPorDia(date);
 
         String dayStr = String.format("%02d/%02d/%d",
                 date.getDayOfMonth(), date.getMonthValue(), date.getYear());
@@ -155,7 +133,6 @@ public class CalendarioPanel {
 
         int hospedadas = ReservasRepository.contarPessoasHospedadasPorData(date);
         int totalAtivas = ReservasRepository.contarPessoasReservasAtivasPorData(date);
-        int percPessoas = totalAtivas > 0 ? hospedadas * 100 / totalAtivas : 0;
 
         peopleHospedadasLabel.setText(
                 "Quantidade de pessoas hospedadas: " +
@@ -245,12 +222,10 @@ public class CalendarioPanel {
         }
 
         mainPanel.setRoomLabels(roomLabels);
-        this.roomsPanel = roomsPanel;
         return roomsPanel;
     }
 
-    public JLayeredPane createLayeredPane(List<QuartoResponse> quartos,
-                                          int daysToShow, int startDay, int numRooms) {
+    public JLayeredPane createLayeredPane(List<QuartoResponse> quartos, int daysToShow, int startDay, int numRooms) {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
 
@@ -333,7 +308,7 @@ public class CalendarioPanel {
         LocalDate monthEnd = mainPanel.getCurrentMonth().withDayOfMonth(mainPanel.getCurrentMonth().lengthOfMonth());
 
         for (BuscaReservasResponse reserva : mainPanel.getCurrentReservations()) {
-            List<DatasReserva> reservasDoQuarto = mainPanel.getReservasRepository().datasReservadasPorQuarto(reserva.quarto(), reserva.reserva_id());
+//            List<DatasReserva> reservasDoQuarto = mainPanel.getReservasRepository().datasReservadasPorQuarto(reserva.quarto(), reserva.reserva_id());
             LocalDate resStartDate = reserva.data_entrada();
             LocalDate resEndDate = reserva.data_saida();
 
@@ -371,13 +346,15 @@ public class CalendarioPanel {
 
             ShadowButton faixa = btn_cinza("");
             faixa.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-            if (reserva.hospedado()) faixa = btn_verde("");
+//            if (reserva.hospedado()) faixa = btn_verde("");
 
             String tooltipPessoas = reserva.pessoas().stream()
-                    .map(p -> p.nome())
+                    .map(BuscaReservasResponse.Pessoas::nome)
                     .collect(Collectors.joining("\n"));
 
-            faixa.setBackground(randomCorClara());
+            if (reserva.hospedado()) faixa.setBackground(new Color(0xDEDAD7));
+            else faixa.setBackground(new Color(0xA5CAD4));
+
             faixa.setForeground(LIGHT_GRAY_2);
             faixa.enableHoverEffect();
             faixa.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 5));
@@ -386,13 +363,9 @@ public class CalendarioPanel {
 
             ShadowButton qtdPessoa = btn_branco(" " + reserva.pessoas().size() + " ");
             qtdPessoa.setToolTipText(tooltipPessoas);
-//            ShadowButton pagamento_ok = btn_verde("$");
-//            pagamento_ok.setToolTipText(reserva.pagamentos().size() + " Pagamentos Adicionado(s)");
-//            ShadowButton hopedado = btn_azul("H");
-//            hopedado.setToolTipText("Hospedado");
 
             String nome = reserva.pessoas().stream()
-                    .filter(p -> p.representante())
+                    .filter(BuscaReservasResponse.Pessoas::representante)
                     .findFirst()
                     .map(p -> reserva.hospedado() ? "[HOSPEDADO] " + p.nome() : p.nome()).orElse("Reservado (sem pessoa definida)");
 
@@ -402,8 +375,6 @@ public class CalendarioPanel {
             labelNome.setAlignmentY(0.65f);
 
             faixa.add(qtdPessoa);
-//            if (reserva.hospedado()) faixa.add(hopedado);
-//            if (reserva.pagamentos().size() > 0) faixa.add(pagamento_ok);
             faixa.add(Box.createHorizontalStrut(5));
             faixa.add(labelNome);
 
@@ -522,5 +493,30 @@ public class CalendarioPanel {
 
     public static Color randomCorClara() {
         return new Color(randomNumberClaro(), randomNumberClaro(), randomNumberClaro());
+    }
+
+    private static final Random random = new Random();
+
+    public static Color randomVerdeClaro() {
+        int r = random.nextInt(60) + 100;
+        int g = random.nextInt(80) + 170;
+        int b = random.nextInt(60) + 100;
+
+        return new Color(r, g, b);
+    }
+    public static Color randomVerdeClaroBaseado() {
+        int baseR = 94;
+        int baseG = 153;
+        int baseB = 132;
+
+        int r = limitarIntervalo(baseR + random.nextInt(21) - 10);
+        int g = limitarIntervalo(baseG + random.nextInt(21) - 10);
+        int b = limitarIntervalo(baseB + random.nextInt(21) - 10);
+
+        return new Color(r, g, b);
+    }
+
+    private static int limitarIntervalo(int valor) {
+        return Math.min(255, Math.max(0, valor));
     }
 }

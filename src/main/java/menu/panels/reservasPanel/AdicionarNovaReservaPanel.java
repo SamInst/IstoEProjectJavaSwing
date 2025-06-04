@@ -75,7 +75,8 @@ public class AdicionarNovaReservaPanel {
 
     private JPanel pagamentosListPanel;
 
-    public AdicionarNovaReservaPanel(ReservasPanel reservasPanel, ReservasRepository reservasRepository,
+    public AdicionarNovaReservaPanel(ReservasPanel reservasPanel,
+                                     ReservasRepository reservasRepository,
                                      Long roomId,
                                      LocalDate checkIn,
                                      LocalDate checkOut,
@@ -166,6 +167,11 @@ public class AdicionarNovaReservaPanel {
         rightButtons.add(salvarReservaButton);
 
         salvarReservaButton.addActionListener(e -> {
+
+            if (timePicker.getSelectedTime() == null){
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Adicione um horario previsto para chegada");
+            }
+
             AdicionarReservasRequest request = montarAdicionarReservasRequest();
             try {
                 reservasRepository.adicionarReserva(request);
@@ -175,7 +181,7 @@ public class AdicionarNovaReservaPanel {
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                notification(Notifications.Type.ERROR, TOP_CENTER, "Erro ao adicionar reserva" + ex);
+                notification(Notifications.Type.ERROR, TOP_CENTER, "Erro ao adicionar reserva");
             }
         });
 
@@ -353,15 +359,15 @@ public class AdicionarNovaReservaPanel {
         mainHorizontalPanel.add(timePanel);
         infoPanel.add(mainHorizontalPanel);
 
-        Runnable updateDiariasInfo = () -> {
-            try {
-                LocalDate newIn = LocalDate.parse(checkinField.getText(), df);
-                LocalDate newOut = LocalDate.parse(checkoutField.getText(), df);
-                checkIn = newIn;
-                checkOut = newOut;
-            } catch (Exception ignored) {
-            }
-        };
+//        Runnable updateDiariasInfo = () -> {
+//            try {
+//                LocalDate newIn = LocalDate.parse(checkinField.getText(), df);
+//                LocalDate newOut = LocalDate.parse(checkoutField.getText(), df);
+//                checkIn = newIn;
+//                checkOut = newOut;
+//            } catch (Exception ignored) {
+//            }
+//        };
 
         datePickerRange.addDateSelectionListener(e -> {
             LocalDate[] sel = datePickerRange.getSelectedDateRange();
@@ -419,7 +425,6 @@ public class AdicionarNovaReservaPanel {
             List<DatasReserva> novasDatas = reservasRepository.datasReservadasPorQuarto(novoQuarto, null);
             datePickerRange.setReservasDoQuarto(novasDatas);
 
-//            reservasRepository.atualizarQuarto(reserva.reserva_id(), novoQuarto);
             categoriaDescricaoLabel.setText(
                     quartosRepository.buscaQuartoPorId(novoQuarto)
                             .categoria()
@@ -521,27 +526,23 @@ public class AdicionarNovaReservaPanel {
         scrollPaneSugestoes.setPreferredSize(new Dimension(buscarPessoaField.getPreferredSize().width, 150));
         popupMenu.add(scrollPaneSugestoes);
 
-        buscarPessoaField.getDocument().addDocumentListener(new SimpleDocumentListener() {
-            @Override
-            public void update() {
-                String texto = buscarPessoaField.getText().trim();
-                if (texto.length() >= 3) {
-                    List<PessoaResponse> resultados = pessoaRepository.buscarPessoaPorNome(texto);
-//                    List<Long> pessoasIds = reserva.pessoas().stream().map(BuscaReservasResponse.Pessoas::pessoa_id).toList();
-//                    resultados.removeIf(p -> pessoasIds.contains(p.id()));
+        buscarPessoaField.getDocument().addDocumentListener((SimpleDocumentListener) () -> {
+            String texto = buscarPessoaField.getText().trim();
+            if (texto.length() >= 3) {
+                List<PessoaResponse> resultados = pessoaRepository.buscarPessoaPorNome(texto);
+                sugestaoModel.clear();
 
-                    sugestaoModel.clear();
-                    if (!resultados.isEmpty()) {
-                        resultados.forEach(sugestaoModel::addElement);
-                        popupMenu.setFocusable(false);
-                        popupMenu.show(buscarPessoaField, 0, buscarPessoaField.getHeight());
-                        SwingUtilities.invokeLater(buscarPessoaField::requestFocusInWindow);
-                    } else {
-                        popupMenu.setVisible(false);
-                    }
+                if (!resultados.isEmpty()) {
+                    resultados.forEach(sugestaoModel::addElement);
+                    popupMenu.setFocusable(false);
+                    popupMenu.show(buscarPessoaField, 0, buscarPessoaField.getHeight());
+                    SwingUtilities.invokeLater(buscarPessoaField::requestFocusInWindow);
+
                 } else {
                     popupMenu.setVisible(false);
                 }
+            } else {
+                popupMenu.setVisible(false);
             }
         });
 
@@ -767,12 +768,30 @@ public class AdicionarNovaReservaPanel {
 
         adicionarPagamentoButton.addActionListener(e -> {
             String descricao = descricaoPagamentoField.getText();
+
             String valor = valorPagamentoField.getText()
                     .replace("R$", "")
                     .replace(".", "")
                     .replace(",", ".")
                     .replaceAll("[^0-9.]", "");
+
             String tipoPagamentoSelecionado = (String) tipoPagamentoComboBox.getSelectedItem();
+            System.out.println(tipoPagamentoSelecionado);
+
+            if (descricao.isEmpty()) {
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Adicione uma descrição ao pagamento.");
+                return;
+            }
+
+            if (Objects.requireNonNull(tipoPagamentoComboBox.getSelectedItem()).equals("SELECIONE")){
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Escolha uma forma de Pagamento");
+                return;
+            }
+
+            if (valor.isEmpty()) {
+                notification(Notifications.Type.WARNING, TOP_CENTER, "Adicione uma valor.");
+                return;
+            }
 
             JPanel pagamentoPanel = createPagamentoPanel(
                     descricao,

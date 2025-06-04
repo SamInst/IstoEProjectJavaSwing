@@ -86,7 +86,7 @@ public class Notifications {
     }
 
     public void show(Type type, Location location, String message) {
-        long duration = FlatUIUtils.getUIInt("Toast.duration", 2500);
+        long duration = FlatUIUtils.getUIInt("Toast.duration", 7500);
         show(type, location, duration, message);
     }
 
@@ -99,7 +99,7 @@ public class Notifications {
     }
 
     public void show(Location location, JComponent component) {
-        long duration = FlatUIUtils.getUIInt("Toast.duration", 2500);
+        long duration = FlatUIUtils.getUIInt("Toast.duration", 7500);
         show(location, duration, component);
     }
 
@@ -240,6 +240,7 @@ public class Notifications {
         }
 
         public void start() {
+            //todo
             int animation = FlatUIUtils.getUIInt("Toast.animation", 200);
             int resolution = FlatUIUtils.getUIInt("Toast.animationResolution", 5);
             animator = new Animator(animation, new Animator.TimingTarget() {
